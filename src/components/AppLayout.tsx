@@ -14,7 +14,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         <VerdoSidebar />
         
         <div className="flex-1 flex flex-col">
-          {/* Header */}
+          {/* Mobile Header */}
           <header className="h-16 bg-white border-b border-border flex items-center px-6 md:hidden">
             <SidebarTrigger>
               <Menu className="w-6 h-6 text-gray-600" />
@@ -22,15 +22,15 @@ export function AppLayout({ children }: AppLayoutProps) {
             <h1 className="ml-4 text-xl font-bold text-verdo-navy">Verdo</h1>
           </header>
 
-          {/* Desktop Trigger */}
-          <div className="hidden md:block absolute top-4 left-4 z-10">
-            <SidebarTrigger className="bg-white shadow-sm border border-gray-200 hover:bg-gray-50">
+          {/* Desktop Trigger - Outside of sidebar */}
+          <div className="hidden md:block fixed top-4 left-4 z-50">
+            <SidebarTrigger className="bg-white shadow-lg border border-gray-200 hover:bg-gray-50 rounded-lg p-2">
               <Menu className="w-5 h-5 text-gray-600" />
             </SidebarTrigger>
           </div>
 
           {/* Main Content */}
-          <main className="flex-1 p-6 md:p-8">
+          <main className="flex-1 p-6 md:p-8 md:pl-16">
             {children}
           </main>
         </div>

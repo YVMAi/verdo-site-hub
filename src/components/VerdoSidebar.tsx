@@ -21,8 +21,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
-  SidebarTrigger
+  useSidebar
 } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -58,11 +57,12 @@ const operationsItems = [
 ];
 
 export function VerdoSidebar() {
-  const { collapsed } = useSidebar();
+  const { state } = useSidebar();
   const [operationsOpen, setOperationsOpen] = useState(true);
+  const isCollapsed = state === "collapsed";
 
   return (
-    <Sidebar className="verdo-sidebar border-r-0">
+    <Sidebar className="verdo-sidebar border-r-0" collapsible="icon">
       <SidebarContent className="p-4">
         {/* Header */}
         <div className="mb-8">
@@ -70,7 +70,7 @@ export function VerdoSidebar() {
             <div className="w-8 h-8 bg-verdo-jade rounded-lg flex items-center justify-center">
               <Leaf className="w-5 h-5 text-white" />
             </div>
-            {!collapsed && (
+            {!isCollapsed && (
               <div>
                 <h1 className="text-xl font-bold text-white">Verdo</h1>
                 <p className="text-xs text-gray-400">by TruGreen</p>
@@ -85,7 +85,7 @@ export function VerdoSidebar() {
             <SidebarMenu>
               {mainNavItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild tooltip={isCollapsed ? item.title : undefined}>
                     <NavLink
                       to={item.url}
                       className={({ isActive }) =>
@@ -93,7 +93,7 @@ export function VerdoSidebar() {
                       }
                     >
                       <item.icon className="w-5 h-5" />
-                      {!collapsed && <span className="font-medium">{item.title}</span>}
+                      {!isCollapsed && <span className="font-medium">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -109,9 +109,9 @@ export function VerdoSidebar() {
               <SidebarGroupLabel className="flex items-center justify-between text-gray-300 hover:text-white cursor-pointer py-2 px-2 rounded-lg hover:bg-verdo-navy-light transition-colors">
                 <div className="flex items-center gap-2">
                   <Settings className="w-4 h-4" />
-                  {!collapsed && <span className="font-medium">Daily Operations</span>}
+                  {!isCollapsed && <span className="font-medium">Daily Operations</span>}
                 </div>
-                {!collapsed && (
+                {!isCollapsed && (
                   <ChevronDown 
                     className={`w-4 h-4 transition-transform ${operationsOpen ? 'rotate-180' : ''}`} 
                   />
@@ -123,7 +123,7 @@ export function VerdoSidebar() {
                 <SidebarMenu>
                   {operationsItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild>
+                      <SidebarMenuButton asChild tooltip={isCollapsed ? item.title : undefined}>
                         <NavLink
                           to={item.url}
                           className={({ isActive }) =>
@@ -131,7 +131,7 @@ export function VerdoSidebar() {
                           }
                         >
                           <item.icon className="w-5 h-5" />
-                          {!collapsed && <span className="font-medium">{item.title}</span>}
+                          {!isCollapsed && <span className="font-medium">{item.title}</span>}
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
