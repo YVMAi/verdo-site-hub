@@ -38,14 +38,14 @@ export const CleaningDataEntry: React.FC<CleaningDataEntryProps> = ({ site }) =>
       if (siteBlocks.length > 0) {
         const newRows = siteBlocks.map((block, index) => {
           const blockInverters = mockInverters.filter(inv => inv.blockId === block.id);
-          const inverter = blockInverters[0]?.name || '';
-          const totalModules = mockCleaningConfig.totalModulesPerInverter[inverter] || 0;
-          const plannedModules = mockCleaningConfig.plannedModulesPerDay[inverter] || 0;
+          const inverterName = blockInverters[0]?.name;
+          const totalModules = inverterName ? mockCleaningConfig.totalModulesPerInverter[inverterName] || 0 : 0;
+          const plannedModules = inverterName ? mockCleaningConfig.plannedModulesPerDay[inverterName] || 0 : 0;
           
           return {
             id: `row-${index}`,
             block: block.name,
-            inverter,
+            inverter: inverterName || '', // This will be handled in the Select component
             scb: '',
             stringTableNumber: '',
             modulesCleaned: 0,
@@ -274,7 +274,7 @@ export const CleaningDataEntry: React.FC<CleaningDataEntryProps> = ({ site }) =>
                 }`}>
                   {/* Block */}
                   <div className="col-span-1">
-                    <Select value={row.block} onValueChange={(value) => updateRow(row.id, 'block', value)}>
+                    <Select value={row.block || undefined} onValueChange={(value) => updateRow(row.id, 'block', value)}>
                       <SelectTrigger className="h-7 text-xs">
                         <SelectValue placeholder="Block" />
                       </SelectTrigger>
@@ -291,7 +291,7 @@ export const CleaningDataEntry: React.FC<CleaningDataEntryProps> = ({ site }) =>
                   {/* Inverter */}
                   <div className="col-span-1">
                     <Select
-                      value={row.inverter}
+                      value={row.inverter || undefined}
                       onValueChange={(value) => updateRow(row.id, 'inverter', value)}
                       disabled={!row.block}
                     >
