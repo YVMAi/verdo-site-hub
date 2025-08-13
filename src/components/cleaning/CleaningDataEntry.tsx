@@ -48,8 +48,8 @@ export const CleaningDataEntry: React.FC<CleaningDataEntryProps> = ({
 
   const addNewRow = () => {
     const newRow: CleaningTableRow = calculateRowData({
-      block: '',
-      inverter: '',
+      block: undefined,
+      inverter: undefined,
       scbNumber: '',
       stringTableNumber: '',
       modulesCleaned: 0,
