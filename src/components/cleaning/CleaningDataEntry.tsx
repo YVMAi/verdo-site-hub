@@ -45,12 +45,12 @@ export const CleaningDataEntry: React.FC<CleaningDataEntryProps> = ({ site }) =>
             id: `row-${index}`,
             block: block.name,
             inverter: inverterName || undefined,
-            scb: '',
-            stringTableNumber: '',
+            scb: undefined,
+            stringTableNumber: undefined,
             modulesCleaned: 0,
             waterConsumption: 0,
             rainfall: 0,
-            remarks: '',
+            remarks: undefined,
             photos: [],
             totalModules,
             cyclesCleaned: 0,
@@ -67,14 +67,14 @@ export const CleaningDataEntry: React.FC<CleaningDataEntryProps> = ({ site }) =>
   const addRow = () => {
     const newRow: CleaningTableRow = {
       id: `row-${Date.now()}`,
-      block: '',
-      inverter: '',
-      scb: '',
-      stringTableNumber: '',
+      block: undefined,
+      inverter: undefined,
+      scb: undefined,
+      stringTableNumber: undefined,
       modulesCleaned: 0,
       waterConsumption: 0,
       rainfall: 0,
-      remarks: '',
+      remarks: undefined,
       photos: [],
       totalModules: 0,
       cyclesCleaned: 0,
@@ -310,7 +310,7 @@ export const CleaningDataEntry: React.FC<CleaningDataEntryProps> = ({ site }) =>
                   {/* SCB */}
                   <div className="col-span-1">
                     <Input
-                      value={row.scb}
+                      value={row.scb || ''}
                       onChange={(e) => updateRow(row.id, 'scb', e.target.value)}
                       placeholder="SCB"
                       className="h-7 text-xs"

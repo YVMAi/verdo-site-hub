@@ -32,9 +32,9 @@ export interface CleaningFormData {
 
 export interface CleaningTableRow {
   id: string;
-  block: string;
-  inverter: string;
-  scb: string;
+  block: string | undefined;
+  inverter: string | undefined;
+  scb: string | undefined;
   stringTableNumber?: string;
   modulesCleaned: number;
   waterConsumption?: number;
