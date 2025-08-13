@@ -86,29 +86,20 @@
   }
 }
 
-/* Verdo Sidebar Styles */
-.verdo-sidebar {
-  @apply bg-verdo-navy;
+/* Custom scrollbar for sidebar */
+.verdo-sidebar ::-webkit-scrollbar {
+  width: 6px;
 }
 
-.verdo-nav-item {
-  @apply flex items-center gap-3 px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-verdo-navy-light transition-all duration-200 font-medium;
+.verdo-sidebar ::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.verdo-nav-item.active {
-  @apply bg-verdo-jade text-white shadow-lg;
+.verdo-sidebar ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
 }
 
-/* Collapsed sidebar specific styles */
-.verdo-sidebar[data-state="collapsed"] .verdo-nav-item {
-  @apply w-10 h-10 justify-center p-0 mx-auto;
-}
-
-.verdo-sidebar[data-state="collapsed"] .verdo-nav-item.active {
-  @apply bg-verdo-jade/90;
-}
-
-/* Tooltip positioning for collapsed sidebar */
-.verdo-sidebar[data-state="collapsed"] [data-radix-tooltip-content] {
-  @apply ml-2;
+.verdo-sidebar ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }

@@ -63,38 +63,42 @@ export function VerdoSidebar() {
 
   return (
     <Sidebar 
-      className="verdo-sidebar border-r-0" 
+      className="verdo-sidebar border-r-0 shadow-xl" 
       collapsible="icon"
     >
-      <SidebarContent className={`${isCollapsed ? 'p-2' : 'p-4'} transition-all duration-200`}>
+      <SidebarContent className="bg-verdo-navy">
         {/* Header */}
-        <div className={`${isCollapsed ? 'mb-4' : 'mb-8'} flex ${isCollapsed ? 'justify-center' : 'items-center gap-3'}`}>
-          <div className="w-8 h-8 bg-verdo-jade rounded-lg flex items-center justify-center flex-shrink-0">
-            <Leaf className="w-5 h-5 text-white" />
-          </div>
-          {!isCollapsed && (
-            <div>
-              <h1 className="text-xl font-bold text-white">Verdo</h1>
-              <p className="text-xs text-gray-400">by TruGreen</p>
+        <div className={`${isCollapsed ? 'px-2 py-4' : 'px-6 py-6'} border-b border-verdo-navy-light/20`}>
+          <div className={`flex ${isCollapsed ? 'justify-center' : 'items-center gap-3'}`}>
+            <div className="w-10 h-10 bg-verdo-jade rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+              <Leaf className="w-6 h-6 text-white" />
             </div>
-          )}
+            {!isCollapsed && (
+              <div>
+                <h1 className="text-2xl font-bold text-white">Verdo</h1>
+                <p className="text-sm text-verdo-jade opacity-90">by TruGreen</p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Main Navigation */}
-        <SidebarGroup>
+        <SidebarGroup className="px-3 py-4">
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-1">
               {mainNavItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={isCollapsed ? item.title : undefined}>
                     <NavLink
                       to={item.url}
                       className={({ isActive }) =>
-                        `verdo-nav-item ${isActive ? 'active' : ''} ${isCollapsed ? 'justify-center' : ''}`
+                        `group flex items-center gap-3 px-3 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-verdo-navy-light/50 transition-all duration-200 font-medium ${
+                          isActive ? 'bg-verdo-jade text-white shadow-lg shadow-verdo-jade/20' : ''
+                        } ${isCollapsed ? 'justify-center w-12 h-12 p-0' : ''}`
                       }
                     >
-                      <item.icon className="w-5 h-5 flex-shrink-0" />
-                      {!isCollapsed && <span className="font-medium">{item.title}</span>}
+                      <item.icon className={`flex-shrink-0 ${isCollapsed ? 'w-6 h-6' : 'w-5 h-5'}`} />
+                      {!isCollapsed && <span className="font-medium truncate">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -104,37 +108,48 @@ export function VerdoSidebar() {
         </SidebarGroup>
 
         {/* Operations Section */}
-        <SidebarGroup>
-          <Collapsible open={!isCollapsed && operationsOpen} onOpenChange={setOperationsOpen}>
+        <SidebarGroup className="px-3">
+          <Collapsible 
+            open={!isCollapsed && operationsOpen} 
+            onOpenChange={setOperationsOpen}
+            className="space-y-2"
+          >
             <CollapsibleTrigger asChild>
               <SidebarGroupLabel 
-                className={`flex items-center ${isCollapsed ? 'justify-center p-2' : 'justify-between'} text-gray-300 hover:text-white cursor-pointer py-2 px-2 rounded-lg hover:bg-verdo-navy-light transition-colors`}
+                className={`group flex items-center gap-3 px-3 py-3 text-gray-400 hover:text-white cursor-pointer rounded-xl hover:bg-verdo-navy-light/30 transition-all duration-200 ${
+                  isCollapsed ? 'justify-center w-12 h-12 p-0' : 'justify-between'
+                }`}
               >
-                <div className={`flex items-center ${isCollapsed ? '' : 'gap-2'}`}>
-                  <Settings className="w-4 h-4 flex-shrink-0" />
-                  {!isCollapsed && <span className="font-medium">Daily Operations</span>}
+                <div className={`flex items-center ${isCollapsed ? '' : 'gap-3'}`}>
+                  <Settings className={`flex-shrink-0 ${isCollapsed ? 'w-6 h-6' : 'w-5 h-5'}`} />
+                  {!isCollapsed && <span className="font-semibold">Daily Operations</span>}
                 </div>
                 {!isCollapsed && (
                   <ChevronDown 
-                    className={`w-4 h-4 transition-transform ${operationsOpen ? 'rotate-180' : ''}`} 
+                    className={`w-4 h-4 transition-transform duration-200 ${
+                      operationsOpen ? 'rotate-180' : ''
+                    }`} 
                   />
                 )}
               </SidebarGroupLabel>
             </CollapsibleTrigger>
-            <CollapsibleContent>
-              <SidebarGroupContent className="mt-2">
-                <SidebarMenu>
+            
+            <CollapsibleContent className="space-y-1">
+              <SidebarGroupContent>
+                <SidebarMenu className="space-y-1">
                   {operationsItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild tooltip={isCollapsed ? item.title : undefined}>
                         <NavLink
                           to={item.url}
                           className={({ isActive }) =>
-                            `verdo-nav-item ${isCollapsed ? 'justify-center' : 'ml-2'} ${isActive ? 'active' : ''}`
+                            `group flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-verdo-navy-light/40 transition-all duration-200 font-medium ${
+                              isActive ? 'bg-verdo-jade/90 text-white shadow-md' : ''
+                            } ${isCollapsed ? 'justify-center w-12 h-12 p-0 rounded-xl' : 'ml-4'}`
                           }
                         >
-                          <item.icon className="w-5 h-5 flex-shrink-0" />
-                          {!isCollapsed && <span className="font-medium">{item.title}</span>}
+                          <item.icon className={`flex-shrink-0 ${isCollapsed ? 'w-5 h-5' : 'w-4 h-4'}`} />
+                          {!isCollapsed && <span className="font-medium truncate">{item.title}</span>}
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
