@@ -54,7 +54,7 @@ export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ si
 
   if (!site) {
     return (
-      <div className="bg-card border rounded-lg p-8 text-center">
+      <div className="bg-card border rounded-lg p-4 sm:p-8 text-center">
         <p className="text-muted-foreground">Select a site to begin grass cutting data entry</p>
       </div>
     );
@@ -129,23 +129,25 @@ export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ si
   return (
     <div className="bg-card border rounded-lg mb-6">
       <div className="p-4 border-b bg-muted/50">
-        <h3 className="font-semibold">Grass Cutting Data Entry</h3>
+        <h3 className="font-semibold text-sm sm:text-base">Grass Cutting Data Entry</h3>
       </div>
       
-      <div className="p-6 space-y-6">
-        {/* Row 1: Date, Block, Inverter */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+        {/* Row 1: Date, Block, Inverter - Stack on mobile */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Date *</label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" className={cn(
-                  "w-full justify-start text-left font-normal",
+                  "w-full justify-start text-left font-normal text-sm",
                   !formData.date && "text-muted-foreground",
                   errors.date && "border-destructive"
                 )}>
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {formData.date ? format(formData.date, 'PPP') : 'Pick a date'}
+                  <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">
+                    {formData.date ? format(formData.date, 'MMM dd, yyyy') : 'Pick a date'}
+                  </span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -164,7 +166,7 @@ export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ si
           <div className="space-y-2">
             <label className="text-sm font-medium">Block *</label>
             <Select value={formData.block || ''} onValueChange={(value) => handleInputChange('block', value)}>
-              <SelectTrigger className={cn(errors.block && "border-destructive")}>
+              <SelectTrigger className={cn("text-sm", errors.block && "border-destructive")}>
                 <SelectValue placeholder="Select block" />
               </SelectTrigger>
               <SelectContent>
@@ -176,10 +178,10 @@ export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ si
             {errors.block && <p className="text-xs text-destructive">{errors.block}</p>}
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 sm:col-span-2 lg:col-span-1">
             <label className="text-sm font-medium">Inverter *</label>
             <Select value={formData.inverter || ''} onValueChange={(value) => handleInputChange('inverter', value)} disabled={!formData.block}>
-              <SelectTrigger className={cn(errors.inverter && "border-destructive")}>
+              <SelectTrigger className={cn("text-sm", errors.inverter && "border-destructive")}>
                 <SelectValue placeholder="Select inverter" />
               </SelectTrigger>
               <SelectContent>
@@ -192,12 +194,12 @@ export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ si
           </div>
         </div>
 
-        {/* Row 2: SCB, Number of Strings, Start Time, Stop Time */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Row 2: SCB, Number of Strings, Times - Stack on mobile */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">SCB</label>
             <Select value={formData.scb || ''} onValueChange={(value) => handleInputChange('scb', value)} disabled={!formData.inverter}>
-              <SelectTrigger>
+              <SelectTrigger className="text-sm">
                 <SelectValue placeholder="Select SCB (optional)" />
               </SelectTrigger>
               <SelectContent>
@@ -209,13 +211,13 @@ export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ si
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Number of Strings Cleaned *</label>
+            <label className="text-sm font-medium">Strings Cleaned *</label>
             <Input
               type="number"
               min="0"
               value={formData.numberOfStringsCleaned || ''}
               onChange={(e) => handleInputChange('numberOfStringsCleaned', parseInt(e.target.value) || 0)}
-              className={cn(errors.numberOfStringsCleaned && "border-destructive")}
+              className={cn("text-sm", errors.numberOfStringsCleaned && "border-destructive")}
               placeholder="0"
             />
             {errors.numberOfStringsCleaned && <p className="text-xs text-destructive">{errors.numberOfStringsCleaned}</p>}
@@ -227,7 +229,7 @@ export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ si
               type="time"
               value={formData.startTime || ''}
               onChange={(e) => handleInputChange('startTime', e.target.value)}
-              className={cn(errors.startTime && "border-destructive")}
+              className={cn("text-sm", errors.startTime && "border-destructive")}
             />
             {errors.startTime && <p className="text-xs text-destructive">{errors.startTime}</p>}
           </div>
@@ -238,18 +240,18 @@ export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ si
               type="time"
               value={formData.stopTime || ''}
               onChange={(e) => handleInputChange('stopTime', e.target.value)}
-              className={cn(errors.stopTime && "border-destructive")}
+              className={cn("text-sm", errors.stopTime && "border-destructive")}
             />
             {errors.stopTime && <p className="text-xs text-destructive">{errors.stopTime}</p>}
           </div>
         </div>
 
-        {/* Row 3: Verified By, Remarks */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Row 3: Verified By, Remarks - Stack on mobile */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Verified By *</label>
             <Select value={formData.verifiedBy || ''} onValueChange={(value) => handleInputChange('verifiedBy', value)}>
-              <SelectTrigger className={cn(errors.verifiedBy && "border-destructive")}>
+              <SelectTrigger className={cn("text-sm", errors.verifiedBy && "border-destructive")}>
                 <SelectValue placeholder="Select verifier" />
               </SelectTrigger>
               <SelectContent>
@@ -268,6 +270,7 @@ export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ si
               onChange={(e) => handleInputChange('remarks', e.target.value)}
               placeholder="Optional remarks"
               rows={3}
+              className="text-sm resize-none"
             />
           </div>
         </div>
@@ -286,23 +289,23 @@ export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ si
             />
             <label htmlFor="photo-upload" className="cursor-pointer flex flex-col items-center gap-2">
               <Upload className="h-6 w-6 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Click to upload photos</span>
+              <span className="text-sm text-muted-foreground text-center">Click to upload photos</span>
             </label>
           </div>
           
           {selectedPhotos.length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 mt-4">
               {selectedPhotos.map((photo, index) => (
                 <div key={index} className="relative">
                   <img
                     src={URL.createObjectURL(photo)}
                     alt={`Upload ${index + 1}`}
-                    className="w-full h-20 object-cover rounded border"
+                    className="w-full h-16 sm:h-20 object-cover rounded border"
                   />
                   <Button
                     size="sm"
                     variant="destructive"
-                    className="absolute -top-1 -right-1 h-6 w-6 rounded-full p-0"
+                    className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0"
                     onClick={() => removePhoto(index)}
                   >
                     <X className="h-3 w-3" />
@@ -313,25 +316,25 @@ export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ si
           )}
         </div>
 
-        {/* Calculated Fields */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-muted/20 rounded-lg">
+        {/* Calculated Fields - Stack on mobile */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-muted/20 rounded-lg">
           <div className="text-center">
-            <p className="text-sm text-muted-foreground">Planned</p>
-            <p className="text-lg font-semibold">{calculatedMetrics.planned}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">Planned</p>
+            <p className="text-lg sm:text-xl font-semibold">{calculatedMetrics.planned}</p>
           </div>
           <div className="text-center">
-            <p className="text-sm text-muted-foreground">Deviation</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">Deviation</p>
             <p className={cn(
-              "text-lg font-semibold",
+              "text-lg sm:text-xl font-semibold",
               calculatedMetrics.deviation > 0 ? "text-green-600" : calculatedMetrics.deviation < 0 ? "text-red-600" : "text-gray-600"
             )}>
               {calculatedMetrics.deviation > 0 ? '+' : ''}{calculatedMetrics.deviation}
             </p>
           </div>
           <div className="text-center">
-            <p className="text-sm text-muted-foreground">% Complete</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">% Complete</p>
             <p className={cn(
-              "text-lg font-semibold",
+              "text-lg sm:text-xl font-semibold",
               calculatedMetrics.percentComplete >= 100 ? "text-green-600" : 
               calculatedMetrics.percentComplete >= 80 ? "text-yellow-600" : "text-red-600"
             )}>
@@ -339,14 +342,14 @@ export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ si
             </p>
           </div>
           <div className="text-center">
-            <p className="text-sm text-muted-foreground">Daily Total</p>
-            <p className="text-lg font-semibold">{formData.numberOfStringsCleaned || 0}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">Daily Total</p>
+            <p className="text-lg sm:text-xl font-semibold">{formData.numberOfStringsCleaned || 0}</p>
           </div>
         </div>
 
         {/* Save Button */}
         <div className="flex justify-end">
-          <Button onClick={handleSave} className="bg-[#001f3f] hover:bg-[#001f3f]/90">
+          <Button onClick={handleSave} className="w-full sm:w-auto bg-[#001f3f] hover:bg-[#001f3f]/90 text-sm">
             <Save className="h-4 w-4 mr-2" />
             Save Entry
           </Button>
