@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { ComingSoonCard } from "@/components/ComingSoonCard";
 import { ClientSiteSelector } from "@/components/ClientSiteSelector";
+import { GrassCuttingDataEntry } from "@/components/grassCutting/GrassCuttingDataEntry";
+import { GrassCuttingHistoric } from "@/components/grassCutting/GrassCuttingHistoric";
 import { Client, Site } from "@/types/generation";
 
 const GrassCutting = () => {
@@ -9,10 +11,10 @@ const GrassCutting = () => {
   const [selectedSite, setSelectedSite] = useState<Site | null>(null);
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-7xl mx-auto p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Grass Cutting Operations</h1>
-        <p className="text-gray-600">Manage and track grass cutting schedules and activities</p>
+        <h1 className="text-3xl font-bold text-[#001f3f] mb-2">Grass Cutting Operations</h1>
+        <p className="text-gray-600">Log, track, and manage grass cutting activities across solar and wind sites</p>
       </div>
       
       <ClientSiteSelector
@@ -22,10 +24,22 @@ const GrassCutting = () => {
         onSiteChange={setSelectedSite}
       />
       
-      <ComingSoonCard 
-        title="Grass Cutting Management"
-        description="Schedule, track, and report on grass cutting operations across all sites."
-      />
+      {selectedClient && selectedSite ? (
+        <div className="space-y-6">
+          <GrassCuttingDataEntry site={selectedSite} />
+          <GrassCuttingHistoric site={selectedSite} client={selectedClient} />
+        </div>
+      ) : (
+        <div className="bg-card border rounded-lg p-8 text-center">
+          <p className="text-muted-foreground mb-4">Select a client and site to begin grass cutting operations</p>
+          <div className="text-sm text-muted-foreground space-y-2">
+            <p>✅ Daily data entry with calculated metrics</p>
+            <p>✅ Historic data with color-coded performance indicators</p>
+            <p>✅ Photo uploads and mobile-responsive design</p>
+            <p>✅ Client/site filtering and export capabilities</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
