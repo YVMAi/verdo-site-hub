@@ -1,0 +1,40 @@
+
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { VerdoSidebar } from "./VerdoSidebar";
+import { Menu } from "lucide-react";
+
+interface AppLayoutProps {
+  children: React.ReactNode;
+}
+
+export function AppLayout({ children }: AppLayoutProps) {
+  return (
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-background">
+        <VerdoSidebar />
+        
+        <div className="flex-1 flex flex-col">
+          {/* Header */}
+          <header className="h-16 bg-white border-b border-border flex items-center px-6 md:hidden">
+            <SidebarTrigger>
+              <Menu className="w-6 h-6 text-gray-600" />
+            </SidebarTrigger>
+            <h1 className="ml-4 text-xl font-bold text-verdo-navy">Verdo</h1>
+          </header>
+
+          {/* Desktop Trigger */}
+          <div className="hidden md:block absolute top-4 left-4 z-10">
+            <SidebarTrigger className="bg-white shadow-sm border border-gray-200 hover:bg-gray-50">
+              <Menu className="w-5 h-5 text-gray-600" />
+            </SidebarTrigger>
+          </div>
+
+          {/* Main Content */}
+          <main className="flex-1 p-6 md:p-8">
+            {children}
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
+  );
+}
