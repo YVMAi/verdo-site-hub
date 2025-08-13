@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { ClientSiteSelector } from "@/components/ClientSiteSelector";
-import { GrassCuttingDataEntry } from "@/components/grassCutting/GrassCuttingDataEntry";
+import { GrassCuttingTableEntry } from "@/components/grassCutting/GrassCuttingTableEntry";
 import { GrassCuttingHistoric } from "@/components/grassCutting/GrassCuttingHistoric";
 import { Client, Site } from "@/types/generation";
 
@@ -25,14 +25,15 @@ const GrassCutting = () => {
       
       {selectedClient && selectedSite ? (
         <div className="space-y-4 sm:space-y-6">
-          <GrassCuttingDataEntry site={selectedSite} />
+          <GrassCuttingTableEntry site={selectedSite} />
           <GrassCuttingHistoric site={selectedSite} client={selectedClient} />
         </div>
       ) : (
         <div className="bg-card border rounded-lg p-4 sm:p-8 text-center">
           <p className="text-muted-foreground mb-4 text-sm sm:text-base">Select a client and site to begin grass cutting operations</p>
           <div className="text-xs sm:text-sm text-muted-foreground space-y-2">
-            <p>✅ Daily data entry with calculated metrics</p>
+            <p>✅ Tabular data entry for multiple blocks at once</p>
+            <p>✅ Real-time calculated metrics and validation</p>
             <p>✅ Historic data with color-coded performance indicators</p>
             <p>✅ Photo uploads and mobile-responsive design</p>
             <p>✅ Client/site filtering and export capabilities</p>

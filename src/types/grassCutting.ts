@@ -32,6 +32,22 @@ export interface GrassCuttingFormData {
   photos: File[];
 }
 
+export interface GrassCuttingTableRow {
+  id: string;
+  block: string;
+  inverter: string;
+  scb?: string;
+  numberOfStringsCleaned: number;
+  startTime: string;
+  stopTime: string;
+  verifiedBy: string;
+  remarks?: string;
+  photos: File[];
+  planned: number;
+  deviation: number;
+  percentComplete: number;
+}
+
 export interface Block {
   id: string;
   name: string;
