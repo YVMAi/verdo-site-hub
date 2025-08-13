@@ -1,13 +1,26 @@
 
+import React, { useState } from 'react';
 import { ComingSoonCard } from "@/components/ComingSoonCard";
+import { ClientSiteSelector } from "@/components/ClientSiteSelector";
+import { Client, Site } from "@/types/generation";
 
 const GrassCutting = () => {
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [selectedSite, setSelectedSite] = useState<Site | null>(null);
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Grass Cutting Operations</h1>
         <p className="text-gray-600">Manage and track grass cutting schedules and activities</p>
       </div>
+      
+      <ClientSiteSelector
+        selectedClient={selectedClient}
+        selectedSite={selectedSite}
+        onClientChange={setSelectedClient}
+        onSiteChange={setSelectedSite}
+      />
       
       <ComingSoonCard 
         title="Grass Cutting Management"
