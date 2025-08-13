@@ -47,7 +47,7 @@ const monitoringItems = [
 
 const operationsItems = [
   {
-    title: "Mowing",
+    title: "Grass Cutting",
     url: "/grass-cutting",
     icon: Scissors,
     badge: 2,
