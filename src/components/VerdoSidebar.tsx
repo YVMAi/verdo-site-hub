@@ -62,21 +62,22 @@ export function VerdoSidebar() {
   const isCollapsed = state === "collapsed";
 
   return (
-    <Sidebar className="verdo-sidebar border-r-0" collapsible="icon">
-      <SidebarContent className="p-4">
+    <Sidebar 
+      className="verdo-sidebar border-r-0" 
+      collapsible="icon"
+    >
+      <SidebarContent className={`${isCollapsed ? 'p-2' : 'p-4'} transition-all duration-200`}>
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-verdo-jade rounded-lg flex items-center justify-center">
-              <Leaf className="w-5 h-5 text-white" />
-            </div>
-            {!isCollapsed && (
-              <div>
-                <h1 className="text-xl font-bold text-white">Verdo</h1>
-                <p className="text-xs text-gray-400">by TruGreen</p>
-              </div>
-            )}
+        <div className={`${isCollapsed ? 'mb-4' : 'mb-8'} flex ${isCollapsed ? 'justify-center' : 'items-center gap-3'}`}>
+          <div className="w-8 h-8 bg-verdo-jade rounded-lg flex items-center justify-center flex-shrink-0">
+            <Leaf className="w-5 h-5 text-white" />
           </div>
+          {!isCollapsed && (
+            <div>
+              <h1 className="text-xl font-bold text-white">Verdo</h1>
+              <p className="text-xs text-gray-400">by TruGreen</p>
+            </div>
+          )}
         </div>
 
         {/* Main Navigation */}
@@ -89,10 +90,10 @@ export function VerdoSidebar() {
                     <NavLink
                       to={item.url}
                       className={({ isActive }) =>
-                        `verdo-nav-item ${isActive ? 'active' : ''}`
+                        `verdo-nav-item ${isActive ? 'active' : ''} ${isCollapsed ? 'justify-center' : ''}`
                       }
                     >
-                      <item.icon className="w-5 h-5" />
+                      <item.icon className="w-5 h-5 flex-shrink-0" />
                       {!isCollapsed && <span className="font-medium">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
@@ -104,11 +105,13 @@ export function VerdoSidebar() {
 
         {/* Operations Section */}
         <SidebarGroup>
-          <Collapsible open={operationsOpen} onOpenChange={setOperationsOpen}>
+          <Collapsible open={!isCollapsed && operationsOpen} onOpenChange={setOperationsOpen}>
             <CollapsibleTrigger asChild>
-              <SidebarGroupLabel className="flex items-center justify-between text-gray-300 hover:text-white cursor-pointer py-2 px-2 rounded-lg hover:bg-verdo-navy-light transition-colors">
-                <div className="flex items-center gap-2">
-                  <Settings className="w-4 h-4" />
+              <SidebarGroupLabel 
+                className={`flex items-center ${isCollapsed ? 'justify-center p-2' : 'justify-between'} text-gray-300 hover:text-white cursor-pointer py-2 px-2 rounded-lg hover:bg-verdo-navy-light transition-colors`}
+              >
+                <div className={`flex items-center ${isCollapsed ? '' : 'gap-2'}`}>
+                  <Settings className="w-4 h-4 flex-shrink-0" />
                   {!isCollapsed && <span className="font-medium">Daily Operations</span>}
                 </div>
                 {!isCollapsed && (
@@ -127,10 +130,10 @@ export function VerdoSidebar() {
                         <NavLink
                           to={item.url}
                           className={({ isActive }) =>
-                            `verdo-nav-item ml-2 ${isActive ? 'active' : ''}`
+                            `verdo-nav-item ${isCollapsed ? 'justify-center' : 'ml-2'} ${isActive ? 'active' : ''}`
                           }
                         >
-                          <item.icon className="w-5 h-5" />
+                          <item.icon className="w-5 h-5 flex-shrink-0" />
                           {!isCollapsed && <span className="font-medium">{item.title}</span>}
                         </NavLink>
                       </SidebarMenuButton>
