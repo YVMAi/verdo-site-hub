@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Camera, Plus, Trash2, RotateCcw, Upload } from 'lucide-react';
 import { Site } from '@/types/generation';
 import { GrassCuttingEntry } from '@/types/grassCutting';
-import { mockGrassCuttingData } from '@/data/mockGrassCuttingData';
+import { mockBlocks, mockInverters } from '@/data/mockGrassCuttingData';
 import { useSidebar } from '@/components/ui/sidebar';
 
 interface GrassCuttingTableEntryProps {
@@ -40,20 +40,23 @@ export const GrassCuttingTableEntry: React.FC<GrassCuttingTableEntryProps> = ({ 
   // Auto-populate rows when site changes
   useEffect(() => {
     if (site) {
-      const siteData = mockGrassCuttingData.find(data => data.siteId === site.id);
-      if (siteData) {
-        const newRows = siteData.blocks.map((block, index) => ({
-          id: `row-${index}`,
-          block: block.name,
-          inverter: block.inverters[0] || '',
-          scb: '',
-          planned: 0,
-          actual: 0,
-          deviation: 0,
-          percentage: 0,
-          remarks: '',
-          photos: []
-        }));
+      const siteBlocks = mockBlocks.filter(block => block.siteId === site.id);
+      if (siteBlocks.length > 0) {
+        const newRows = siteBlocks.map((block, index) => {
+          const blockInverters = mockInverters.filter(inv => inv.blockId === block.id);
+          return {
+            id: `row-${index}`,
+            block: block.name,
+            inverter: blockInverters[0]?.name || '',
+            scb: '',
+            planned: 0,
+            actual: 0,
+            deviation: 0,
+            percentage: 0,
+            remarks: '',
+            photos: []
+          };
+        });
         setRows(newRows);
       }
     }
@@ -125,34 +128,38 @@ export const GrassCuttingTableEntry: React.FC<GrassCuttingTableEntryProps> = ({ 
 
   const autoPopulate = () => {
     if (site) {
-      const siteData = mockGrassCuttingData.find(data => data.siteId === site.id);
-      if (siteData) {
-        const newRows = siteData.blocks.map((block, index) => ({
-          id: `row-${index}`,
-          block: block.name,
-          inverter: block.inverters[0] || '',
-          scb: '',
-          planned: 0,
-          actual: 0,
-          deviation: 0,
-          percentage: 0,
-          remarks: '',
-          photos: []
-        }));
+      const siteBlocks = mockBlocks.filter(block => block.siteId === site.id);
+      if (siteBlocks.length > 0) {
+        const newRows = siteBlocks.map((block, index) => {
+          const blockInverters = mockInverters.filter(inv => inv.blockId === block.id);
+          return {
+            id: `row-${index}`,
+            block: block.name,
+            inverter: blockInverters[0]?.name || '',
+            scb: '',
+            planned: 0,
+            actual: 0,
+            deviation: 0,
+            percentage: 0,
+            remarks: '',
+            photos: []
+          };
+        });
         setRows(newRows);
       }
     }
   };
 
   const getAvailableInverters = (blockName: string) => {
-    const siteData = mockGrassCuttingData.find(data => data.siteId === site.id);
-    const block = siteData?.blocks.find(b => b.name === blockName);
-    return block?.inverters || [];
+    const block = mockBlocks.find(b => b.name === blockName && b.siteId === site.id);
+    if (block) {
+      return mockInverters.filter(inv => inv.blockId === block.id);
+    }
+    return [];
   };
 
   const getAvailableBlocks = () => {
-    const siteData = mockGrassCuttingData.find(data => data.siteId === site.id);
-    return siteData?.blocks || [];
+    return mockBlocks.filter(block => block.siteId === site.id);
   };
 
   const totalPlanned = rows.reduce((sum, row) => sum + row.planned, 0);
@@ -216,7 +223,7 @@ export const GrassCuttingTableEntry: React.FC<GrassCuttingTableEntryProps> = ({ 
                     </SelectTrigger>
                     <SelectContent>
                       {getAvailableBlocks().map(block => (
-                        <SelectItem key={block.name} value={block.name} className="text-xs">
+                        <SelectItem key={block.id} value={block.name} className="text-xs">
                           {block.name}
                         </SelectItem>
                       ))}
@@ -236,8 +243,8 @@ export const GrassCuttingTableEntry: React.FC<GrassCuttingTableEntryProps> = ({ 
                     </SelectTrigger>
                     <SelectContent>
                       {getAvailableInverters(row.block).map(inverter => (
-                        <SelectItem key={inverter} value={inverter} className="text-xs">
-                          {inverter}
+                        <SelectItem key={inverter.id} value={inverter.name} className="text-xs">
+                          {inverter.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
