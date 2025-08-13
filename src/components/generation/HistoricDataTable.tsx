@@ -25,7 +25,7 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
   const [sortColumn, setSortColumn] = useState<string>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [filterValue, setFilterValue] = useState('');
-  const [groupByColumn, setGroupByColumn] = useState<string>('');
+  const [groupByColumn, setGroupByColumn] = useState<string>('none');
   const { toast } = useToast();
 
   const filteredData = useMemo(() => {
@@ -52,7 +52,7 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
   }, [site, activeTab, filterValue, sortColumn, sortDirection]);
 
   const groupedData = useMemo(() => {
-    if (!groupByColumn) return { '': filteredData };
+    if (groupByColumn === 'none') return { '': filteredData };
     
     return filteredData.reduce((groups, item) => {
       const groupValue = item.values[groupByColumn] || 'Unknown';
@@ -160,7 +160,7 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
               <SelectValue placeholder="Group by..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">No grouping</SelectItem>
+              <SelectItem value="none">No grouping</SelectItem>
               {site.columns.map(column => (
                 <SelectItem key={column.id} value={column.id}>
                   {column.name}
@@ -175,14 +175,14 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
         <div className="min-w-full">
           {Object.entries(groupedData).map(([groupValue, items]) => (
             <div key={groupValue}>
-              {groupByColumn && (
+              {groupByColumn !== 'none' && (
                 <div className="bg-muted/30 px-4 py-2 text-sm font-medium border-b">
                   {groupByColumn}: {groupValue} ({items.length} items)
                 </div>
               )}
               
               <table className="w-full text-sm">
-                {(!groupByColumn || groupValue === Object.keys(groupedData)[0]) && (
+                {(groupByColumn === 'none' || groupValue === Object.keys(groupedData)[0]) && (
                   <thead className="bg-muted/30 sticky top-0">
                     <tr>
                       {site.columns.map((column) => (
