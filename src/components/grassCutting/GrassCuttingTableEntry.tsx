@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { CalendarIcon, Save, Plus, Trash2, Upload, X, RefreshCw } from 'lucide-react';
+import { CalendarIcon, Save, Plus, Trash2, Upload, X, RefreshCw, Camera } from 'lucide-react';
 import { format, subDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Site } from '@/types/generation';
@@ -121,6 +121,19 @@ export const GrassCuttingTableEntry: React.FC<GrassCuttingTableEntryProps> = ({ 
       }
       return row;
     }));
+  };
+
+  const handleRowPhotoUpload = (rowId: string, event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    updateRow(rowId, 'photos', [...(rows.find(r => r.id === rowId)?.photos || []), ...files]);
+  };
+
+  const removeRowPhoto = (rowId: string, photoIndex: number) => {
+    const row = rows.find(r => r.id === rowId);
+    if (row) {
+      const updatedPhotos = row.photos.filter((_, index) => index !== photoIndex);
+      updateRow(rowId, 'photos', updatedPhotos);
+    }
   };
 
   const autoPopulateRows = () => {
@@ -288,6 +301,7 @@ export const GrassCuttingTableEntry: React.FC<GrassCuttingTableEntryProps> = ({ 
                     <TableHead className="min-w-[70px] text-xs p-2">Stop *</TableHead>
                     <TableHead className="min-w-[100px] text-xs p-2">Verified By *</TableHead>
                     <TableHead className="min-w-[120px] text-xs p-2">Remarks</TableHead>
+                    <TableHead className="min-w-[100px] text-xs p-2">Photos</TableHead>
                     <TableHead className="w-[50px] text-xs p-2">Plan</TableHead>
                     <TableHead className="w-[50px] text-xs p-2">Dev</TableHead>
                     <TableHead className="w-[40px] text-xs p-2">%</TableHead>
@@ -388,6 +402,58 @@ export const GrassCuttingTableEntry: React.FC<GrassCuttingTableEntryProps> = ({ 
                           className="text-xs resize-none h-8 min-w-[100px]"
                         />
                       </TableCell>
+                      <TableCell className="p-1">
+                        <div className="flex flex-col gap-1">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={(e) => handleRowPhotoUpload(row.id, e)}
+                            className="hidden"
+                            id={`row-photo-${row.id}`}
+                          />
+                          <label htmlFor={`row-photo-${row.id}`} className="cursor-pointer">
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              className="h-6 w-full text-xs p-1"
+                              asChild
+                            >
+                              <span>
+                                <Camera className="h-3 w-3 mr-1" />
+                                {row.photos.length}
+                              </span>
+                            </Button>
+                          </label>
+                          {row.photos.length > 0 && (
+                            <div className="flex flex-wrap gap-1 max-w-[100px]">
+                              {row.photos.slice(0, 2).map((photo, photoIndex) => (
+                                <div key={photoIndex} className="relative">
+                                  <img
+                                    src={URL.createObjectURL(photo)}
+                                    alt={`Row ${index + 1} Photo ${photoIndex + 1}`}
+                                    className="w-6 h-6 object-cover rounded border"
+                                  />
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    className="absolute -top-1 -right-1 h-3 w-3 rounded-full p-0"
+                                    onClick={() => removeRowPhoto(row.id, photoIndex)}
+                                  >
+                                    <X className="h-2 w-2" />
+                                  </Button>
+                                </div>
+                              ))}
+                              {row.photos.length > 2 && (
+                                <div className="w-6 h-6 bg-muted rounded border flex items-center justify-center">
+                                  <span className="text-xs">+{row.photos.length - 2}</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell className="text-center text-xs font-medium p-1">
                         {row.planned}
                       </TableCell>
@@ -424,7 +490,7 @@ export const GrassCuttingTableEntry: React.FC<GrassCuttingTableEntryProps> = ({ 
 
         {/* Compact Global Photo Upload */}
         <div className="space-y-2">
-          <label className="text-xs font-medium text-muted-foreground">Photos (applies to all entries)</label>
+          <label className="text-xs font-medium text-muted-foreground">Global Photos (applies to all entries)</label>
           <div className="border-2 border-dashed border-muted-foreground/25 rounded-md p-3">
             <input
               type="file"
