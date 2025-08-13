@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,7 +44,7 @@ export const CleaningDataEntry: React.FC<CleaningDataEntryProps> = ({ site }) =>
           return {
             id: `row-${index}`,
             block: block.name,
-            inverter: inverterName || '', // This will be handled in the Select component
+            inverter: inverterName || undefined,
             scb: '',
             stringTableNumber: '',
             modulesCleaned: 0,
@@ -228,7 +227,7 @@ export const CleaningDataEntry: React.FC<CleaningDataEntryProps> = ({ site }) =>
 
           <div>
             <label className="block text-xs font-medium mb-1">Verified By *</label>
-            <Select value={verifiedBy} onValueChange={setVerifiedBy}>
+            <Select value={verifiedBy || undefined} onValueChange={setVerifiedBy}>
               <SelectTrigger className="h-8 text-xs">
                 <SelectValue placeholder="Select verifier" />
               </SelectTrigger>
