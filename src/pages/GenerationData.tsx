@@ -6,7 +6,7 @@ import { DataEntryTable } from '@/components/generation/DataEntryTable';
 import { HistoricDataTable } from '@/components/generation/HistoricDataTable';
 import { mockClients, mockSites, tabConfigs } from '@/data/mockGenerationData';
 import { Client, Site, TabType } from '@/types/generation';
-import { Building, MapPin } from 'lucide-react';
+import { Building, MapPin, Database } from 'lucide-react';
 
 const GenerationData = () => {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -20,7 +20,7 @@ const GenerationData = () => {
   const handleClientChange = (clientId: string) => {
     const client = mockClients.find(c => c.id === clientId) || null;
     setSelectedClient(client);
-    setSite(null); // Reset site when client changes
+    setSite(null);
   };
 
   const handleSiteChange = (siteId: string) => {
@@ -29,18 +29,18 @@ const GenerationData = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-full mx-auto space-y-6 px-4">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-3xl font-bold text-foreground mb-2">Daily Generation Data</h1>
         <p className="text-muted-foreground">
-          Enter and manage solar and wind generation data across multiple sites
+          Enter and manage solar and wind generation data with Excel-like functionality
         </p>
       </div>
 
       {/* Client & Site Selection */}
-      <div className="bg-card border rounded-lg p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="bg-card border rounded-lg p-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <label className="text-sm font-medium flex items-center gap-2">
               <Building className="h-4 w-4" />
@@ -81,10 +81,13 @@ const GenerationData = () => {
         </div>
 
         {selectedClient && selectedSite && (
-          <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+          <div className="mt-4 p-3 bg-muted/50 rounded-lg">
             <div className="flex items-center justify-between text-sm">
-              <div>
-                <span className="font-medium">Selected:</span> {selectedClient.name} → {selectedSite.name}
+              <div className="flex items-center gap-2">
+                <Database className="h-4 w-4" />
+                <span className="font-medium">{selectedClient.name}</span>
+                <span className="text-muted-foreground">→</span>
+                <span className="font-medium">{selectedSite.name}</span>
               </div>
               <div className="text-muted-foreground">
                 Edit window: {selectedClient.allowedEditDays} days • 
@@ -96,38 +99,40 @@ const GenerationData = () => {
       </div>
 
       {/* Tabs and Data Tables */}
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabType)}>
-        <TabsList className="grid w-full grid-cols-3">
+      {selectedClient && selectedSite ? (
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabType)}>
+          <TabsList className="grid w-full grid-cols-3">
+            {tabConfigs.map(tab => (
+              <TabsTrigger 
+                key={tab.id} 
+                value={tab.id} 
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
           {tabConfigs.map(tab => (
-            <TabsTrigger key={tab.id} value={tab.id} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              {tab.label}
-            </TabsTrigger>
+            <TabsContent key={tab.id} value={tab.id} className="space-y-8 mt-6">
+              {/* Data Entry Table */}
+              <div>
+                <DataEntryTable site={selectedSite} activeTab={activeTab} />
+              </div>
+
+              {/* Historic Data Table */}
+              <div>
+                <HistoricDataTable 
+                  site={selectedSite} 
+                  activeTab={activeTab}
+                  allowedEditDays={selectedClient.allowedEditDays || 30}
+                />
+              </div>
+            </TabsContent>
           ))}
-        </TabsList>
-
-        {tabConfigs.map(tab => (
-          <TabsContent key={tab.id} value={tab.id} className="space-y-6 mt-6">
-            {/* Data Entry Table */}
-            <div>
-              <h2 className="text-xl font-semibold mb-4">New Data Entry</h2>
-              <DataEntryTable site={selectedSite} activeTab={activeTab} />
-            </div>
-
-            {/* Historic Data Table */}
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Historic Data</h2>
-              <HistoricDataTable 
-                site={selectedSite} 
-                activeTab={activeTab}
-                allowedEditDays={selectedClient?.allowedEditDays || 30}
-              />
-            </div>
-          </TabsContent>
-        ))}
-      </Tabs>
-
-      {/* Info Panel */}
-      {(!selectedClient || !selectedSite) && (
+        </Tabs>
+      ) : (
+        /* Info Panel */
         <div className="bg-muted/30 border border-dashed rounded-lg p-8 text-center">
           <div className="space-y-4">
             <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
@@ -136,8 +141,8 @@ const GenerationData = () => {
             <div>
               <h3 className="text-lg font-semibold mb-2">Get Started</h3>
               <p className="text-muted-foreground max-w-md mx-auto">
-                Select a client and site from the dropdowns above to begin entering and viewing generation data.
-                Each site has customized columns and data validation rules.
+                Select a client and site from the dropdowns above to begin entering and viewing generation data
+                with Excel-like functionality including copy/paste, sorting, filtering, and more.
               </p>
             </div>
           </div>
