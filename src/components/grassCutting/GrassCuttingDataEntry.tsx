@@ -18,64 +18,39 @@ interface GrassCuttingDataEntryProps {
   site: Site | null;
 }
 
-interface TableData {
-  [blockName: string]: {
-    [inverterName: string]: {
-      totalStrings: number;
-      grassCuttingDone: number;
-      percentCompleted: number;
-    };
-  };
-}
-
 export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ site }) => {
-  const [date, setDate] = useState<Date>(new Date());
-  const [tableData, setTableData] = useState<TableData>({});
-  const [verifiedBy, setVerifiedBy] = useState<string>('');
-  const [remarks, setRemarks] = useState<string>('');
+  const [formData, setFormData] = useState<Partial<GrassCuttingFormData>>({
+    date: new Date(),
+    numberOfStringsCleaned: 0,
+  });
   const [selectedPhotos, setSelectedPhotos] = useState<File[]>([]);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
-  // Initialize table data when site changes
-  useMemo(() => {
-    if (!site) return;
-    
-    const blocks = mockBlocks.filter(block => block.siteId === site.id);
-    const newTableData: TableData = {};
-    
-    blocks.forEach(block => {
-      const blockInverters = mockInverters.filter(inv => inv.blockId === block.id);
-      newTableData[block.name] = {};
-      
-      blockInverters.forEach(inverter => {
-        newTableData[block.name][inverter.name] = {
-          totalStrings: 768, // Mock total strings per inverter
-          grassCuttingDone: 0,
-          percentCompleted: 0,
-        };
-      });
-    });
-    
-    setTableData(newTableData);
+  const availableBlocks = useMemo(() => {
+    return site ? mockBlocks.filter(block => block.siteId === site.id) : [];
   }, [site]);
 
-  const blocks = Object.keys(tableData);
-  
-  const totalSummary = useMemo(() => {
-    let totalDone = 0;
-    let totalPlanned = 0;
-    
-    Object.values(tableData).forEach(blockData => {
-      Object.values(blockData).forEach(inverterData => {
-        totalDone += inverterData.grassCuttingDone;
-        totalPlanned += inverterData.totalStrings;
-      });
-    });
-    
-    const deviation = totalDone - totalPlanned;
-    
-    return { totalDone, totalPlanned, deviation };
-  }, [tableData]);
+  const availableInverters = useMemo(() => {
+    return formData.block 
+      ? mockInverters.filter(inv => inv.blockId === mockBlocks.find(b => b.name === formData.block)?.id)
+      : [];
+  }, [formData.block]);
+
+  const availableSCBs = useMemo(() => {
+    return formData.inverter
+      ? mockSCBs.filter(scb => scb.inverterId === mockInverters.find(inv => inv.name === formData.inverter)?.id)
+      : [];
+  }, [formData.inverter]);
+
+  const calculatedMetrics = useMemo(() => {
+    const planned = 25; // Mock planned value
+    const actual = formData.numberOfStringsCleaned || 0;
+    const deviation = actual - planned;
+    const percentComplete = planned > 0 ? Math.round((actual / planned) * 100) : 0;
+
+    return { planned, deviation, percentComplete };
+  }, [formData.numberOfStringsCleaned]);
 
   if (!site) {
     return (
@@ -85,19 +60,20 @@ export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ si
     );
   }
 
-  const updateCellValue = (blockName: string, inverterName: string, value: number) => {
-    setTableData(prev => {
-      const updated = { ...prev };
-      if (updated[blockName] && updated[blockName][inverterName]) {
-        const totalStrings = updated[blockName][inverterName].totalStrings;
-        updated[blockName][inverterName] = {
-          ...updated[blockName][inverterName],
-          grassCuttingDone: value,
-          percentCompleted: totalStrings > 0 ? Math.round((value / totalStrings) * 100) : 0,
-        };
-      }
-      return updated;
-    });
+  const handleInputChange = (field: keyof GrassCuttingFormData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Clear dependent fields
+    if (field === 'block') {
+      setFormData(prev => ({ ...prev, inverter: '', scb: '' }));
+    } else if (field === 'inverter') {
+      setFormData(prev => ({ ...prev, scb: '' }));
+    }
+    
+    // Clear error for this field
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
   };
 
   const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -109,28 +85,43 @@ export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ si
     setSelectedPhotos(prev => prev.filter((_, i) => i !== index));
   };
 
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!formData.date) newErrors.date = 'Date is required';
+    if (!formData.block) newErrors.block = 'Block is required';
+    if (!formData.inverter) newErrors.inverter = 'Inverter is required';
+    if (!formData.numberOfStringsCleaned || formData.numberOfStringsCleaned <= 0) {
+      newErrors.numberOfStringsCleaned = 'Number of strings must be greater than 0';
+    }
+    if (!formData.startTime) newErrors.startTime = 'Start time is required';
+    if (!formData.stopTime) newErrors.stopTime = 'Stop time is required';
+    if (!formData.verifiedBy) newErrors.verifiedBy = 'Verified by is required';
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSave = () => {
-    if (!date || !verifiedBy) {
+    if (!validateForm()) {
       toast({
         title: "Validation Error",
-        description: "Date and Verified By are required fields.",
+        description: "Please fix the errors before saving.",
         variant: "destructive",
       });
       return;
     }
 
-    console.log('Saving grass cutting data:', { 
-      date, 
-      tableData, 
-      verifiedBy, 
-      remarks, 
-      photos: selectedPhotos 
-    });
+    console.log('Saving grass cutting data:', { ...formData, photos: selectedPhotos });
     
     toast({
       title: "Data Saved",
-      description: `Grass cutting data for ${format(date, 'PPP')} has been saved successfully.`,
+      description: `Grass cutting data for ${format(formData.date!, 'PPP')} has been saved successfully.`,
     });
+
+    // Reset form
+    setFormData({ date: new Date(), numberOfStringsCleaned: 0 });
+    setSelectedPhotos([]);
   };
 
   const thirtyDaysAgo = subDays(new Date(), 30);
@@ -141,174 +132,126 @@ export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ si
         <h3 className="font-semibold text-sm sm:text-base">Grass Cutting Data Entry</h3>
       </div>
       
-      <div className="p-4 sm:p-6 space-y-6">
-        {/* Date and Controls */}
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+        {/* Row 1: Date, Block, Inverter - Stack on mobile */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Date *</label>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full sm:w-auto justify-start text-left font-normal text-sm">
+                <Button variant="outline" className={cn(
+                  "w-full justify-start text-left font-normal text-sm",
+                  !formData.date && "text-muted-foreground",
+                  errors.date && "border-destructive"
+                )}>
                   <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
-                  <span>{date ? format(date, 'MMM dd, yyyy') : 'Pick a date'}</span>
+                  <span className="truncate">
+                    {formData.date ? format(formData.date, 'MMM dd, yyyy') : 'Pick a date'}
+                  </span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={date}
-                  onSelect={(newDate) => newDate && setDate(newDate)}
+                  selected={formData.date}
+                  onSelect={(date) => date && handleInputChange('date', date)}
                   disabled={(date) => date > new Date() || date < thirtyDaysAgo}
+                  className="pointer-events-auto"
                 />
               </PopoverContent>
             </Popover>
+            {errors.date && <p className="text-xs text-destructive">{errors.date}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Block *</label>
+            <Select value={formData.block || ''} onValueChange={(value) => handleInputChange('block', value)}>
+              <SelectTrigger className={cn("text-sm", errors.block && "border-destructive")}>
+                <SelectValue placeholder="Select block" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableBlocks.map(block => (
+                  <SelectItem key={block.id} value={block.name}>{block.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.block && <p className="text-xs text-destructive">{errors.block}</p>}
+          </div>
+
+          <div className="space-y-2 sm:col-span-2 lg:col-span-1">
+            <label className="text-sm font-medium">Inverter *</label>
+            <Select value={formData.inverter || ''} onValueChange={(value) => handleInputChange('inverter', value)} disabled={!formData.block}>
+              <SelectTrigger className={cn("text-sm", errors.inverter && "border-destructive")}>
+                <SelectValue placeholder="Select inverter" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableInverters.map(inverter => (
+                  <SelectItem key={inverter.id} value={inverter.name}>{inverter.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.inverter && <p className="text-xs text-destructive">{errors.inverter}</p>}
           </div>
         </div>
 
-        {/* Excel-style Table */}
-        <div className="overflow-x-auto">
-          <div className="min-w-[1200px]">
-            {/* Header Row */}
-            <div className="grid grid-cols-[120px_repeat(16,_80px)_120px_120px_100px] gap-0 border">
-              {/* First cell - empty */}
-              <div className="h-12 bg-[#8B4513] border-r border-gray-300"></div>
-              
-              {/* Block headers */}
-              {blocks.map(blockName => {
-                const inverters = Object.keys(tableData[blockName] || {});
-                return (
-                  <div 
-                    key={blockName} 
-                    className={`h-12 bg-[#8B4513] text-white text-sm font-medium flex items-center justify-center border-r border-gray-300`}
-                    style={{ gridColumn: `span ${inverters.length}` }}
-                  >
-                    {blockName}
-                  </div>
-                );
-              })}
-              
-              {/* Summary headers */}
-              <div className="h-12 bg-[#8B4513] text-white text-sm font-medium flex items-center justify-center border-r border-gray-300">
-                Daily Actual Grasscutting
-              </div>
-              <div className="h-12 bg-[#8B4513] text-white text-sm font-medium flex items-center justify-center border-r border-gray-300">
-                Daily Planned
-              </div>
-              <div className="h-12 bg-[#8B4513] text-white text-sm font-medium flex items-center justify-center">
-                Deviation
-              </div>
-            </div>
+        {/* Row 2: SCB, Number of Strings, Times - Stack on mobile */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">SCB</label>
+            <Select value={formData.scb || ''} onValueChange={(value) => handleInputChange('scb', value)} disabled={!formData.inverter}>
+              <SelectTrigger className="text-sm">
+                <SelectValue placeholder="Select SCB (optional)" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableSCBs.map(scb => (
+                  <SelectItem key={scb.id} value={scb.name}>{scb.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-            {/* Inverter sub-headers */}
-            <div className="grid grid-cols-[120px_repeat(16,_80px)_120px_120px_100px] gap-0 border-t-0">
-              <div className="h-10 bg-[#A0522D] border-r border-gray-300 flex items-center justify-center text-sm font-medium">
-                Inverter
-              </div>
-              
-              {blocks.map(blockName => 
-                Object.keys(tableData[blockName] || {}).map(inverterName => (
-                  <div 
-                    key={`${blockName}-${inverterName}`}
-                    className="h-10 bg-[#A0522D] text-white text-xs flex items-center justify-center border-r border-gray-300"
-                  >
-                    {inverterName}
-                  </div>
-                ))
-              )}
-              
-              {/* Summary sub-headers */}
-              <div className="h-10 bg-[#A0522D] border-r border-gray-300"></div>
-              <div className="h-10 bg-[#A0522D] border-r border-gray-300"></div>
-              <div className="h-10 bg-[#A0522D]"></div>
-            </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Strings Cleaned *</label>
+            <Input
+              type="number"
+              min="0"
+              value={formData.numberOfStringsCleaned || ''}
+              onChange={(e) => handleInputChange('numberOfStringsCleaned', parseInt(e.target.value) || 0)}
+              className={cn("text-sm", errors.numberOfStringsCleaned && "border-destructive")}
+              placeholder="0"
+            />
+            {errors.numberOfStringsCleaned && <p className="text-xs text-destructive">{errors.numberOfStringsCleaned}</p>}
+          </div>
 
-            {/* Data Rows */}
-            {/* Total Strings Row */}
-            <div className="grid grid-cols-[120px_repeat(16,_80px)_120px_120px_100px] gap-0 border-t">
-              <div className="h-10 bg-cyan-100 border-r border-gray-300 flex items-center justify-center text-sm font-medium">
-                Total Strings
-              </div>
-              
-              {blocks.map(blockName => 
-                Object.keys(tableData[blockName] || {}).map(inverterName => (
-                  <div 
-                    key={`total-${blockName}-${inverterName}`}
-                    className="h-10 bg-cyan-100 border-r border-gray-300 flex items-center justify-center text-sm"
-                  >
-                    {tableData[blockName]?.[inverterName]?.totalStrings || 0}
-                  </div>
-                ))
-              )}
-              
-              <div className="h-10 bg-cyan-100 border-r border-gray-300"></div>
-              <div className="h-10 bg-cyan-100 border-r border-gray-300"></div>
-              <div className="h-10 bg-cyan-100 flex items-center justify-center text-sm font-semibold">0</div>
-            </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Start Time *</label>
+            <Input
+              type="time"
+              value={formData.startTime || ''}
+              onChange={(e) => handleInputChange('startTime', e.target.value)}
+              className={cn("text-sm", errors.startTime && "border-destructive")}
+            />
+            {errors.startTime && <p className="text-xs text-destructive">{errors.startTime}</p>}
+          </div>
 
-            {/* Grass Cutting Done Row */}
-            <div className="grid grid-cols-[120px_repeat(16,_80px)_120px_120px_100px] gap-0 border-t">
-              <div className="h-10 bg-cyan-100 border-r border-gray-300 flex items-center justify-center text-sm font-medium">
-                Grass Cutting Done
-              </div>
-              
-              {blocks.map(blockName => 
-                Object.keys(tableData[blockName] || {}).map(inverterName => (
-                  <div 
-                    key={`done-${blockName}-${inverterName}`}
-                    className="h-10 bg-cyan-100 border-r border-gray-300 p-1"
-                  >
-                    <Input
-                      type="number"
-                      min="0"
-                      value={tableData[blockName]?.[inverterName]?.grassCuttingDone || ''}
-                      onChange={(e) => updateCellValue(blockName, inverterName, parseInt(e.target.value) || 0)}
-                      className="h-8 text-xs text-center border-0 bg-transparent p-1"
-                    />
-                  </div>
-                ))
-              )}
-              
-              <div className="h-10 bg-cyan-100 border-r border-gray-300 flex items-center justify-center text-sm font-semibold">
-                {totalSummary.totalDone}
-              </div>
-              <div className="h-10 bg-cyan-100 border-r border-gray-300 flex items-center justify-center text-sm">
-                248
-              </div>
-              <div className="h-10 bg-cyan-100 flex items-center justify-center text-sm font-semibold">
-                {totalSummary.totalDone - 248}
-              </div>
-            </div>
-
-            {/* % Completed Row */}
-            <div className="grid grid-cols-[120px_repeat(16,_80px)_120px_120px_100px] gap-0 border-t">
-              <div className="h-10 bg-cyan-100 border-r border-gray-300 flex items-center justify-center text-sm font-medium">
-                % Completed
-              </div>
-              
-              {blocks.map(blockName => 
-                Object.keys(tableData[blockName] || {}).map(inverterName => (
-                  <div 
-                    key={`percent-${blockName}-${inverterName}`}
-                    className="h-10 bg-cyan-100 border-r border-gray-300 flex items-center justify-center text-sm"
-                  >
-                    {tableData[blockName]?.[inverterName]?.percentCompleted || 0}%
-                  </div>
-                ))
-              )}
-              
-              <div className="h-10 bg-cyan-100 border-r border-gray-300"></div>
-              <div className="h-10 bg-cyan-100 border-r border-gray-300"></div>
-              <div className="h-10 bg-cyan-100"></div>
-            </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Stop Time *</label>
+            <Input
+              type="time"
+              value={formData.stopTime || ''}
+              onChange={(e) => handleInputChange('stopTime', e.target.value)}
+              className={cn("text-sm", errors.stopTime && "border-destructive")}
+            />
+            {errors.stopTime && <p className="text-xs text-destructive">{errors.stopTime}</p>}
           </div>
         </div>
 
-        {/* Verified By and Remarks */}
+        {/* Row 3: Verified By, Remarks - Stack on mobile */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Verified By *</label>
-            <Select value={verifiedBy} onValueChange={setVerifiedBy}>
-              <SelectTrigger className="text-sm">
+            <Select value={formData.verifiedBy || ''} onValueChange={(value) => handleInputChange('verifiedBy', value)}>
+              <SelectTrigger className={cn("text-sm", errors.verifiedBy && "border-destructive")}>
                 <SelectValue placeholder="Select verifier" />
               </SelectTrigger>
               <SelectContent>
@@ -317,13 +260,14 @@ export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ si
                 ))}
               </SelectContent>
             </Select>
+            {errors.verifiedBy && <p className="text-xs text-destructive">{errors.verifiedBy}</p>}
           </div>
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Remarks</label>
             <Textarea
-              value={remarks}
-              onChange={(e) => setRemarks(e.target.value)}
+              value={formData.remarks || ''}
+              onChange={(e) => handleInputChange('remarks', e.target.value)}
               placeholder="Optional remarks"
               rows={3}
               className="text-sm resize-none"
@@ -372,9 +316,40 @@ export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ si
           )}
         </div>
 
+        {/* Calculated Fields - Stack on mobile */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-muted/20 rounded-lg">
+          <div className="text-center">
+            <p className="text-xs sm:text-sm text-muted-foreground">Planned</p>
+            <p className="text-lg sm:text-xl font-semibold">{calculatedMetrics.planned}</p>
+          </div>
+          <div className="text-center">
+            <p className="text-xs sm:text-sm text-muted-foreground">Deviation</p>
+            <p className={cn(
+              "text-lg sm:text-xl font-semibold",
+              calculatedMetrics.deviation > 0 ? "text-green-600" : calculatedMetrics.deviation < 0 ? "text-red-600" : "text-gray-600"
+            )}>
+              {calculatedMetrics.deviation > 0 ? '+' : ''}{calculatedMetrics.deviation}
+            </p>
+          </div>
+          <div className="text-center">
+            <p className="text-xs sm:text-sm text-muted-foreground">% Complete</p>
+            <p className={cn(
+              "text-lg sm:text-xl font-semibold",
+              calculatedMetrics.percentComplete >= 100 ? "text-green-600" : 
+              calculatedMetrics.percentComplete >= 80 ? "text-yellow-600" : "text-red-600"
+            )}>
+              {calculatedMetrics.percentComplete}%
+            </p>
+          </div>
+          <div className="text-center">
+            <p className="text-xs sm:text-sm text-muted-foreground">Daily Total</p>
+            <p className="text-lg sm:text-xl font-semibold">{formData.numberOfStringsCleaned || 0}</p>
+          </div>
+        </div>
+
         {/* Save Button */}
         <div className="flex justify-end">
-          <Button onClick={handleSave} className="w-full sm:w-auto bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/90 text-sm">
+          <Button onClick={handleSave} className="w-full sm:w-auto bg-[#001f3f] hover:bg-[#001f3f]/90 text-sm">
             <Save className="h-4 w-4 mr-2" />
             Save Entry
           </Button>

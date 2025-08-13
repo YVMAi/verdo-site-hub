@@ -164,314 +164,134 @@ export const CleaningDataEntry: React.FC<CleaningDataEntryProps> = ({
         <div className="p-4 border-b bg-[hsl(var(--verdo-navy))] text-white">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">Cleaning Data Entry</h3>
-            <div className="text-sm">Excel-style Data Entry</div>
+            <Button onClick={addNewRow} size="sm" className="bg-[hsl(var(--verdo-jade))] hover:bg-[hsl(var(--verdo-jade-light))]">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Row
+            </Button>
           </div>
         </div>
 
         <div className="overflow-x-auto">
-          {Object.entries(mockSiteConfig.blocks).map(([blockName, blockConfig]) => (
-            <div key={blockName} className="border-b last:border-b-0">
-              {/* Block Header */}
-              <div className="bg-amber-200 border-b">
-                <div className="grid grid-cols-[120px_repeat(auto-fit,minmax(80px,1fr))_200px_100px_100px_100px_100px_150px] gap-px">
-                  <div className="p-3 font-semibold text-center bg-amber-300">Block</div>
-                  {blockConfig.inverters.map((inverter) => (
-                    <div key={inverter} className="p-3 font-semibold text-center bg-amber-200 text-sm">
-                      {inverter}
-                    </div>
-                  ))}
-                  <div className="p-3 font-semibold text-center bg-amber-300 text-sm">Planned Modules</div>
-                  <div className="p-3 font-semibold text-center bg-amber-300 text-sm">Total Cleaned</div>
-                  <div className="p-3 font-semibold text-center bg-amber-300 text-sm">Uncleaned Modules</div>
-                  <div className="p-3 font-semibold text-center bg-amber-300 text-sm">Rainfall (mm)</div>
-                  <div className="p-3 font-semibold text-center bg-amber-300 text-sm">Water Consumption</div>
-                  <div className="p-3 font-semibold text-center bg-amber-300 text-sm">Remarks</div>
-                </div>
-              </div>
-
-              {/* Block Name Row */}
-              <div className="bg-orange-100">
-                <div className="grid grid-cols-[120px_repeat(auto-fit,minmax(80px,1fr))_200px_100px_100px_100px_100px_150px] gap-px">
-                  <div className="p-3 font-bold text-center bg-orange-200">{blockName}</div>
-                  {blockConfig.inverters.map((inverter) => (
-                    <div key={inverter} className="p-2 bg-orange-100"></div>
-                  ))}
-                  <div className="p-3 font-bold text-center bg-orange-200">{blockConfig.dailyPlannedModules}</div>
-                  <div className="p-3 font-bold text-center bg-orange-200">
-                    {tableData
-                      .filter(row => row.block === blockName)
-                      .reduce((sum, row) => sum + (row.modulesCleaned || 0), 0)}
-                  </div>
-                  <div className="p-3 font-bold text-center bg-orange-200">
-                    {blockConfig.dailyPlannedModules - tableData
-                      .filter(row => row.block === blockName)
-                      .reduce((sum, row) => sum + (row.modulesCleaned || 0), 0)}
-                  </div>
-                  <div className="p-3 font-bold text-center bg-orange-200">
+          <Table>
+            <TableHeader className="bg-amber-100">
+              <TableRow>
+                <TableHead>Block</TableHead>
+                <TableHead>Inverter</TableHead>
+                <TableHead>SCB Number</TableHead>
+                <TableHead>String Table</TableHead>
+                <TableHead>Modules Cleaned</TableHead>
+                {cleaningType === 'Wet' && <TableHead>Water (L)</TableHead>}
+                <TableHead>Total Modules</TableHead>
+                <TableHead>Cycles Cleaned</TableHead>
+                <TableHead>Planned Modules</TableHead>
+                <TableHead>Cleaned (%)</TableHead>
+                <TableHead>Uncleaned</TableHead>
+                <TableHead>Remarks</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {tableData.map((row, index) => (
+                <TableRow key={index} className={index % 2 === 0 ? "bg-white" : "bg-green-50"}>
+                  <TableCell>
+                    <Select 
+                      value={row.block || undefined} 
+                      onValueChange={(value) => updateRow(index, 'block', value)}
+                    >
+                      <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.keys(mockSiteConfig.blocks).map(block => (
+                          <SelectItem key={block} value={block}>{block}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell>
+                    <Select 
+                      value={row.inverter || undefined} 
+                      onValueChange={(value) => updateRow(index, 'inverter', value)}
+                    >
+                      <SelectTrigger className="w-24">
+                        <SelectValue placeholder="INV" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {row.block && mockSiteConfig.blocks[row.block]?.inverters.map(inv => (
+                          <SelectItem key={inv} value={inv}>{inv}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell>
+                    <Input
+                      value={row.scbNumber}
+                      onChange={(e) => updateRow(index, 'scbNumber', e.target.value)}
+                      className="w-24"
+                      placeholder="SCB"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Input
+                      value={row.stringTableNumber || ''}
+                      onChange={(e) => updateRow(index, 'stringTableNumber', e.target.value)}
+                      className="w-24"
+                      placeholder="ST"
+                    />
+                  </TableCell>
+                  <TableCell>
                     <Input
                       type="number"
-                      step="0.1"
-                      value={rainfall || ''}
-                      onChange={(e) => setRainfall(e.target.value ? parseFloat(e.target.value) : undefined)}
-                      placeholder="0.0"
-                      className="w-full text-center"
+                      value={row.modulesCleaned || ''}
+                      onChange={(e) => updateRow(index, 'modulesCleaned', parseInt(e.target.value) || 0)}
+                      className="w-24"
+                      placeholder="0"
                     />
-                  </div>
-                  <div className="p-3 font-bold text-center bg-orange-200">
-                    {cleaningType === 'Wet' ? 
-                      tableData
-                        .filter(row => row.block === blockName)
-                        .reduce((sum, row) => sum + (row.waterConsumption || 0), 0) + 'L'
-                      : 'N/A'
-                    }
-                  </div>
-                  <div className="p-2 bg-orange-200"></div>
-                </div>
-              </div>
-
-              {/* Total Number of Modules Row */}
-              <div className="bg-gray-50">
-                <div className="grid grid-cols-[120px_repeat(auto-fit,minmax(80px,1fr))_200px_100px_100px_100px_100px_150px] gap-px">
-                  <div className="p-3 font-medium text-sm bg-gray-100">Total Number of Modules</div>
-                  {blockConfig.inverters.map((inverter) => (
-                    <div key={inverter} className="p-3 text-center font-medium text-sm bg-gray-50">
-                      {Math.floor(blockConfig.totalModules / blockConfig.inverters.length)}
-                    </div>
-                  ))}
-                  <div className="p-3 text-center font-medium text-sm bg-gray-100">{blockConfig.totalModules}</div>
-                  <div className="p-3 bg-gray-100"></div>
-                  <div className="p-3 bg-gray-100"></div>
-                  <div className="p-3 bg-gray-100"></div>
-                  <div className="p-3 bg-gray-100"></div>
-                  <div className="p-3 bg-gray-100"></div>
-                </div>
-              </div>
-
-              {/* Total Modules Cleaned Row */}
-              <div className="bg-white">
-                <div className="grid grid-cols-[120px_repeat(auto-fit,minmax(80px,1fr))_200px_100px_100px_100px_100px_150px] gap-px">
-                  <div className="p-3 font-medium text-sm bg-gray-100">Total Modules Cleaned</div>
-                  {blockConfig.inverters.map((inverter) => {
-                    const existingRow = tableData.find(row => row.block === blockName && row.inverter === inverter);
-                    return (
-                      <div key={inverter} className="p-2 bg-white">
-                        <Input
-                          type="number"
-                          value={existingRow?.modulesCleaned || ''}
-                          onChange={(e) => {
-                            const value = parseInt(e.target.value) || 0;
-                            if (existingRow) {
-                              const index = tableData.findIndex(row => row.block === blockName && row.inverter === inverter);
-                              updateRow(index, 'modulesCleaned', value);
-                            } else {
-                              const newRow = calculateRowData({
-                                block: blockName,
-                                inverter,
-                                scbNumber: '',
-                                stringTableNumber: '',
-                                modulesCleaned: value,
-                                waterConsumption: 0,
-                                remarks: '',
-                              });
-                              setTableData([...tableData, newRow]);
-                            }
-                          }}
-                          placeholder="0"
-                          className="w-full text-center"
-                        />
-                      </div>
-                    );
-                  })}
-                  <div className="p-3 bg-gray-100"></div>
-                  <div className="p-3 bg-gray-100"></div>
-                  <div className="p-3 bg-gray-100"></div>
-                  <div className="p-3 bg-gray-100"></div>
-                  <div className="p-3 bg-gray-100"></div>
-                  <div className="p-3 bg-gray-100"></div>
-                </div>
-              </div>
-
-              {/* SCB Number Row */}
-              <div className="bg-green-50">
-                <div className="grid grid-cols-[120px_repeat(auto-fit,minmax(80px,1fr))_200px_100px_100px_100px_100px_150px] gap-px">
-                  <div className="p-3 font-medium text-sm bg-green-100">SCB Number</div>
-                  {blockConfig.inverters.map((inverter) => {
-                    const existingRow = tableData.find(row => row.block === blockName && row.inverter === inverter);
-                    return (
-                      <div key={inverter} className="p-2 bg-green-50">
-                        <Input
-                          value={existingRow?.scbNumber || ''}
-                          onChange={(e) => {
-                            if (existingRow) {
-                              const index = tableData.findIndex(row => row.block === blockName && row.inverter === inverter);
-                              updateRow(index, 'scbNumber', e.target.value);
-                            } else {
-                              const newRow = calculateRowData({
-                                block: blockName,
-                                inverter,
-                                scbNumber: e.target.value,
-                                stringTableNumber: '',
-                                modulesCleaned: 0,
-                                waterConsumption: 0,
-                                remarks: '',
-                              });
-                              setTableData([...tableData, newRow]);
-                            }
-                          }}
-                          placeholder="SCB"
-                          className="w-full text-center"
-                        />
-                      </div>
-                    );
-                  })}
-                  <div className="p-3 bg-green-100"></div>
-                  <div className="p-3 bg-green-100"></div>
-                  <div className="p-3 bg-green-100"></div>
-                  <div className="p-3 bg-green-100"></div>
-                  <div className="p-3 bg-green-100"></div>
-                  <div className="p-3 bg-green-100"></div>
-                </div>
-              </div>
-
-              {/* String Table Number Row */}
-              <div className="bg-white">
-                <div className="grid grid-cols-[120px_repeat(auto-fit,minmax(80px,1fr))_200px_100px_100px_100px_100px_150px] gap-px">
-                  <div className="p-3 font-medium text-sm bg-gray-100">String Table Number</div>
-                  {blockConfig.inverters.map((inverter) => {
-                    const existingRow = tableData.find(row => row.block === blockName && row.inverter === inverter);
-                    return (
-                      <div key={inverter} className="p-2 bg-white">
-                        <Input
-                          value={existingRow?.stringTableNumber || ''}
-                          onChange={(e) => {
-                            if (existingRow) {
-                              const index = tableData.findIndex(row => row.block === blockName && row.inverter === inverter);
-                              updateRow(index, 'stringTableNumber', e.target.value);
-                            } else {
-                              const newRow = calculateRowData({
-                                block: blockName,
-                                inverter,
-                                scbNumber: '',
-                                stringTableNumber: e.target.value,
-                                modulesCleaned: 0,
-                                waterConsumption: 0,
-                                remarks: '',
-                              });
-                              setTableData([...tableData, newRow]);
-                            }
-                          }}
-                          placeholder="ST"
-                          className="w-full text-center"
-                        />
-                      </div>
-                    );
-                  })}
-                  <div className="p-3 bg-gray-100"></div>
-                  <div className="p-3 bg-gray-100"></div>
-                  <div className="p-3 bg-gray-100"></div>
-                  <div className="p-3 bg-gray-100"></div>
-                  <div className="p-3 bg-gray-100"></div>
-                  <div className="p-3 bg-gray-100"></div>
-                </div>
-              </div>
-
-              {/* Water Consumption Row (only for Wet cleaning) */}
-              {cleaningType === 'Wet' && (
-                <div className="bg-blue-50">
-                  <div className="grid grid-cols-[120px_repeat(auto-fit,minmax(80px,1fr))_200px_100px_100px_100px_100px_150px] gap-px">
-                    <div className="p-3 font-medium text-sm bg-blue-100">Water Consumption (L)</div>
-                    {blockConfig.inverters.map((inverter) => {
-                      const existingRow = tableData.find(row => row.block === blockName && row.inverter === inverter);
-                      return (
-                        <div key={inverter} className="p-2 bg-blue-50">
-                          <Input
-                            type="number"
-                            value={existingRow?.waterConsumption || ''}
-                            onChange={(e) => {
-                              const value = parseInt(e.target.value) || 0;
-                              if (existingRow) {
-                                const index = tableData.findIndex(row => row.block === blockName && row.inverter === inverter);
-                                updateRow(index, 'waterConsumption', value);
-                              } else {
-                                const newRow = calculateRowData({
-                                  block: blockName,
-                                  inverter,
-                                  scbNumber: '',
-                                  stringTableNumber: '',
-                                  modulesCleaned: 0,
-                                  waterConsumption: value,
-                                  remarks: '',
-                                });
-                                setTableData([...tableData, newRow]);
-                              }
-                            }}
-                            placeholder="0"
-                            className="w-full text-center"
-                          />
-                        </div>
-                      );
-                    })}
-                    <div className="p-3 bg-blue-100"></div>
-                    <div className="p-3 bg-blue-100"></div>
-                    <div className="p-3 bg-blue-100"></div>
-                    <div className="p-3 bg-blue-100"></div>
-                    <div className="p-3 bg-blue-100"></div>
-                    <div className="p-3 bg-blue-100"></div>
-                  </div>
-                </div>
-              )}
-
-              {/* Remarks Row */}
-              <div className="bg-yellow-50">
-                <div className="grid grid-cols-[120px_repeat(auto-fit,minmax(80px,1fr))_200px_100px_100px_100px_100px_150px] gap-px">
-                  <div className="p-3 font-medium text-sm bg-yellow-100">Remarks</div>
-                  {blockConfig.inverters.map((inverter) => {
-                    const existingRow = tableData.find(row => row.block === blockName && row.inverter === inverter);
-                    return (
-                      <div key={inverter} className="p-2 bg-yellow-50">
-                        <Input
-                          value={existingRow?.remarks || ''}
-                          onChange={(e) => {
-                            if (existingRow) {
-                              const index = tableData.findIndex(row => row.block === blockName && row.inverter === inverter);
-                              updateRow(index, 'remarks', e.target.value);
-                            } else {
-                              const newRow = calculateRowData({
-                                block: blockName,
-                                inverter,
-                                scbNumber: '',
-                                stringTableNumber: '',
-                                modulesCleaned: 0,
-                                waterConsumption: 0,
-                                remarks: e.target.value,
-                              });
-                              setTableData([...tableData, newRow]);
-                            }
-                          }}
-                          placeholder="Notes"
-                          className="w-full text-center text-xs"
-                        />
-                      </div>
-                    );
-                  })}
-                  <div className="p-3 bg-yellow-100"></div>
-                  <div className="p-3 bg-yellow-100"></div>
-                  <div className="p-3 bg-yellow-100"></div>
-                  <div className="p-3 bg-yellow-100"></div>
-                  <div className="p-3 bg-yellow-100"></div>
-                  <div className="p-2 bg-yellow-50">
-                    <Textarea
-                      value={globalRemarks}
-                      onChange={(e) => setGlobalRemarks(e.target.value)}
-                      placeholder="General remarks..."
-                      className="w-full text-xs min-h-[60px]"
+                  </TableCell>
+                  {cleaningType === 'Wet' && (
+                    <TableCell>
+                      <Input
+                        type="number"
+                        value={row.waterConsumption || ''}
+                        onChange={(e) => updateRow(index, 'waterConsumption', parseInt(e.target.value) || 0)}
+                        className="w-24"
+                        placeholder="0"
+                      />
+                    </TableCell>
+                  )}
+                  <TableCell className="font-medium">{row.totalModules}</TableCell>
+                  <TableCell className="font-medium">{row.cyclesCleaned.toFixed(2)}</TableCell>
+                  <TableCell className="font-medium">{row.dailyPlannedModules}</TableCell>
+                  <TableCell className="font-medium">{row.totalCleanedPercent.toFixed(1)}%</TableCell>
+                  <TableCell className="font-medium">{row.uncleanedModules}</TableCell>
+                  <TableCell>
+                    <Input
+                      value={row.remarks || ''}
+                      onChange={(e) => updateRow(index, 'remarks', e.target.value)}
+                      className="w-32"
+                      placeholder="Notes"
                     />
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => removeRow(index)}
+                    >
+                      Remove
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
+
+        {tableData.length === 0 && (
+          <div className="p-8 text-center text-muted-foreground">
+            <p>No data entries yet. Click "Add Row" to start adding cleaning data.</p>
+          </div>
+        )}
 
         <div className="p-4 border-t">
           <Button className="bg-[hsl(var(--verdo-jade))] hover:bg-[hsl(var(--verdo-jade-light))]">
