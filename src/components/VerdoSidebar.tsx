@@ -1,37 +1,38 @@
+
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Menu, X, Zap, Settings, Scissors, Droplets, Search, Leaf, ChevronDown, BarChart3, Plus } from 'lucide-react';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
 const overviewItems = [{
   title: "Overview",
   url: "/",
   icon: BarChart3,
   description: "Dashboard and key metrics"
 }];
+
 const monitoringItems = [{
   title: "Daily generation data",
   url: "/generation",
   icon: Zap,
   description: "View today's output and trends"
 }];
+
 const operationsItems = [{
   title: "Grass Cutting",
   url: "/grass-cutting",
   icon: Scissors,
-  badge: 2,
   description: "Grass cutting operations"
 }, {
   title: "Cleaning",
   url: "/cleaning",
   icon: Droplets,
-  badge: 1,
   description: "Site cleaning tasks"
 }, {
   title: "Inspections",
   url: "/field-inspection",
   icon: Search,
-  badge: 3,
   description: "Log site checks and issues"
 }, {
   title: "Vegetation control",
@@ -39,12 +40,14 @@ const operationsItems = [{
   icon: Leaf,
   description: "Vegetation management"
 }];
+
 export function VerdoSidebar() {
   const {
     state
   } = useSidebar();
   const [operationsOpen, setOperationsOpen] = useState(true);
   const isCollapsed = state === "collapsed";
+  
   return <Sidebar className="verdo-sidebar border-r-0 shadow-xl w-[248px] group-data-[collapsible=icon]:w-16" collapsible="icon">
       <SidebarContent className="bg-verdo-navy">
         {/* Header */}
@@ -140,10 +143,7 @@ export function VerdoSidebar() {
                       isActive
                     }) => `group flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-verdo-navy-light/40 transition-all duration-200 font-medium relative ml-4 ${isActive ? 'bg-verdo-jade/10 text-white shadow-md before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:bg-verdo-jade before:rounded-r-full' : ''}`}>
                             <item.icon className="w-4 h-4 flex-shrink-0" />
-                            <div className="flex items-center justify-between w-full">
-                              <span className="font-medium truncate">{item.title}</span>
-                              {item.badge}
-                            </div>
+                            <span className="font-medium truncate">{item.title}</span>
                           </NavLink>
                         </SidebarMenuButton>
                       </SidebarMenuItem>)}
