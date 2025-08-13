@@ -10,7 +10,9 @@ import {
   Droplets, 
   Search, 
   Leaf,
-  ChevronDown
+  ChevronDown,
+  BarChart3,
+  Plus
 } from 'lucide-react';
 import {
   Sidebar,
@@ -25,79 +27,126 @@ import {
 } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-const mainNavItems = [
+const overviewItems = [
   {
-    title: "Daily Generation Data",
+    title: "Overview",
+    url: "/",
+    icon: BarChart3,
+    description: "Dashboard and key metrics"
+  }
+];
+
+const monitoringItems = [
+  {
+    title: "Daily generation data",
     url: "/generation",
     icon: Zap,
+    description: "View today's output and trends"
   }
 ];
 
 const operationsItems = [
   {
-    title: "Grass Cutting",
+    title: "Mowing",
     url: "/grass-cutting",
     icon: Scissors,
+    badge: 2,
+    description: "Grass cutting operations"
   },
   {
     title: "Cleaning",
     url: "/cleaning",
     icon: Droplets,
+    badge: 1,
+    description: "Site cleaning tasks"
   },
   {
-    title: "Field Inspection",
+    title: "Inspections",
     url: "/field-inspection",
     icon: Search,
+    badge: 3,
+    description: "Log site checks and issues"
   },
   {
-    title: "Vegetation",
+    title: "Vegetation control",
     url: "/vegetation",
     icon: Leaf,
+    description: "Vegetation management"
   }
 ];
 
 export function VerdoSidebar() {
   const { state } = useSidebar();
-  const [operationsOpen, setOperationsOpen] = useState(true);
+  const [operationsOpen, setOperationsOpen] = useState(false);
   const isCollapsed = state === "collapsed";
 
   return (
     <Sidebar 
-      className="verdo-sidebar border-r-0 shadow-xl" 
+      className="verdo-sidebar border-r-0 shadow-xl w-[248px] group-data-[collapsible=icon]:w-16" 
       collapsible="icon"
     >
       <SidebarContent className="bg-verdo-navy">
         {/* Header */}
-        <div className={`${isCollapsed ? 'px-2 py-4' : 'px-6 py-6'} border-b border-verdo-navy-light/20`}>
+        <div className={`${isCollapsed ? 'px-2 py-4' : 'px-4 py-5'} border-b border-verdo-navy-light/20`}>
           <div className={`flex ${isCollapsed ? 'justify-center' : 'items-center gap-3'}`}>
-            <div className="w-10 h-10 bg-verdo-jade rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
-              <Leaf className="w-6 h-6 text-white" />
+            <div className="w-8 h-8 bg-verdo-jade rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
+              <Leaf className="w-5 h-5 text-white" />
             </div>
             {!isCollapsed && (
               <div>
-                <h1 className="text-2xl font-bold text-white">Verdo</h1>
-                <p className="text-sm text-verdo-jade opacity-90">by TruGreen</p>
+                <h1 className="text-xl font-semibold text-white">Verdo</h1>
+                <p className="text-xs text-verdo-jade opacity-90">by TruGreen</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Main Navigation */}
-        <SidebarGroup className="px-3 py-4">
+        {/* Overview Section */}
+        <SidebarGroup className="px-3 py-3">
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
-              {mainNavItems.map((item) => (
+              {overviewItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={isCollapsed ? item.title : undefined}>
                     <NavLink
                       to={item.url}
                       className={({ isActive }) =>
-                        `group flex items-center gap-3 px-3 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-verdo-navy-light/50 transition-all duration-200 font-medium ${
-                          isActive ? 'bg-verdo-jade text-white shadow-lg shadow-verdo-jade/20' : ''
+                        `group flex items-center gap-3 px-3 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-verdo-navy-light/40 transition-all duration-200 font-medium relative ${
+                          isActive ? 'bg-verdo-jade/10 text-white shadow-lg before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:bg-verdo-jade before:rounded-r-full' : ''
                         } ${isCollapsed ? 'justify-center w-12 h-12 p-0' : ''}`
                       }
                     >
-                      <item.icon className={`flex-shrink-0 ${isCollapsed ? 'w-6 h-6' : 'w-5 h-5'}`} />
+                      <item.icon className={`flex-shrink-0 ${isCollapsed ? 'w-5 h-5' : 'w-5 h-5'}`} />
+                      {!isCollapsed && <span className="font-medium truncate">{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Monitoring Section */}
+        <SidebarGroup className="px-3">
+          {!isCollapsed && (
+            <SidebarGroupLabel className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider opacity-70">
+              Monitoring
+            </SidebarGroupLabel>
+          )}
+          <SidebarGroupContent>
+            <SidebarMenu className="space-y-1">
+              {monitoringItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild tooltip={isCollapsed ? item.title : undefined}>
+                    <NavLink
+                      to={item.url}
+                      className={({ isActive }) =>
+                        `group flex items-center gap-3 px-3 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-verdo-navy-light/40 transition-all duration-200 font-medium relative ${
+                          isActive ? 'bg-verdo-jade/10 text-white shadow-lg before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:bg-verdo-jade before:rounded-r-full' : ''
+                        } ${isCollapsed ? 'justify-center w-12 h-12 p-0' : ''}`
+                      }
+                    >
+                      <item.icon className={`flex-shrink-0 ${isCollapsed ? 'w-5 h-5' : 'w-5 h-5'}`} />
                       {!isCollapsed && <span className="font-medium truncate">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
@@ -112,17 +161,24 @@ export function VerdoSidebar() {
           <Collapsible 
             open={!isCollapsed && operationsOpen} 
             onOpenChange={setOperationsOpen}
-            className="space-y-2"
+            className="space-y-1"
           >
             <CollapsibleTrigger asChild>
               <SidebarGroupLabel 
-                className={`group flex items-center gap-3 px-3 py-3 text-gray-400 hover:text-white cursor-pointer rounded-xl hover:bg-verdo-navy-light/30 transition-all duration-200 ${
+                className={`group flex items-center gap-3 px-3 py-3 text-gray-300 hover:text-white cursor-pointer rounded-xl hover:bg-verdo-navy-light/30 transition-all duration-200 font-medium ${
                   isCollapsed ? 'justify-center w-12 h-12 p-0' : 'justify-between'
                 }`}
               >
                 <div className={`flex items-center ${isCollapsed ? '' : 'gap-3'}`}>
-                  <Settings className={`flex-shrink-0 ${isCollapsed ? 'w-6 h-6' : 'w-5 h-5'}`} />
-                  {!isCollapsed && <span className="font-semibold">Daily Operations</span>}
+                  <Settings className={`flex-shrink-0 ${isCollapsed ? 'w-5 h-5' : 'w-5 h-5'}`} />
+                  {!isCollapsed && (
+                    <>
+                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider opacity-70">Operations</span>
+                      <button className="ml-auto p-1 rounded-md hover:bg-verdo-navy-light/50 transition-colors">
+                        <Plus className="w-3 h-3" />
+                      </button>
+                    </>
+                  )}
                 </div>
                 {!isCollapsed && (
                   <ChevronDown 
@@ -143,13 +199,22 @@ export function VerdoSidebar() {
                         <NavLink
                           to={item.url}
                           className={({ isActive }) =>
-                            `group flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-verdo-navy-light/40 transition-all duration-200 font-medium ${
-                              isActive ? 'bg-verdo-jade/90 text-white shadow-md' : ''
-                            } ${isCollapsed ? 'justify-center w-12 h-12 p-0 rounded-xl' : 'ml-4'}`
+                            `group flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-verdo-navy-light/40 transition-all duration-200 font-medium relative ${
+                              isActive ? 'bg-verdo-jade/10 text-white shadow-md before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:bg-verdo-jade before:rounded-r-full' : ''
+                            } ${isCollapsed ? 'justify-center w-12 h-10 p-0 rounded-xl' : 'ml-4'}`
                           }
                         >
-                          <item.icon className={`flex-shrink-0 ${isCollapsed ? 'w-5 h-5' : 'w-4 h-4'}`} />
-                          {!isCollapsed && <span className="font-medium truncate">{item.title}</span>}
+                          <item.icon className={`flex-shrink-0 ${isCollapsed ? 'w-4 h-4' : 'w-4 h-4'}`} />
+                          {!isCollapsed && (
+                            <div className="flex items-center justify-between w-full">
+                              <span className="font-medium truncate">{item.title}</span>
+                              {item.badge && (
+                                <span className="bg-verdo-jade text-white text-xs px-2 py-0.5 rounded-full font-medium">
+                                  {item.badge}
+                                </span>
+                              )}
+                            </div>
+                          )}
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -159,6 +224,20 @@ export function VerdoSidebar() {
             </CollapsibleContent>
           </Collapsible>
         </SidebarGroup>
+
+        {/* Quick Access Section */}
+        {!isCollapsed && (
+          <SidebarGroup className="px-3 mt-auto">
+            <SidebarGroupLabel className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider opacity-70">
+              Quick access
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <div className="text-center py-4">
+                <p className="text-xs text-gray-500">Pin your favorites here</p>
+              </div>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
     </Sidebar>
   );

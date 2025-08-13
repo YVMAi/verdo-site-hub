@@ -88,7 +88,7 @@
 
 /* Custom scrollbar for sidebar */
 .verdo-sidebar ::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 
 .verdo-sidebar ::-webkit-scrollbar-track {
@@ -97,9 +97,39 @@
 
 .verdo-sidebar ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
+  border-radius: 2px;
 }
 
 .verdo-sidebar ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+
+/* Enhanced focus states for accessibility */
+.verdo-sidebar [role="button"]:focus-visible,
+.verdo-sidebar a:focus-visible {
+  outline: 2px solid hsl(var(--verdo-jade));
+  outline-offset: 2px;
+}
+
+/* Smooth transitions for collapsible states */
+.verdo-sidebar .group-data-\[collapsible\=icon\]\:w-16 {
+  transition: width 0.2s ease-in-out;
+}
+
+/* Badge animations */
+.verdo-sidebar .badge {
+  animation: fade-in 0.2s ease-out;
+}
+
+/* Active state accent bar */
+.verdo-sidebar a[aria-current="page"]::before,
+.verdo-sidebar a.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: hsl(var(--verdo-jade));
+  border-radius: 0 2px 2px 0;
 }
