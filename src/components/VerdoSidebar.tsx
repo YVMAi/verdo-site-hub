@@ -25,11 +25,6 @@ const operationsItems = [{
   icon: Scissors,
   description: "Grass cutting operations"
 }, {
-  title: "Cleaning",
-  url: "/cleaning",
-  icon: Droplets,
-  description: "Site cleaning tasks"
-}, {
   title: "Inspections",
   url: "/field-inspection",
   icon: Search,
