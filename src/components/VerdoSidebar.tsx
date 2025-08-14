@@ -20,6 +20,11 @@ const monitoringItems = [{
 }];
 
 const operationsItems = [{
+  title: "Grass Cutting",
+  url: "/grass-cutting",
+  icon: Scissors,
+  description: "Grass cutting operations"
+}, {
   title: "Cleaning",
   url: "/cleaning",
   icon: Droplets,
