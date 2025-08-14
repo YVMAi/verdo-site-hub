@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ClientSiteSelector } from "@/components/ClientSiteSelector";
-import { CleaningDataEntry } from "@/components/cleaning/CleaningDataEntry";
-import { CleaningHistoric } from "@/components/cleaning/CleaningHistoric";
+import { CompactCleaningDataEntry } from "@/components/cleaning/CompactCleaningDataEntry";
+import { CompactCleaningHistoric } from "@/components/cleaning/CompactCleaningHistoric";
 import { Client, Site } from "@/types/generation";
 import { CleaningSiteData } from "@/types/cleaning";
 import { mockCleaningData } from "@/data/mockCleaningData";
@@ -20,10 +20,10 @@ const Cleaning = () => {
   }, [selectedClient, selectedSite, wetDryType]);
 
   return (
-    <div className="max-w-full mx-auto space-y-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Cleaning Management</h1>
-        <p className="text-gray-600">Track and manage solar module cleaning operations</p>
+    <div className="max-w-full mx-auto space-y-4">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 mb-1">Cleaning Management</h1>
+        <p className="text-gray-600 text-sm">Track and manage solar module cleaning operations</p>
       </div>
       
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
@@ -52,9 +52,9 @@ const Cleaning = () => {
         </div>
       </div>
 
-      <div className="space-y-6">
-        <CleaningDataEntry data={currentData} />
-        <CleaningHistoric data={currentData} />
+      <div className="space-y-4">
+        <CompactCleaningDataEntry data={currentData} />
+        <CompactCleaningHistoric data={currentData} />
       </div>
     </div>
   );

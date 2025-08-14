@@ -1,18 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ClientSiteSelector } from "@/components/ClientSiteSelector";
-import { GrassCuttingDataEntry } from "@/components/grassCutting/GrassCuttingDataEntry";
-import { GrassCuttingHistoric } from "@/components/grassCutting/GrassCuttingHistoric";
+import { CompactGrassCuttingDataEntry } from "@/components/grassCutting/CompactGrassCuttingDataEntry";
+import { CompactGrassCuttingHistoric } from "@/components/grassCutting/CompactGrassCuttingHistoric";
 import { Client, Site } from "@/types/generation";
+import { GrassCuttingSiteData } from "@/types/grassCutting";
+import { mockGrassCuttingData } from "@/data/mockGrassCuttingData";
 
 const GrassCutting = () => {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [selectedSite, setSelectedSite] = useState<Site | null>(null);
 
+  const currentData: GrassCuttingSiteData | null = useMemo(() => {
+    if (!selectedClient || !selectedSite) return null;
+    
+    const key = `${selectedClient.id}-${selectedSite.id}`;
+    return mockGrassCuttingData[key] || null;
+  }, [selectedClient, selectedSite]);
+
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-6">
-      <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#001f3f] mb-2">Grass Cutting Operations</h1>
-        <p className="text-sm sm:text-base text-gray-600">Log, track, and manage grass cutting activities across solar and wind sites</p>
+    <div className="max-w-full mx-auto space-y-4">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 mb-1">Grass Cutting Management</h1>
+        <p className="text-gray-600 text-sm">Track and manage grass cutting operations</p>
       </div>
       
       <ClientSiteSelector
@@ -21,24 +30,11 @@ const GrassCutting = () => {
         onClientChange={setSelectedClient}
         onSiteChange={setSelectedSite}
       />
-      
-      {selectedClient && selectedSite ? (
-        <div className="space-y-4 sm:space-y-6">
-          <GrassCuttingDataEntry site={selectedSite} />
-          <GrassCuttingHistoric site={selectedSite} client={selectedClient} />
-        </div>
-      ) : (
-        <div className="bg-card border rounded-lg p-4 sm:p-8 text-center">
-          <p className="text-muted-foreground mb-4 text-sm sm:text-base">Select a client and site to begin grass cutting operations</p>
-          <div className="text-xs sm:text-sm text-muted-foreground space-y-2">
-            <p>✅ Excel-style tabular data entry with block and inverter grouping</p>
-            <p>✅ Real-time calculated metrics and percentage completion</p>
-            <p>✅ Historic data with daily actual vs planned tracking</p>
-            <p>✅ Date range filtering and export capabilities</p>
-            <p>✅ Client/site filtering and responsive design</p>
-          </div>
-        </div>
-      )}
+
+      <div className="space-y-4">
+        <CompactGrassCuttingDataEntry data={currentData} />
+        <CompactGrassCuttingHistoric data={currentData} />
+      </div>
     </div>
   );
 };
