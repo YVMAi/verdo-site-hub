@@ -172,59 +172,59 @@ export const GrassCuttingHistoric: React.FC<GrassCuttingHistoricProps> = ({ site
                 </tr>
 
                 {/* Static Rows */}
-                <tr className="bg-gray-50">
-                  <td className="p-2 border border-gray-300 text-xs font-medium">Total Strings</td>
+                <tr className="bg-blue-50">
+                  <td className="p-2 border border-gray-300 text-xs font-medium bg-blue-100">Total Strings</td>
                   {siteData.map((blockData) =>
                     blockData.inverters.map((inverter) => (
-                      <td key={`total-${inverter.inverterId}`} className="p-2 border border-gray-300 text-xs text-center">
+                      <td key={`total-${inverter.inverterId}`} className="p-2 border border-gray-300 text-xs text-center bg-blue-50">
                         {inverter.totalStrings}
                       </td>
                     ))
                   )}
-                  <td className="p-2 border border-gray-300"></td>
-                  <td className="p-2 border border-gray-300"></td>
-                  <td className="p-2 border border-gray-300"></td>
-                  <td className="p-2 border border-gray-300"></td>
-                  <td className="p-2 border border-gray-300"></td>
+                  <td className="p-2 border border-gray-300 bg-blue-50"></td>
+                  <td className="p-2 border border-gray-300 bg-blue-50"></td>
+                  <td className="p-2 border border-gray-300 bg-blue-50"></td>
+                  <td className="p-2 border border-gray-300 bg-blue-50"></td>
+                  <td className="p-2 border border-gray-300 bg-blue-50"></td>
                 </tr>
 
-                <tr className="bg-white">
-                  <td className="p-2 border border-gray-300 text-xs font-medium">Grass Cutting Done</td>
+                <tr className="bg-blue-50">
+                  <td className="p-2 border border-gray-300 text-xs font-medium bg-blue-100">Grass Cutting Done</td>
                   {siteData.map((blockData) =>
                     blockData.inverters.map((inverter) => (
-                      <td key={`done-${inverter.inverterId}`} className="p-2 border border-gray-300 text-xs text-center">
+                      <td key={`done-${inverter.inverterId}`} className="p-2 border border-gray-300 text-xs text-center bg-blue-50">
                         {inverter.grassCuttingDone}
                       </td>
                     ))
                   )}
-                  <td className="p-2 border border-gray-300"></td>
-                  <td className="p-2 border border-gray-300"></td>
-                  <td className="p-2 border border-gray-300"></td>
-                  <td className="p-2 border border-gray-300"></td>
-                  <td className="p-2 border border-gray-300"></td>
+                  <td className="p-2 border border-gray-300 bg-blue-50"></td>
+                  <td className="p-2 border border-gray-300 bg-blue-50"></td>
+                  <td className="p-2 border border-gray-300 bg-blue-50"></td>
+                  <td className="p-2 border border-gray-300 bg-blue-50"></td>
+                  <td className="p-2 border border-gray-300 bg-blue-50"></td>
                 </tr>
 
-                <tr className="bg-gray-50">
-                  <td className="p-2 border border-gray-300 text-xs font-medium">Cycles Completed</td>
+                <tr className="bg-green-50">
+                  <td className="p-2 border border-gray-300 text-xs font-medium bg-green-100">Cycles Completed</td>
                   {siteData.map((blockData) =>
                     blockData.inverters.map((inverter) => (
-                      <td key={`cycles-${inverter.inverterId}`} className="p-2 border border-gray-300 text-xs text-center">
+                      <td key={`cycles-${inverter.inverterId}`} className="p-2 border border-gray-300 text-xs text-center bg-green-50">
                         {(inverter.grassCuttingDone / inverter.totalStrings).toFixed(2)}
                       </td>
                     ))
                   )}
-                  <td className="p-2 border border-gray-300"></td>
-                  <td className="p-2 border border-gray-300"></td>
-                  <td className="p-2 border border-gray-300"></td>
-                  <td className="p-2 border border-gray-300"></td>
-                  <td className="p-2 border border-gray-300"></td>
+                  <td className="p-2 border border-gray-300 bg-green-50"></td>
+                  <td className="p-2 border border-gray-300 bg-green-50"></td>
+                  <td className="p-2 border border-gray-300 bg-green-50"></td>
+                  <td className="p-2 border border-gray-300 bg-green-50"></td>
+                  <td className="p-2 border border-gray-300 bg-green-50"></td>
                 </tr>
               </thead>
 
               <tbody>
                 {filteredData.map((entry, index) => (
-                  <tr key={entry.date} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="p-2 border border-gray-300 text-xs flex items-center gap-1">
+                  <tr key={entry.date} className="bg-yellow-50">
+                    <td className="p-2 border border-gray-300 text-xs flex items-center gap-1 bg-yellow-100">
                       {format(new Date(entry.date), 'dd-MMM-yy')}
                       {isEditable(entry.date) && (
                         <Button size="sm" variant="ghost" className="h-4 w-4 p-0">
@@ -234,22 +234,22 @@ export const GrassCuttingHistoric: React.FC<GrassCuttingHistoricProps> = ({ site
                     </td>
                     {siteData.map((blockData) =>
                       blockData.inverters.map((inverter) => (
-                        <td key={`data-${entry.date}-${inverter.inverterId}`} className="p-2 border border-gray-300 text-xs text-center">
+                        <td key={`data-${entry.date}-${inverter.inverterId}`} className="p-2 border border-gray-300 text-xs text-center bg-yellow-50">
                           {entry.blockInverterData[blockData.blockId]?.[inverter.inverterId]?.dailyGrassCutting || 0}
                         </td>
                       ))
                     )}
-                    <td className="p-2 border border-gray-300 text-xs">NA</td>
-                    <td className="p-2 border border-gray-300 text-xs text-center font-medium">
+                    <td className="p-2 border border-gray-300 text-xs bg-yellow-50">NA</td>
+                    <td className="p-2 border border-gray-300 text-xs text-center font-medium bg-green-50">
                       {entry.dailyActual}
                     </td>
-                    <td className="p-2 border border-gray-300 text-xs text-center">
+                    <td className="p-2 border border-gray-300 text-xs text-center bg-blue-50">
                       {entry.dailyPlanned}
                     </td>
-                    <td className="p-2 border border-gray-300 text-xs text-center">
+                    <td className="p-2 border border-gray-300 text-xs text-center bg-green-50">
                       {entry.deviation}
                     </td>
-                    <td className="p-2 border border-gray-300 text-xs text-center">
+                    <td className="p-2 border border-gray-300 text-xs text-center bg-green-50">
                       {entry.deviationPercent}%
                     </td>
                   </tr>

@@ -168,48 +168,48 @@ export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ si
               </thead>
 
               <tbody>
-                {/* Total Strings Row */}
-                <tr className="bg-gray-50">
-                  <td className="p-2 border border-gray-300 text-xs font-medium">Total Strings</td>
+                {/* Total Strings Row - Status Field */}
+                <tr className="bg-blue-50">
+                  <td className="p-2 border border-gray-300 text-xs font-medium bg-blue-100">Total Strings</td>
                   {siteData.map((blockData) =>
                     blockData.inverters.map((inverter) => (
-                      <td key={`total-${inverter.inverterId}`} className="p-2 border border-gray-300 text-xs text-center">
+                      <td key={`total-${inverter.inverterId}`} className="p-2 border border-gray-300 text-xs text-center bg-blue-50">
                         {inverter.totalStrings}
                       </td>
                     ))
                   )}
-                  <td className="p-2 border border-gray-300"></td>
+                  <td className="p-2 border border-gray-300 bg-blue-50"></td>
                 </tr>
 
-                {/* Grass Cutting Done Row */}
-                <tr className="bg-white">
-                  <td className="p-2 border border-gray-300 text-xs font-medium">Grass Cutting Done</td>
+                {/* Grass Cutting Done Row - Status Field */}
+                <tr className="bg-blue-50">
+                  <td className="p-2 border border-gray-300 text-xs font-medium bg-blue-100">Grass Cutting Done</td>
                   {siteData.map((blockData) =>
                     blockData.inverters.map((inverter) => (
-                      <td key={`done-${inverter.inverterId}`} className="p-2 border border-gray-300 text-xs text-center font-medium">
+                      <td key={`done-${inverter.inverterId}`} className="p-2 border border-gray-300 text-xs text-center font-medium bg-blue-50">
                         {getUpdatedGrassCuttingDone(blockData.blockId, inverter.inverterId, inverter.grassCuttingDone)}
                       </td>
                     ))
                   )}
-                  <td className="p-2 border border-gray-300"></td>
+                  <td className="p-2 border border-gray-300 bg-blue-50"></td>
                 </tr>
 
-                {/* % Completed Row */}
-                <tr className="bg-gray-50">
-                  <td className="p-2 border border-gray-300 text-xs font-medium">% Completed</td>
+                {/* % Completed Row - Calculated Field */}
+                <tr className="bg-green-50">
+                  <td className="p-2 border border-gray-300 text-xs font-medium bg-green-100">% Completed</td>
                   {siteData.map((blockData) =>
                     blockData.inverters.map((inverter) => (
-                      <td key={`percent-${inverter.inverterId}`} className="p-2 border border-gray-300 text-xs text-center font-medium">
+                      <td key={`percent-${inverter.inverterId}`} className="p-2 border border-gray-300 text-xs text-center font-medium bg-green-50">
                         {getCalculatedPercentCompleted(blockData.blockId, inverter.inverterId, inverter.totalStrings, inverter.grassCuttingDone)}%
                       </td>
                     ))
                   )}
-                  <td className="p-2 border border-gray-300"></td>
+                  <td className="p-2 border border-gray-300 bg-green-50"></td>
                 </tr>
 
-                {/* Input Row */}
-                <tr className="bg-white">
-                  <td className="p-1 border border-gray-300 text-xs font-medium flex items-center">
+                {/* Input Row - Input Field */}
+                <tr className="bg-yellow-50">
+                  <td className="p-1 border border-gray-300 text-xs font-medium flex items-center bg-yellow-100">
                     <Input
                       type="text"
                       value={format(selectedDate, 'dd-MMM-yy')}
@@ -219,7 +219,7 @@ export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ si
                   </td>
                   {siteData.map((blockData) =>
                     blockData.inverters.map((inverter) => (
-                      <td key={`input-${inverter.inverterId}`} className="p-1 border border-gray-300">
+                      <td key={`input-${inverter.inverterId}`} className="p-1 border border-gray-300 bg-yellow-50">
                         <Input
                           type="number"
                           min="0"
@@ -230,13 +230,13 @@ export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ si
                             'value', 
                             parseInt(e.target.value) || 0
                           )}
-                          className="h-8 text-xs text-center border-0"
+                          className="h-8 text-xs text-center border-0 bg-yellow-50"
                           placeholder="0"
                         />
                       </td>
                     ))
                   )}
-                  <td className="p-1 border border-gray-300">
+                  <td className="p-1 border border-gray-300 bg-yellow-50">
                     <Textarea
                       value={getDailyInput(siteData[0]?.blockId || '', siteData[0]?.inverters[0]?.inverterId || '', 'remarks') as string}
                       onChange={(e) => {
@@ -244,7 +244,7 @@ export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ si
                           handleDailyInputChange(siteData[0].blockId, siteData[0].inverters[0].inverterId, 'remarks', e.target.value);
                         }
                       }}
-                      className="h-8 text-xs resize-none border-0"
+                      className="h-8 text-xs resize-none border-0 bg-yellow-50"
                       placeholder="Enter remarks..."
                       rows={1}
                     />
