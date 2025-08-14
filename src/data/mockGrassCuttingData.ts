@@ -1,46 +1,88 @@
 import { Block, Inverter, User, BlockInverterData, DailyEntry } from '@/types/grassCutting';
 
 export const mockBlocks: Block[] = [
-  // Site 1 (Solar Farm Alpha) blocks
+  // Site 1 (Solar Farm Alpha) blocks - 4 blocks
   { id: '1', name: 'Block 1', siteId: '1' },
   { id: '2', name: 'Block 2', siteId: '1' },
   { id: '3', name: 'Block 3', siteId: '1' },
   { id: '4', name: 'Block 4', siteId: '1' },
   
-  // Site 2 (Wind Farm Beta) blocks
+  // Site 2 (Wind Farm Beta) blocks - 2 blocks
   { id: '5', name: 'Block 1', siteId: '2' },
   { id: '6', name: 'Block 2', siteId: '2' },
   
-  // Site 3 (Solar Farm Gamma) blocks
+  // Site 3 (Solar Farm Gamma) blocks - 3 blocks
   { id: '7', name: 'Block 1', siteId: '3' },
   { id: '8', name: 'Block 2', siteId: '3' },
   { id: '9', name: 'Block 3', siteId: '3' },
+
+  // Site 4 (Hybrid Farm Delta) blocks - 5 blocks
+  { id: '10', name: 'Block 1', siteId: '4' },
+  { id: '11', name: 'Block 2', siteId: '4' },
+  { id: '12', name: 'Block 3', siteId: '4' },
+  { id: '13', name: 'Block 4', siteId: '4' },
+  { id: '14', name: 'Block 5', siteId: '4' },
 ];
 
 export const mockInverters: Inverter[] = [
-  // Block 1 inverters
+  // Site 1 - Block 1 inverters (4 inverters)
   { id: '1', name: 'INV1', blockId: '1', totalStrings: 768 },
   { id: '2', name: 'INV2', blockId: '1', totalStrings: 768 },
   { id: '3', name: 'INV3', blockId: '1', totalStrings: 792 },
   { id: '4', name: 'INV4', blockId: '1', totalStrings: 792 },
   
-  // Block 2 inverters
+  // Site 1 - Block 2 inverters (4 inverters)
   { id: '5', name: 'INV1', blockId: '2', totalStrings: 777 },
   { id: '6', name: 'INV2', blockId: '2', totalStrings: 768 },
   { id: '7', name: 'INV3', blockId: '2', totalStrings: 768 },
   { id: '8', name: 'INV4', blockId: '2', totalStrings: 768 },
   
-  // Block 3 inverters
+  // Site 1 - Block 3 inverters (4 inverters)
   { id: '9', name: 'INV1', blockId: '3', totalStrings: 768 },
   { id: '10', name: 'INV2', blockId: '3', totalStrings: 768 },
   { id: '11', name: 'INV3', blockId: '3', totalStrings: 768 },
   { id: '12', name: 'INV4', blockId: '3', totalStrings: 768 },
   
-  // Block 4 inverters
+  // Site 1 - Block 4 inverters (4 inverters)
   { id: '13', name: 'INV1', blockId: '4', totalStrings: 768 },
   { id: '14', name: 'INV2', blockId: '4', totalStrings: 768 },
   { id: '15', name: 'INV3', blockId: '4', totalStrings: 768 },
   { id: '16', name: 'INV4', blockId: '4', totalStrings: 768 },
+
+  // Site 2 - Block 1 inverters (3 inverters)
+  { id: '17', name: 'INV1', blockId: '5', totalStrings: 650 },
+  { id: '18', name: 'INV2', blockId: '5', totalStrings: 650 },
+  { id: '19', name: 'INV3', blockId: '5', totalStrings: 680 },
+  
+  // Site 2 - Block 2 inverters (3 inverters)
+  { id: '20', name: 'INV1', blockId: '6', totalStrings: 720 },
+  { id: '21', name: 'INV2', blockId: '6', totalStrings: 720 },
+  { id: '22', name: 'INV3', blockId: '6', totalStrings: 700 },
+
+  // Site 3 - Block 1 inverters (2 inverters)
+  { id: '23', name: 'INV1', blockId: '7', totalStrings: 800 },
+  { id: '24', name: 'INV2', blockId: '7', totalStrings: 800 },
+  
+  // Site 3 - Block 2 inverters (2 inverters)
+  { id: '25', name: 'INV1', blockId: '8', totalStrings: 850 },
+  { id: '26', name: 'INV2', blockId: '8', totalStrings: 850 },
+  
+  // Site 3 - Block 3 inverters (2 inverters)
+  { id: '27', name: 'INV1', blockId: '9', totalStrings: 900 },
+  { id: '28', name: 'INV2', blockId: '9', totalStrings: 900 },
+
+  // Site 4 - Various block configurations
+  { id: '29', name: 'INV1', blockId: '10', totalStrings: 600 },
+  { id: '30', name: 'INV2', blockId: '10', totalStrings: 600 },
+  { id: '31', name: 'INV1', blockId: '11', totalStrings: 750 },
+  { id: '32', name: 'INV2', blockId: '11', totalStrings: 750 },
+  { id: '33', name: 'INV3', blockId: '11', totalStrings: 750 },
+  { id: '34', name: 'INV1', blockId: '12', totalStrings: 820 },
+  { id: '35', name: 'INV1', blockId: '13', totalStrings: 900 },
+  { id: '36', name: 'INV2', blockId: '13', totalStrings: 900 },
+  { id: '37', name: 'INV3', blockId: '13', totalStrings: 900 },
+  { id: '38', name: 'INV4', blockId: '13', totalStrings: 900 },
+  { id: '39', name: 'INV1', blockId: '14', totalStrings: 1000 },
 ];
 
 export const mockUsers: User[] = [
@@ -53,6 +95,7 @@ export const mockUsers: User[] = [
 ];
 
 export const mockGrassCuttingData: BlockInverterData[] = [
+  // Site 1 data
   {
     blockId: '1',
     blockName: 'Block 1',
@@ -92,7 +135,51 @@ export const mockGrassCuttingData: BlockInverterData[] = [
       { inverterId: '15', inverterName: 'INV3', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
       { inverterId: '16', inverterName: 'INV4', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
     ]
-  }
+  },
+  // Site 2 data
+  {
+    blockId: '5',
+    blockName: 'Block 1',
+    inverters: [
+      { inverterId: '17', inverterName: 'INV1', totalStrings: 650, grassCuttingDone: 0, percentCompleted: 0 },
+      { inverterId: '18', inverterName: 'INV2', totalStrings: 650, grassCuttingDone: 0, percentCompleted: 0 },
+      { inverterId: '19', inverterName: 'INV3', totalStrings: 680, grassCuttingDone: 0, percentCompleted: 0 },
+    ]
+  },
+  {
+    blockId: '6',
+    blockName: 'Block 2',
+    inverters: [
+      { inverterId: '20', inverterName: 'INV1', totalStrings: 720, grassCuttingDone: 0, percentCompleted: 0 },
+      { inverterId: '21', inverterName: 'INV2', totalStrings: 720, grassCuttingDone: 0, percentCompleted: 0 },
+      { inverterId: '22', inverterName: 'INV3', totalStrings: 700, grassCuttingDone: 0, percentCompleted: 0 },
+    ]
+  },
+  // Site 3 data
+  {
+    blockId: '7',
+    blockName: 'Block 1',
+    inverters: [
+      { inverterId: '23', inverterName: 'INV1', totalStrings: 800, grassCuttingDone: 0, percentCompleted: 0 },
+      { inverterId: '24', inverterName: 'INV2', totalStrings: 800, grassCuttingDone: 0, percentCompleted: 0 },
+    ]
+  },
+  {
+    blockId: '8',
+    blockName: 'Block 2',
+    inverters: [
+      { inverterId: '25', inverterName: 'INV1', totalStrings: 850, grassCuttingDone: 0, percentCompleted: 0 },
+      { inverterId: '26', inverterName: 'INV2', totalStrings: 850, grassCuttingDone: 0, percentCompleted: 0 },
+    ]
+  },
+  {
+    blockId: '9',
+    blockName: 'Block 3',
+    inverters: [
+      { inverterId: '27', inverterName: 'INV1', totalStrings: 900, grassCuttingDone: 0, percentCompleted: 0 },
+      { inverterId: '28', inverterName: 'INV2', totalStrings: 900, grassCuttingDone: 0, percentCompleted: 0 },
+    ]
+  },
 ];
 
 export const mockHistoricalData: DailyEntry[] = [

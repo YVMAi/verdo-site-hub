@@ -259,6 +259,29 @@ export const GrassCuttingHistoric: React.FC<GrassCuttingHistoricProps> = ({ site
           </div>
         </div>
 
+        {/* Legend */}
+        <div className="bg-gray-50 rounded-lg p-4 space-y-2 mb-4">
+          <h4 className="text-sm font-semibold text-gray-700 mb-3">Field Types Legend:</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-blue-100 border border-blue-200 rounded"></div>
+              <span className="text-xs text-gray-600">Status Fields</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-green-100 border border-green-200 rounded"></div>
+              <span className="text-xs text-gray-600">Calculated Fields</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-yellow-100 border border-yellow-200 rounded"></div>
+              <span className="text-xs text-gray-600">Historical Data</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Edit className="h-3 w-3 text-gray-500" />
+              <span className="text-xs text-gray-600">Editable (within edit window)</span>
+            </div>
+          </div>
+        </div>
+
         {/* Pagination Info */}
         <div className="mt-4 flex justify-between items-center text-xs text-muted-foreground">
           <span>Showing {filteredData.length} entries</span>
