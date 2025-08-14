@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppLayout } from "./components/AppLayout";
 import Index from "./pages/Index";
 import GenerationData from "./pages/GenerationData";
-import GrassCutting from "./pages/GrassCutting";
 import Cleaning from "./pages/Cleaning";
 import FieldInspection from "./pages/FieldInspection";
 import Vegetation from "./pages/Vegetation";
@@ -25,7 +24,6 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/generation" element={<GenerationData />} />
-            <Route path="/grass-cutting" element={<GrassCutting />} />
             <Route path="/cleaning" element={<Cleaning />} />
             <Route path="/field-inspection" element={<FieldInspection />} />
             <Route path="/vegetation" element={<Vegetation />} />
