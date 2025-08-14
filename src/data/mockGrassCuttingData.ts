@@ -1,252 +1,150 @@
-import { Block, Inverter, User, BlockInverterData, DailyEntry } from '@/types/grassCutting';
+import { GrassCuttingSiteData } from "@/types/grassCutting";
 
-export const mockBlocks: Block[] = [
-  // Site 1 (Solar Farm Alpha) blocks - 4 blocks
-  { id: '1', name: 'Block 1', siteId: '1' },
-  { id: '2', name: 'Block 2', siteId: '1' },
-  { id: '3', name: 'Block 3', siteId: '1' },
-  { id: '4', name: 'Block 4', siteId: '1' },
-  
-  // Site 2 (Wind Farm Beta) blocks - 2 blocks
-  { id: '5', name: 'Block 1', siteId: '2' },
-  { id: '6', name: 'Block 2', siteId: '2' },
-  
-  // Site 3 (Solar Farm Gamma) blocks - 3 blocks
-  { id: '7', name: 'Block 1', siteId: '3' },
-  { id: '8', name: 'Block 2', siteId: '3' },
-  { id: '9', name: 'Block 3', siteId: '3' },
-
-  // Site 4 (Hybrid Farm Delta) blocks - 5 blocks
-  { id: '10', name: 'Block 1', siteId: '4' },
-  { id: '11', name: 'Block 2', siteId: '4' },
-  { id: '12', name: 'Block 3', siteId: '4' },
-  { id: '13', name: 'Block 4', siteId: '4' },
-  { id: '14', name: 'Block 5', siteId: '4' },
-];
-
-export const mockInverters: Inverter[] = [
-  // Site 1 - Block 1 inverters (4 inverters)
-  { id: '1', name: 'INV1', blockId: '1', totalStrings: 768 },
-  { id: '2', name: 'INV2', blockId: '1', totalStrings: 768 },
-  { id: '3', name: 'INV3', blockId: '1', totalStrings: 792 },
-  { id: '4', name: 'INV4', blockId: '1', totalStrings: 792 },
-  
-  // Site 1 - Block 2 inverters (4 inverters)
-  { id: '5', name: 'INV1', blockId: '2', totalStrings: 777 },
-  { id: '6', name: 'INV2', blockId: '2', totalStrings: 768 },
-  { id: '7', name: 'INV3', blockId: '2', totalStrings: 768 },
-  { id: '8', name: 'INV4', blockId: '2', totalStrings: 768 },
-  
-  // Site 1 - Block 3 inverters (4 inverters)
-  { id: '9', name: 'INV1', blockId: '3', totalStrings: 768 },
-  { id: '10', name: 'INV2', blockId: '3', totalStrings: 768 },
-  { id: '11', name: 'INV3', blockId: '3', totalStrings: 768 },
-  { id: '12', name: 'INV4', blockId: '3', totalStrings: 768 },
-  
-  // Site 1 - Block 4 inverters (4 inverters)
-  { id: '13', name: 'INV1', blockId: '4', totalStrings: 768 },
-  { id: '14', name: 'INV2', blockId: '4', totalStrings: 768 },
-  { id: '15', name: 'INV3', blockId: '4', totalStrings: 768 },
-  { id: '16', name: 'INV4', blockId: '4', totalStrings: 768 },
-
-  // Site 2 - Block 1 inverters (3 inverters)
-  { id: '17', name: 'INV1', blockId: '5', totalStrings: 650 },
-  { id: '18', name: 'INV2', blockId: '5', totalStrings: 650 },
-  { id: '19', name: 'INV3', blockId: '5', totalStrings: 680 },
-  
-  // Site 2 - Block 2 inverters (3 inverters)
-  { id: '20', name: 'INV1', blockId: '6', totalStrings: 720 },
-  { id: '21', name: 'INV2', blockId: '6', totalStrings: 720 },
-  { id: '22', name: 'INV3', blockId: '6', totalStrings: 700 },
-
-  // Site 3 - Block 1 inverters (2 inverters)
-  { id: '23', name: 'INV1', blockId: '7', totalStrings: 800 },
-  { id: '24', name: 'INV2', blockId: '7', totalStrings: 800 },
-  
-  // Site 3 - Block 2 inverters (2 inverters)
-  { id: '25', name: 'INV1', blockId: '8', totalStrings: 850 },
-  { id: '26', name: 'INV2', blockId: '8', totalStrings: 850 },
-  
-  // Site 3 - Block 3 inverters (2 inverters)
-  { id: '27', name: 'INV1', blockId: '9', totalStrings: 900 },
-  { id: '28', name: 'INV2', blockId: '9', totalStrings: 900 },
-
-  // Site 4 - Various block configurations
-  { id: '29', name: 'INV1', blockId: '10', totalStrings: 600 },
-  { id: '30', name: 'INV2', blockId: '10', totalStrings: 600 },
-  { id: '31', name: 'INV1', blockId: '11', totalStrings: 750 },
-  { id: '32', name: 'INV2', blockId: '11', totalStrings: 750 },
-  { id: '33', name: 'INV3', blockId: '11', totalStrings: 750 },
-  { id: '34', name: 'INV1', blockId: '12', totalStrings: 820 },
-  { id: '35', name: 'INV1', blockId: '13', totalStrings: 900 },
-  { id: '36', name: 'INV2', blockId: '13', totalStrings: 900 },
-  { id: '37', name: 'INV3', blockId: '13', totalStrings: 900 },
-  { id: '38', name: 'INV4', blockId: '13', totalStrings: 900 },
-  { id: '39', name: 'INV1', blockId: '14', totalStrings: 1000 },
-];
-
-export const mockUsers: User[] = [
-  { id: '1', name: 'John Smith' },
-  { id: '2', name: 'Sarah Johnson' },
-  { id: '3', name: 'Mike Wilson' },
-  { id: '4', name: 'Lisa Brown' },
-  { id: '5', name: 'David Chen' },
-  { id: '6', name: 'Emma Davis' },
-];
-
-export const mockGrassCuttingData: BlockInverterData[] = [
-  // Site 1 data
-  {
-    blockId: '1',
-    blockName: 'Block 1',
-    inverters: [
-      { inverterId: '1', inverterName: 'INV1', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
-      { inverterId: '2', inverterName: 'INV2', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
-      { inverterId: '3', inverterName: 'INV3', totalStrings: 792, grassCuttingDone: 0, percentCompleted: 0 },
-      { inverterId: '4', inverterName: 'INV4', totalStrings: 792, grassCuttingDone: 0, percentCompleted: 0 },
-    ]
-  },
-  {
-    blockId: '2',
-    blockName: 'Block 2',
-    inverters: [
-      { inverterId: '5', inverterName: 'INV1', totalStrings: 777, grassCuttingDone: 0, percentCompleted: 0 },
-      { inverterId: '6', inverterName: 'INV2', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
-      { inverterId: '7', inverterName: 'INV3', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
-      { inverterId: '8', inverterName: 'INV4', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
-    ]
-  },
-  {
-    blockId: '3',
-    blockName: 'Block 3',
-    inverters: [
-      { inverterId: '9', inverterName: 'INV1', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
-      { inverterId: '10', inverterName: 'INV2', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
-      { inverterId: '11', inverterName: 'INV3', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
-      { inverterId: '12', inverterName: 'INV4', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
-    ]
-  },
-  {
-    blockId: '4',
-    blockName: 'Block 4',
-    inverters: [
-      { inverterId: '13', inverterName: 'INV1', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
-      { inverterId: '14', inverterName: 'INV2', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
-      { inverterId: '15', inverterName: 'INV3', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
-      { inverterId: '16', inverterName: 'INV4', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
-    ]
-  },
-  // Site 2 data
-  {
-    blockId: '5',
-    blockName: 'Block 1',
-    inverters: [
-      { inverterId: '17', inverterName: 'INV1', totalStrings: 650, grassCuttingDone: 0, percentCompleted: 0 },
-      { inverterId: '18', inverterName: 'INV2', totalStrings: 650, grassCuttingDone: 0, percentCompleted: 0 },
-      { inverterId: '19', inverterName: 'INV3', totalStrings: 680, grassCuttingDone: 0, percentCompleted: 0 },
-    ]
-  },
-  {
-    blockId: '6',
-    blockName: 'Block 2',
-    inverters: [
-      { inverterId: '20', inverterName: 'INV1', totalStrings: 720, grassCuttingDone: 0, percentCompleted: 0 },
-      { inverterId: '21', inverterName: 'INV2', totalStrings: 720, grassCuttingDone: 0, percentCompleted: 0 },
-      { inverterId: '22', inverterName: 'INV3', totalStrings: 700, grassCuttingDone: 0, percentCompleted: 0 },
-    ]
-  },
-  // Site 3 data
-  {
-    blockId: '7',
-    blockName: 'Block 1',
-    inverters: [
-      { inverterId: '23', inverterName: 'INV1', totalStrings: 800, grassCuttingDone: 0, percentCompleted: 0 },
-      { inverterId: '24', inverterName: 'INV2', totalStrings: 800, grassCuttingDone: 0, percentCompleted: 0 },
-    ]
-  },
-  {
-    blockId: '8',
-    blockName: 'Block 2',
-    inverters: [
-      { inverterId: '25', inverterName: 'INV1', totalStrings: 850, grassCuttingDone: 0, percentCompleted: 0 },
-      { inverterId: '26', inverterName: 'INV2', totalStrings: 850, grassCuttingDone: 0, percentCompleted: 0 },
-    ]
-  },
-  {
-    blockId: '9',
-    blockName: 'Block 3',
-    inverters: [
-      { inverterId: '27', inverterName: 'INV1', totalStrings: 900, grassCuttingDone: 0, percentCompleted: 0 },
-      { inverterId: '28', inverterName: 'INV2', totalStrings: 900, grassCuttingDone: 0, percentCompleted: 0 },
-    ]
-  },
-];
-
-export const mockHistoricalData: DailyEntry[] = [
-  {
-    date: '2025-08-14',
-    blockInverterData: {
-      '1': {
-        '1': { dailyGrassCutting: 45, remarks: 'NA' },
-        '2': { dailyGrassCutting: 462, remarks: 'NA' },
-        '3': { dailyGrassCutting: 701, remarks: 'NA' },
-        '4': { dailyGrassCutting: 700, remarks: 'NA' }
+export const mockGrassCuttingData: { [key: string]: GrassCuttingSiteData } = {
+  "1-1": {
+    clientId: "1",
+    siteId: "1",
+    blocks: [
+      {
+        id: "block-1",
+        name: "Block 1",
+        inverters: [
+          { id: "INV1", totalStrings: 768, grassCuttingDone: 340, percentCompleted: 44 },
+          { id: "INV2", totalStrings: 768, grassCuttingDone: 520, percentCompleted: 68 },
+          { id: "INV3", totalStrings: 792, grassCuttingDone: 280, percentCompleted: 35 },
+          { id: "INV4", totalStrings: 792, grassCuttingDone: 475, percentCompleted: 60 }
+        ]
       },
-      '2': {
-        '5': { dailyGrassCutting: 87, remarks: 'NA' },
-        '6': { dailyGrassCutting: 247, remarks: 'NA' },
-        '7': { dailyGrassCutting: 694, remarks: 'NA' },
-        '8': { dailyGrassCutting: 72, remarks: 'NA' }
+      {
+        id: "block-2",
+        name: "Block 2",
+        inverters: [
+          { id: "INV1", totalStrings: 777, grassCuttingDone: 460, percentCompleted: 59 },
+          { id: "INV2", totalStrings: 768, grassCuttingDone: 615, percentCompleted: 80 },
+          { id: "INV3", totalStrings: 768, grassCuttingDone: 692, percentCompleted: 90 },
+          { id: "INV4", totalStrings: 768, grassCuttingDone: 307, percentCompleted: 40 }
+        ]
       },
-      '3': {
-        '9': { dailyGrassCutting: 354, remarks: 'NA' },
-        '10': { dailyGrassCutting: 410, remarks: 'NA' },
-        '11': { dailyGrassCutting: 304, remarks: 'NA' },
-        '12': { dailyGrassCutting: 81, remarks: 'NA' }
+      {
+        id: "block-3",
+        name: "Block 3",
+        inverters: [
+          { id: "INV1", totalStrings: 768, grassCuttingDone: 384, percentCompleted: 50 },
+          { id: "INV2", totalStrings: 768, grassCuttingDone: 461, percentCompleted: 60 },
+          { id: "INV3", totalStrings: 768, grassCuttingDone: 345, percentCompleted: 45 },
+          { id: "INV4", totalStrings: 768, grassCuttingDone: 537, percentCompleted: 70 }
+        ]
       },
-      '4': {
-        '13': { dailyGrassCutting: 322, remarks: 'NA' },
-        '14': { dailyGrassCutting: 309, remarks: 'NA' },
-        '15': { dailyGrassCutting: 84, remarks: 'NA' },
-        '16': { dailyGrassCutting: 742, remarks: 'NA' }
+      {
+        id: "block-4",
+        name: "Block 4",
+        inverters: [
+          { id: "INV1", totalStrings: 768, grassCuttingDone: 614, percentCompleted: 80 },
+          { id: "INV2", totalStrings: 768, grassCuttingDone: 307, percentCompleted: 40 },
+          { id: "INV3", totalStrings: 768, grassCuttingDone: 230, percentCompleted: 30 },
+          { id: "INV4", totalStrings: 768, grassCuttingDone: 460, percentCompleted: 60 }
+        ]
       }
-    },
-    dailyActual: 6516,
-    dailyPlanned: 20000,
-    deviation: 13484,
-    deviationPercent: 67
-  },
-  {
-    date: '2025-08-13',
-    blockInverterData: {
-      '1': {
-        '1': { dailyGrassCutting: 615, remarks: 'NA' },
-        '2': { dailyGrassCutting: 199, remarks: 'NA' },
-        '3': { dailyGrassCutting: 499, remarks: 'NA' },
-        '4': { dailyGrassCutting: 173, remarks: 'NA' }
-      },
-      '2': {
-        '5': { dailyGrassCutting: 164, remarks: 'NA' },
-        '6': { dailyGrassCutting: 702, remarks: 'NA' },
-        '7': { dailyGrassCutting: 733, remarks: 'NA' },
-        '8': { dailyGrassCutting: 551, remarks: 'NA' }
-      },
-      '3': {
-        '9': { dailyGrassCutting: 424, remarks: 'NA' },
-        '10': { dailyGrassCutting: 225, remarks: 'NA' },
-        '11': { dailyGrassCutting: 470, remarks: 'NA' },
-        '12': { dailyGrassCutting: 384, remarks: 'NA' }
-      },
-      '4': {
-        '13': { dailyGrassCutting: 298, remarks: 'NA' },
-        '14': { dailyGrassCutting: 320, remarks: 'NA' },
-        '15': { dailyGrassCutting: 663, remarks: 'NA' },
-        '16': { dailyGrassCutting: 96, remarks: 'NA' }
+    ],
+    dailyEntries: [
+      {
+        date: "14-Aug-25",
+        inverterData: {
+          "block-1-INV1": 45, "block-1-INV2": 462, "block-1-INV3": 701, "block-1-INV4": 700,
+          "block-2-INV1": 87, "block-2-INV2": 247, "block-2-INV3": 694, "block-2-INV4": 72,
+          "block-3-INV1": 354, "block-3-INV2": 410, "block-3-INV3": 304, "block-3-INV4": 81,
+          "block-4-INV1": 322, "block-4-INV2": 309, "block-4-INV3": 84, "block-4-INV4": 742
+        },
+        plannedStrings: 20000,
+        dailyActual: 6516,
+        deviation: 13484,
+        rainfallMM: "<INPUT>",
+        remarks: "<INPUT>"
       }
-    },
-    dailyActual: 6516,
-    dailyPlanned: 20000,
-    deviation: 13484,
-    deviationPercent: 67
+    ],
+    historicEntries: [
+      {
+        date: "13-Aug-25",
+        inverterData: {
+          "block-1-INV1": 615, "block-1-INV2": 199, "block-1-INV3": 499, "block-1-INV4": 173,
+          "block-2-INV1": 164, "block-2-INV2": 702, "block-2-INV3": 733, "block-2-INV4": 551,
+          "block-3-INV1": 424, "block-3-INV2": 225, "block-3-INV3": 470, "block-3-INV4": 384,
+          "block-4-INV1": 298, "block-4-INV2": 320, "block-4-INV3": 663, "block-4-INV4": 96
+        },
+        plannedStrings: 20000,
+        dailyActual: 6516,
+        deviation: 13484,
+        rainfallMM: "2 MM",
+        remarks: "NA",
+        cyclesCompleted: 1.2
+      },
+      {
+        date: "12-Aug-25",
+        inverterData: {
+          "block-1-INV1": 520, "block-1-INV2": 350, "block-1-INV3": 280, "block-1-INV4": 410,
+          "block-2-INV1": 380, "block-2-INV2": 460, "block-2-INV3": 520, "block-2-INV4": 340,
+          "block-3-INV1": 290, "block-3-INV2": 370, "block-3-INV3": 450, "block-3-INV4": 320,
+          "block-4-INV1": 400, "block-4-INV2": 480, "block-4-INV3": 360, "block-4-INV4": 440
+        },
+        plannedStrings: 18000,
+        dailyActual: 6570,
+        deviation: 11430,
+        rainfallMM: "0 MM",
+        remarks: "Clear weather",
+        cyclesCompleted: 1.1
+      }
+    ]
+  },
+  "1-2": {
+    clientId: "1",
+    siteId: "2",
+    blocks: [
+      {
+        id: "block-1",
+        name: "Block 1",
+        inverters: [
+          { id: "INV1", totalStrings: 650, grassCuttingDone: 520, percentCompleted: 80 },
+          { id: "INV2", totalStrings: 650, grassCuttingDone: 455, percentCompleted: 70 }
+        ]
+      },
+      {
+        id: "block-2",
+        name: "Block 2",
+        inverters: [
+          { id: "INV1", totalStrings: 720, grassCuttingDone: 576, percentCompleted: 80 },
+          { id: "INV2", totalStrings: 720, grassCuttingDone: 504, percentCompleted: 70 },
+          { id: "INV3", totalStrings: 700, grassCuttingDone: 350, percentCompleted: 50 }
+        ]
+      }
+    ],
+    dailyEntries: [
+      {
+        date: "14-Aug-25",
+        inverterData: {
+          "block-1-INV1": 120, "block-1-INV2": 150,
+          "block-2-INV1": 180, "block-2-INV2": 160, "block-2-INV3": 140
+        },
+        plannedStrings: 1000,
+        dailyActual: 750,
+        deviation: 250,
+        rainfallMM: "<INPUT>",
+        remarks: "<INPUT>"
+      }
+    ],
+    historicEntries: [
+      {
+        date: "13-Aug-25",
+        inverterData: {
+          "block-1-INV1": 100, "block-1-INV2": 130,
+          "block-2-INV1": 150, "block-2-INV2": 140, "block-2-INV3": 120
+        },
+        plannedStrings: 900,
+        dailyActual: 640,
+        deviation: 260,
+        rainfallMM: "1 MM",
+        remarks: "Good progress",
+        cyclesCompleted: 0.8
+      }
+    ]
   }
-];
+};
