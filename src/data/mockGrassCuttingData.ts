@@ -57,40 +57,40 @@ export const mockGrassCuttingData: BlockInverterData[] = [
     blockId: '1',
     blockName: 'Block 1',
     inverters: [
-      { inverterId: '1', inverterName: 'INV1', totalStrings: 768, grassCuttingDone: 1536, percentCompleted: 6 },
-      { inverterId: '2', inverterName: 'INV2', totalStrings: 768, grassCuttingDone: 1162, percentCompleted: 60 },
-      { inverterId: '3', inverterName: 'INV3', totalStrings: 792, grassCuttingDone: 792, percentCompleted: 89 },
-      { inverterId: '4', inverterName: 'INV4', totalStrings: 792, grassCuttingDone: 792, percentCompleted: 88 },
+      { inverterId: '1', inverterName: 'INV1', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
+      { inverterId: '2', inverterName: 'INV2', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
+      { inverterId: '3', inverterName: 'INV3', totalStrings: 792, grassCuttingDone: 0, percentCompleted: 0 },
+      { inverterId: '4', inverterName: 'INV4', totalStrings: 792, grassCuttingDone: 0, percentCompleted: 0 },
     ]
   },
   {
     blockId: '2',
     blockName: 'Block 2',
     inverters: [
-      { inverterId: '5', inverterName: 'INV1', totalStrings: 777, grassCuttingDone: 777, percentCompleted: 11 },
-      { inverterId: '6', inverterName: 'INV2', totalStrings: 768, grassCuttingDone: 768, percentCompleted: 32 },
-      { inverterId: '7', inverterName: 'INV3', totalStrings: 768, grassCuttingDone: 768, percentCompleted: 90 },
-      { inverterId: '8', inverterName: 'INV4', totalStrings: 768, grassCuttingDone: 768, percentCompleted: 9 },
+      { inverterId: '5', inverterName: 'INV1', totalStrings: 777, grassCuttingDone: 0, percentCompleted: 0 },
+      { inverterId: '6', inverterName: 'INV2', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
+      { inverterId: '7', inverterName: 'INV3', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
+      { inverterId: '8', inverterName: 'INV4', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
     ]
   },
   {
     blockId: '3',
     blockName: 'Block 3',
     inverters: [
-      { inverterId: '9', inverterName: 'INV1', totalStrings: 768, grassCuttingDone: 768, percentCompleted: 46 },
-      { inverterId: '10', inverterName: 'INV2', totalStrings: 768, grassCuttingDone: 768, percentCompleted: 53 },
-      { inverterId: '11', inverterName: 'INV3', totalStrings: 768, grassCuttingDone: 768, percentCompleted: 40 },
-      { inverterId: '12', inverterName: 'INV4', totalStrings: 768, grassCuttingDone: 768, percentCompleted: 11 },
+      { inverterId: '9', inverterName: 'INV1', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
+      { inverterId: '10', inverterName: 'INV2', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
+      { inverterId: '11', inverterName: 'INV3', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
+      { inverterId: '12', inverterName: 'INV4', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
     ]
   },
   {
     blockId: '4',
     blockName: 'Block 4',
     inverters: [
-      { inverterId: '13', inverterName: 'INV1', totalStrings: 768, grassCuttingDone: 768, percentCompleted: 42 },
-      { inverterId: '14', inverterName: 'INV2', totalStrings: 768, grassCuttingDone: 768, percentCompleted: 40 },
-      { inverterId: '15', inverterName: 'INV3', totalStrings: 768, grassCuttingDone: 765, percentCompleted: 11 },
-      { inverterId: '16', inverterName: 'INV4', totalStrings: 768, grassCuttingDone: 765, percentCompleted: 97 },
+      { inverterId: '13', inverterName: 'INV1', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
+      { inverterId: '14', inverterName: 'INV2', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
+      { inverterId: '15', inverterName: 'INV3', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
+      { inverterId: '16', inverterName: 'INV4', totalStrings: 768, grassCuttingDone: 0, percentCompleted: 0 },
     ]
   }
 ];
