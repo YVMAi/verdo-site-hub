@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { DataGrid, Column } from 'react-data-grid';
+import { DataGrid } from 'react-data-grid';
 import { GrassCuttingSiteData } from "@/types/grassCutting";
 import 'react-data-grid/lib/styles.css';
 
@@ -15,7 +15,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
     }
 
     // Create columns dynamically
-    const cols: Column<any>[] = [
+    const cols: any[] = [
       { key: 'field', name: 'Field', width: 180, frozen: true }
     ];
 

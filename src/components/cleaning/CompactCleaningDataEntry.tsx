@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { DataGrid, Column } from 'react-data-grid';
+import { DataGrid } from 'react-data-grid';
 import { CleaningSiteData } from "@/types/cleaning";
 import 'react-data-grid/lib/styles.css';
 
@@ -15,7 +15,7 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
     }
 
     // Create columns dynamically
-    const cols: Column<any>[] = [
+    const cols: any[] = [
       { key: 'field', name: 'Field', width: 180, frozen: true }
     ];
 
