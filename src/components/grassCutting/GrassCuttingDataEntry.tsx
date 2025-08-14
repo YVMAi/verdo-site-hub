@@ -40,6 +40,17 @@ export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ si
     );
   }, [site, availableBlocks]);
 
+  // Calculate updated grass cutting done and % completed based on daily inputs
+  const getUpdatedGrassCuttingDone = (blockId: string, inverterId: string, originalDone: number) => {
+    const dailyInput = getDailyInput(blockId, inverterId, 'value') as number;
+    return originalDone + dailyInput;
+  };
+
+  const getCalculatedPercentCompleted = (blockId: string, inverterId: string, totalStrings: number, originalDone: number) => {
+    const updatedDone = getUpdatedGrassCuttingDone(blockId, inverterId, originalDone);
+    return totalStrings > 0 ? Math.round((updatedDone / totalStrings) * 100) : 0;
+  };
+
   const handleDailyInputChange = (blockId: string, inverterId: string, field: 'value' | 'remarks', newValue: string | number) => {
     setDailyInputs(prev => ({
       ...prev,
@@ -175,8 +186,8 @@ export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ si
                   <td className="p-2 border border-gray-300 text-xs font-medium">Grass Cutting Done</td>
                   {siteData.map((blockData) =>
                     blockData.inverters.map((inverter) => (
-                      <td key={`done-${inverter.inverterId}`} className="p-2 border border-gray-300 text-xs text-center">
-                        {inverter.grassCuttingDone}
+                      <td key={`done-${inverter.inverterId}`} className="p-2 border border-gray-300 text-xs text-center font-medium">
+                        {getUpdatedGrassCuttingDone(blockData.blockId, inverter.inverterId, inverter.grassCuttingDone)}
                       </td>
                     ))
                   )}
@@ -188,8 +199,8 @@ export const GrassCuttingDataEntry: React.FC<GrassCuttingDataEntryProps> = ({ si
                   <td className="p-2 border border-gray-300 text-xs font-medium">% Completed</td>
                   {siteData.map((blockData) =>
                     blockData.inverters.map((inverter) => (
-                      <td key={`percent-${inverter.inverterId}`} className="p-2 border border-gray-300 text-xs text-center">
-                        {inverter.percentCompleted}%
+                      <td key={`percent-${inverter.inverterId}`} className="p-2 border border-gray-300 text-xs text-center font-medium">
+                        {getCalculatedPercentCompleted(blockData.blockId, inverter.inverterId, inverter.totalStrings, inverter.grassCuttingDone)}%
                       </td>
                     ))
                   )}
