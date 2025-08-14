@@ -1,9 +1,9 @@
 import { CleaningSiteData } from "@/types/cleaning";
 
 export const mockCleaningData: { [key: string]: CleaningSiteData } = {
-  "green-energy-site-a-wet": {
-    clientId: "green-energy",
-    siteId: "site-a",
+  "1-1-wet": {
+    clientId: "1",
+    siteId: "1",
     wetDryType: "wet",
     blocks: [
       {
@@ -96,9 +96,9 @@ export const mockCleaningData: { [key: string]: CleaningSiteData } = {
       }
     ]
   },
-  "green-energy-site-b-dry": {
-    clientId: "green-energy",
-    siteId: "site-b",
+  "1-1-dry": {
+    clientId: "1",
+    siteId: "1",
     wetDryType: "dry",
     blocks: [
       {
@@ -130,6 +130,33 @@ export const mockCleaningData: { [key: string]: CleaningSiteData } = {
         totalUncleaned: 600,
         rainfallMM: "0 MM",
         remarks: "Dry cleaning completed"
+      }
+    ],
+    historicEntries: []
+  },
+  "1-2-wet": {
+    clientId: "1",
+    siteId: "2",
+    wetDryType: "wet",
+    blocks: [
+      {
+        id: "block-1",
+        name: "Block 1",
+        inverters: [
+          { id: "INV1", totalModules: 800, modulesCleaned: 600, percentCompleted: 75 },
+          { id: "INV2", totalModules: 800, modulesCleaned: 720, percentCompleted: 90 }
+        ]
+      }
+    ],
+    dailyEntries: [
+      {
+        date: "14-Aug-25",
+        inverterData: { "block-1-INV1": 150, "block-1-INV2": 200 },
+        plannedModules: 500,
+        totalCleaned: 350,
+        totalUncleaned: 150,
+        rainfallMM: "1 MM",
+        remarks: "Good progress"
       }
     ],
     historicEntries: []
