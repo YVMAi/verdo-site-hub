@@ -1,7 +1,5 @@
-import React, { useMemo } from 'react';
-import { DataGrid } from 'react-data-grid';
+import React from 'react';
 import { CleaningSiteData } from "@/types/cleaning";
-import 'react-data-grid/lib/styles.css';
 
 interface CompactCleaningHistoricProps {
   data: CleaningSiteData | null;
@@ -9,90 +7,6 @@ interface CompactCleaningHistoricProps {
 }
 
 export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = ({ data }) => {
-  const { columns, rows } = useMemo(() => {
-    if (!data) {
-      return { columns: [], rows: [] };
-    }
-
-    // Create columns dynamically
-    const cols: any[] = [
-      { key: 'field', name: 'Field', width: 180, frozen: true }
-    ];
-
-    // Add inverter columns
-    data.blocks.forEach(block => {
-      block.inverters.forEach(inverter => {
-        cols.push({
-          key: `${block.id}-${inverter.id}`,
-          name: `${block.name} ${inverter.id}`,
-          width: 80,
-          headerCellClass: 'bg-blue-600 text-white text-xs'
-        });
-      });
-    });
-
-    // Add summary columns
-    cols.push(
-      { key: 'planned', name: 'Planned', width: 80, headerCellClass: 'bg-green-600 text-white text-xs' },
-      { key: 'cleaned', name: 'Cleaned', width: 80, headerCellClass: 'bg-green-600 text-white text-xs' },
-      { key: 'uncleaned', name: 'Uncleaned', width: 80, headerCellClass: 'bg-green-600 text-white text-xs' },
-      { key: 'rainfall', name: 'Rainfall', width: 80, headerCellClass: 'bg-yellow-500 text-white text-xs' },
-      { key: 'remarks', name: 'Remarks', width: 120, headerCellClass: 'bg-yellow-500 text-white text-xs' }
-    );
-
-    // Create rows
-    const rowData: any[] = [];
-
-    // Total Modules row
-    const totalModulesRow: any = { field: 'Total Modules' };
-    data.blocks.forEach(block => {
-      block.inverters.forEach(inverter => {
-        totalModulesRow[`${block.id}-${inverter.id}`] = inverter.totalModules;
-      });
-    });
-    rowData.push(totalModulesRow);
-
-    // Modules Cleaned row
-    const modulesCleanedRow: any = { field: 'Modules Cleaned' };
-    data.blocks.forEach(block => {
-      block.inverters.forEach(inverter => {
-        modulesCleanedRow[`${block.id}-${inverter.id}`] = inverter.modulesCleaned;
-      });
-    });
-    rowData.push(modulesCleanedRow);
-
-    // Cycles Completed row
-    const cyclesCompletedRow: any = { field: 'Cycles Completed' };
-    data.blocks.forEach(block => {
-      block.inverters.forEach(inverter => {
-        cyclesCompletedRow[`${block.id}-${inverter.id}`] = (inverter.modulesCleaned / inverter.totalModules).toFixed(2);
-      });
-    });
-    rowData.push(cyclesCompletedRow);
-
-    // Historic entries
-    data.historicEntries.forEach(entry => {
-      const historicRow: any = {
-        field: `${entry.date}`,
-        planned: entry.plannedModules,
-        cleaned: entry.totalCleaned,
-        uncleaned: entry.totalUncleaned,
-        rainfall: entry.rainfallMM,
-        remarks: entry.remarks
-      };
-      
-      data.blocks.forEach(block => {
-        block.inverters.forEach(inverter => {
-          historicRow[`${block.id}-${inverter.id}`] = entry.inverterData[`${block.id}-${inverter.id}`] || 0;
-        });
-      });
-      
-      rowData.push(historicRow);
-    });
-
-    return { columns: cols, rows: rowData };
-  }, [data]);
-
   if (!data) {
     return (
       <div className="bg-white rounded border p-4 text-center text-gray-500 text-sm">
@@ -123,15 +37,123 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
         </span>
       </div>
 
-      <div style={{ height: '400px' }}>
-        <DataGrid
-          columns={columns}
-          rows={rows}
-          className="rdg-light"
-          style={{ fontSize: '12px' }}
-          headerRowHeight={30}
-          rowHeight={28}
-        />
+      <div className="overflow-x-auto" style={{ maxHeight: '500px' }}>
+        <table className="w-full text-xs border-collapse">
+          <thead className="sticky top-0">
+            <tr className="bg-blue-900 text-white">
+              <th className="px-2 py-1 text-left font-medium border border-gray-300 w-32">Field</th>
+              {data.blocks.map(block => (
+                <th key={block.id} className="px-2 py-1 text-center font-medium border border-gray-300" colSpan={block.inverters.length}>
+                  {block.name}
+                </th>
+              ))}
+              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-600">Planned</th>
+              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-600">Cleaned</th>
+              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-600">Uncleaned</th>
+              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-yellow-500">Rainfall</th>
+              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-yellow-500">Remarks</th>
+            </tr>
+            <tr className="bg-blue-800 text-white">
+              <th className="px-2 py-1 text-left font-medium border border-gray-300">Inverter</th>
+              {data.blocks.map(block => (
+                block.inverters.map(inverter => (
+                  <th key={`${block.id}-${inverter.id}`} className="px-2 py-1 text-center font-medium border border-gray-300 w-16">
+                    {inverter.id}
+                  </th>
+                ))
+              ))}
+              <th className="px-2 py-1 border border-gray-300"></th>
+              <th className="px-2 py-1 border border-gray-300"></th>
+              <th className="px-2 py-1 border border-gray-300"></th>
+              <th className="px-2 py-1 border border-gray-300"></th>
+              <th className="px-2 py-1 border border-gray-300"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {/* Total Modules */}
+            <tr className="bg-blue-50">
+              <td className="px-2 py-1 font-medium border border-gray-300">Total Modules</td>
+              {data.blocks.map(block => (
+                block.inverters.map(inverter => (
+                  <td key={`total-${block.id}-${inverter.id}`} className="px-2 py-1 text-center border border-gray-300 bg-blue-100">
+                    {inverter.totalModules}
+                  </td>
+                ))
+              ))}
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+            </tr>
+
+            {/* Modules Cleaned */}
+            <tr className="bg-blue-50">
+              <td className="px-2 py-1 font-medium border border-gray-300">Modules Cleaned</td>
+              {data.blocks.map(block => (
+                block.inverters.map(inverter => (
+                  <td key={`cleaned-${block.id}-${inverter.id}`} className="px-2 py-1 text-center border border-gray-300 bg-blue-100">
+                    {inverter.modulesCleaned}
+                  </td>
+                ))
+              ))}
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+            </tr>
+
+            {/* Cycles Completed */}
+            <tr className="bg-green-50">
+              <td className="px-2 py-1 font-medium border border-gray-300">Cycles Completed</td>
+              {data.blocks.map(block => (
+                block.inverters.map(inverter => (
+                  <td key={`cycles-${block.id}-${inverter.id}`} className="px-2 py-1 text-center border border-gray-300 bg-green-100">
+                    {(inverter.modulesCleaned / inverter.totalModules).toFixed(2)}
+                  </td>
+                ))
+              ))}
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+            </tr>
+
+            {/* Historic Entries */}
+            {data.historicEntries.map((entry, index) => (
+              <tr key={entry.date} className="bg-yellow-50">
+                <td className="px-2 py-1 font-medium border border-gray-300">
+                  <span className="text-xs bg-gray-200 px-1 rounded mr-1">EDIT</span>
+                  {entry.date}
+                </td>
+                {data.blocks.map(block => (
+                  block.inverters.map(inverter => (
+                    <td key={`entry-${entry.date}-${block.id}-${inverter.id}`} className="px-2 py-1 text-center border border-gray-300 bg-yellow-100">
+                      {entry.inverterData[`${block.id}-${inverter.id}`] || 0}
+                    </td>
+                  ))
+                ))}
+                <td className="px-2 py-1 text-center border border-gray-300 bg-green-100">
+                  {entry.plannedModules}
+                </td>
+                <td className="px-2 py-1 text-center border border-gray-300 bg-green-100">
+                  {entry.totalCleaned}
+                </td>
+                <td className="px-2 py-1 text-center border border-gray-300 bg-green-100">
+                  {entry.totalUncleaned}
+                </td>
+                <td className="px-2 py-1 text-center border border-gray-300 bg-yellow-100">
+                  {entry.rainfallMM}
+                </td>
+                <td className="px-2 py-1 text-center border border-gray-300 bg-yellow-100">
+                  {entry.remarks}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
