@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { GrassCuttingSiteData } from "@/types/grassCutting";
 import { Button } from "@/components/ui/button";
@@ -17,46 +16,6 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState<string>('all');
   const [editingEntries, setEditingEntries] = useState<Set<string>>(new Set());
-
-  const filteredEntries = useMemo(() => {
-    if (!data || !data.historicEntries) return [];
-    
-    let entries = data.historicEntries;
-
-    // Filter by search term
-    if (searchTerm) {
-      entries = entries.filter(entry => 
-        entry.date.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        entry.remarks.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        entry.rainfallMM.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Filter by date range
-    if (dateFilter !== 'all') {
-      const today = new Date();
-      const filterDate = new Date();
-      
-      switch (dateFilter) {
-        case 'week':
-          filterDate.setDate(today.getDate() - 7);
-          break;
-        case 'month':
-          filterDate.setMonth(today.getMonth() - 1);
-          break;
-        case 'quarter':
-          filterDate.setMonth(today.getMonth() - 3);
-          break;
-      }
-      
-      entries = entries.filter(entry => {
-        const entryDate = new Date(entry.date);
-        return entryDate >= filterDate;
-      });
-    }
-
-    return entries;
-  }, [data?.historicEntries, searchTerm, dateFilter]);
 
   if (!data) {
     return (
@@ -196,6 +155,44 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
     document.body.removeChild(link);
   };
 
+  const filteredEntries = useMemo(() => {
+    let entries = data.historicEntries;
+
+    // Filter by search term
+    if (searchTerm) {
+      entries = entries.filter(entry => 
+        entry.date.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        entry.remarks.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        entry.rainfallMM.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Filter by date range
+    if (dateFilter !== 'all') {
+      const today = new Date();
+      const filterDate = new Date();
+      
+      switch (dateFilter) {
+        case 'week':
+          filterDate.setDate(today.getDate() - 7);
+          break;
+        case 'month':
+          filterDate.setMonth(today.getMonth() - 1);
+          break;
+        case 'quarter':
+          filterDate.setMonth(today.getMonth() - 3);
+          break;
+      }
+      
+      entries = entries.filter(entry => {
+        const entryDate = new Date(entry.date);
+        return entryDate >= filterDate;
+      });
+    }
+
+    return entries;
+  }, [data.historicEntries, searchTerm, dateFilter]);
+
   const getColumnWidth = (values: any[], defaultWidth: string = "w-16") => {
     const maxLength = Math.max(...values.map(v => String(v).length), 0);
     if (maxLength > 8) return "w-24";
@@ -249,7 +246,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
 
   return (
     <div className="bg-white rounded border">
-      <div className="bg-verdo-navy-600 px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
+       <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
         <span>Historic Grass Cutting Data</span>
         <div className="flex gap-2">
           <Button
@@ -296,7 +293,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
         <div className="text-xs flex gap-4">
           <span className="flex items-center gap-1">
             <div className="w-3 h-3 bg-blue-100 border border-blue-300"></div>
-            Static
+            Status
           </span>
           <span className="flex items-center gap-1">
             <div className="w-3 h-3 bg-green-100 border border-green-300"></div>
@@ -402,7 +399,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
                     <div className="flex items-center justify-between">
                       <div>
                         {isEditable && (
-                          <span className="text-xs bg-orange-200 px-1 rounded mr-1"></span>
+                          <span className="text-xs bg-orange-200 px-1 rounded mr-1">EDIT</span>
                         )}
                         {entry.date}
                       </div>
