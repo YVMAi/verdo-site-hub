@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { format } from "date-fns";
 import { CalendarIcon, Save, Upload, Table, FileText, Plus, Trash2 } from "lucide-react";
@@ -499,8 +500,8 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
   return (
     <div className="bg-white rounded border">
       <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
-        <span>Enter Cleaning Data</span>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-4">
+          <span>Enter Cleaning Data</span>
           <ToggleGroup 
             type="single" 
             value={viewMode} 
@@ -524,6 +525,8 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
               Table
             </ToggleGroupItem>
           </ToggleGroup>
+        </div>
+        <div className="flex gap-2">
           <BulkUploadModal onUpload={handleBulkUpload} />
           <Button 
             onClick={handleSave}

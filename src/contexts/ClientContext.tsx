@@ -1,6 +1,7 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Client } from '@/types/generation';
+import { mockClients } from '@/data/mockGenerationData';
 
 interface ClientContextType {
   selectedClient: Client | null;
@@ -23,6 +24,13 @@ interface ClientProviderProps {
 
 export const ClientProvider: React.FC<ClientProviderProps> = ({ children }) => {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+
+  useEffect(() => {
+    // Set the first client as selected by default
+    if (mockClients.length > 0 && !selectedClient) {
+      setSelectedClient(mockClients[0]);
+    }
+  }, [selectedClient]);
 
   return (
     <ClientContext.Provider value={{ selectedClient, setSelectedClient }}>
