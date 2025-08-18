@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { format } from "date-fns";
-import { CalendarIcon, Save, Plus, Trash2 } from "lucide-react";
+import { CalendarIcon, Plus, Trash2 } from "lucide-react";
 import { GrassCuttingSiteData } from "@/types/grassCutting";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -9,7 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 
 interface GrassCuttingFormProps {
@@ -21,18 +21,19 @@ interface FormRow {
   id: string;
   blockId: string;
   inverterId: string;
+  stringsCleaned: string;
   remarks: string;
 }
 
 export const GrassCuttingForm: React.FC<GrassCuttingFormProps> = ({ data, onDataChange }) => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [rows, setRows] = useState<FormRow[]>([
-    { id: '1', blockId: '', inverterId: '', remarks: '' }
+    { id: '1', blockId: '', inverterId: '', stringsCleaned: '', remarks: '' }
   ]);
 
   if (!data) {
     return (
-      <div className="bg-white rounded border p-8 text-center text-gray-500">
+      <div className="bg-white rounded border p-6 text-center text-gray-500">
         Select client and site to view data
       </div>
     );
@@ -57,7 +58,7 @@ export const GrassCuttingForm: React.FC<GrassCuttingFormProps> = ({ data, onData
 
   const addRow = () => {
     const newId = (Math.max(...rows.map(r => parseInt(r.id))) + 1).toString();
-    setRows(prev => [...prev, { id: newId, blockId: '', inverterId: '', remarks: '' }]);
+    setRows(prev => [...prev, { id: newId, blockId: '', inverterId: '', stringsCleaned: '', remarks: '' }]);
   };
 
   const removeRow = (rowId: string) => {
@@ -66,34 +67,79 @@ export const GrassCuttingForm: React.FC<GrassCuttingFormProps> = ({ data, onData
     }
   };
 
-  const handleSave = () => {
-    const dataToSave = {
-      date: format(selectedDate, "dd-MMM-yy"),
-      rows: rows,
-    };
-    
-    console.log('Saving grass cutting data:', dataToSave);
-    if (onDataChange) {
-      // This would update the parent with the new data
-    }
+  const SearchableSelect = ({ 
+    value, 
+    onValueChange, 
+    placeholder, 
+    options,
+    disabled = false 
+  }: {
+    value: string;
+    onValueChange: (value: string) => void;
+    placeholder: string;
+    options: { id: string; name?: string }[];
+    disabled?: boolean;
+  }) => {
+    const [open, setOpen] = useState(false);
+
+    return (
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="w-full justify-between h-8 text-xs"
+            disabled={disabled}
+          >
+            {value
+              ? options.find((option) => option.id === value)?.name || options.find((option) => option.id === value)?.id
+              : placeholder}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-full p-0" align="start">
+          <Command>
+            <CommandInput placeholder={`Search ${placeholder.toLowerCase()}...`} className="h-8" />
+            <CommandList>
+              <CommandEmpty>No options found.</CommandEmpty>
+              <CommandGroup>
+                {options.map((option) => (
+                  <CommandItem
+                    key={option.id}
+                    value={option.id}
+                    onSelect={(currentValue) => {
+                      onValueChange(currentValue);
+                      setOpen(false);
+                    }}
+                    className="text-xs"
+                  >
+                    {option.name || option.id}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    );
   };
 
   return (
-    <div className="bg-white rounded border p-6">
-      <div className="space-y-6">
+    <div className="bg-white rounded border p-4">
+      <div className="space-y-4">
         {/* Date Selection */}
-        <div className="space-y-2">
-          <Label htmlFor="date">Select Date</Label>
+        <div className="space-y-1">
+          <Label htmlFor="date" className="text-sm">Select Date</Label>
           <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
                 className={cn(
-                  "w-[280px] justify-start text-left font-normal",
+                  "w-[200px] justify-start text-left font-normal h-8 text-xs",
                   !selectedDate && "text-muted-foreground"
                 )}
               >
-                <CalendarIcon className="mr-2 h-4 w-4" />
+                <CalendarIcon className="mr-2 h-3 w-3" />
                 {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
               </Button>
             </PopoverTrigger>
@@ -109,18 +155,19 @@ export const GrassCuttingForm: React.FC<GrassCuttingFormProps> = ({ data, onData
           </Popover>
         </div>
 
-        {/* Table Form */}
-        <div className="space-y-4">
+        {/* Compact Table Form */}
+        <div className="space-y-2">
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-gray-300">
+            <table className="w-full border-collapse border border-gray-300 text-xs">
               <thead>
                 <tr className="bg-blue-900 text-white">
-                  <th className="border border-gray-300 px-4 py-2 text-left font-medium">Block</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left font-medium">Inverter</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left font-medium">Remarks</th>
-                  <th className="border border-gray-300 px-4 py-2 text-center font-medium">Total Strings</th>
-                  <th className="border border-gray-300 px-4 py-2 text-center font-medium">% Completed</th>
-                  <th className="border border-gray-300 px-4 py-2 text-center font-medium">Actions</th>
+                  <th className="border border-gray-300 px-2 py-1.5 text-left font-medium min-w-[120px]">Block</th>
+                  <th className="border border-gray-300 px-2 py-1.5 text-left font-medium min-w-[120px]">Inverter</th>
+                  <th className="border border-gray-300 px-2 py-1.5 text-left font-medium min-w-[100px]">Strings Cleaned</th>
+                  <th className="border border-gray-300 px-2 py-1.5 text-left font-medium min-w-[150px]">Remarks</th>
+                  <th className="border border-gray-300 px-2 py-1.5 text-center font-medium min-w-[80px]">Total Strings</th>
+                  <th className="border border-gray-300 px-2 py-1.5 text-center font-medium min-w-[80px]">% Completed</th>
+                  <th className="border border-gray-300 px-2 py-1.5 text-center font-medium min-w-[80px]">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -128,80 +175,71 @@ export const GrassCuttingForm: React.FC<GrassCuttingFormProps> = ({ data, onData
                   const selectedInverter = getSelectedInverterData(row.blockId, row.inverterId);
                   return (
                     <tr key={row.id} className="bg-white">
-                      <td className="border border-gray-300 p-2">
-                        <Select
+                      <td className="border border-gray-300 p-1">
+                        <SearchableSelect
                           value={row.blockId}
                           onValueChange={(value) => {
                             handleRowChange(row.id, 'blockId', value);
                             handleRowChange(row.id, 'inverterId', ''); // Reset inverter when block changes
                           }}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select Block" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {data.blocks.map(block => (
-                              <SelectItem key={block.id} value={block.id}>
-                                {block.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          placeholder="Select Block"
+                          options={data.blocks}
+                        />
                       </td>
-                      <td className="border border-gray-300 p-2">
-                        <Select
+                      <td className="border border-gray-300 p-1">
+                        <SearchableSelect
                           value={row.inverterId}
                           onValueChange={(value) => handleRowChange(row.id, 'inverterId', value)}
+                          placeholder="Select Inverter"
+                          options={getInvertersForBlock(row.blockId)}
                           disabled={!row.blockId}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select Inverter" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {getInvertersForBlock(row.blockId).map(inverter => (
-                              <SelectItem key={inverter.id} value={inverter.id}>
-                                {inverter.id}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        />
                       </td>
-                      <td className="border border-gray-300 p-2">
+                      <td className="border border-gray-300 p-1">
+                        <Input
+                          type="number"
+                          value={row.stringsCleaned}
+                          onChange={(e) => handleRowChange(row.id, 'stringsCleaned', e.target.value)}
+                          placeholder="0"
+                          className="h-8 text-xs text-center"
+                        />
+                      </td>
+                      <td className="border border-gray-300 p-1">
                         <Textarea
                           value={row.remarks}
                           onChange={(e) => handleRowChange(row.id, 'remarks', e.target.value)}
                           placeholder="Enter remarks..."
-                          className="min-h-[60px] resize-none"
+                          className="min-h-[32px] text-xs resize-none"
                         />
                       </td>
-                      <td className="border border-gray-300 p-2 text-center bg-blue-50">
-                        <span className="text-sm font-medium">
+                      <td className="border border-gray-300 p-1 text-center bg-blue-50">
+                        <span className="text-xs font-medium">
                           {selectedInverter ? selectedInverter.totalStrings : '-'}
                         </span>
                       </td>
-                      <td className="border border-gray-300 p-2 text-center bg-green-50">
-                        <span className="text-sm font-medium">
+                      <td className="border border-gray-300 p-1 text-center bg-green-50">
+                        <span className="text-xs font-medium">
                           {selectedInverter ? `${selectedInverter.percentCompleted}%` : '-'}
                         </span>
                       </td>
-                      <td className="border border-gray-300 p-2 text-center">
-                        <div className="flex gap-2 justify-center">
+                      <td className="border border-gray-300 p-1 text-center">
+                        <div className="flex gap-1 justify-center">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => removeRow(row.id)}
                             disabled={rows.length === 1}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 h-6 w-6 p-0"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3 w-3" />
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={addRow}
-                            className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                            className="text-green-600 hover:text-green-700 hover:bg-green-50 h-6 w-6 p-0"
                           >
-                            <Plus className="h-4 w-4" />
+                            <Plus className="h-3 w-3" />
                           </Button>
                         </div>
                       </td>
@@ -211,17 +249,6 @@ export const GrassCuttingForm: React.FC<GrassCuttingFormProps> = ({ data, onData
               </tbody>
             </table>
           </div>
-        </div>
-
-        {/* Save Button */}
-        <div className="flex justify-end">
-          <Button 
-            onClick={handleSave}
-            className="gap-2 bg-green-600 hover:bg-green-700 text-white"
-          >
-            <Save className="h-4 w-4" />
-            Save Data
-          </Button>
         </div>
       </div>
     </div>
