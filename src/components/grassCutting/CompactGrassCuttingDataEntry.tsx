@@ -6,6 +6,7 @@ import { GrassCuttingSiteData } from "@/types/grassCutting";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { BulkUploadModal } from "./BulkUploadModal";
 import { cn } from "@/lib/utils";
 
 interface CompactGrassCuttingDataEntryProps {
@@ -13,7 +14,7 @@ interface CompactGrassCuttingDataEntryProps {
   onDataChange?: (data: GrassCuttingSiteData) => void;
 }
 
-export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntryProps> = ({ data }) => {
+export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntryProps> = ({ data, onDataChange }) => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [inputValues, setInputValues] = useState<{[key: string]: string}>({});
   const [rainfall, setRainfall] = useState<string>("");
@@ -31,6 +32,35 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
     setInputValues(prev => ({ ...prev, [key]: value }));
   };
 
+  const handleBulkUpload = (uploadedData: any[]) => {
+    console.log('Bulk upload data:', uploadedData);
+    // Process the uploaded data and update the form
+    uploadedData.forEach(row => {
+      if (row['Block-Inverter'] && row['Daily Grass Cutting']) {
+        setInputValues(prev => ({
+          ...prev,
+          [row['Block-Inverter']]: row['Daily Grass Cutting']
+        }));
+      }
+      if (row['Rainfall MM']) {
+        setRainfall(row['Rainfall MM']);
+      }
+      if (row['Remarks']) {
+        setRemarks(row['Remarks']);
+      }
+      if (row['Date']) {
+        try {
+          const date = new Date(row['Date']);
+          if (!isNaN(date.getTime())) {
+            setSelectedDate(date);
+          }
+        } catch (e) {
+          console.warn('Invalid date format:', row['Date']);
+        }
+      }
+    });
+  };
+
   const getColumnWidth = (key: string, defaultWidth: string = "w-16") => {
     const value = inputValues[key] || "";
     if (value.length > 8) return "w-24";
@@ -40,8 +70,9 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
 
   return (
     <div className="bg-white rounded border">
-      <div className="bg-blue-600 px-3 py-2 text-white font-medium text-sm">
-        Enter Grass Cutting Data
+      <div className="bg-blue-600 px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
+        <span>Enter Grass Cutting Data</span>
+        <BulkUploadModal onUpload={handleBulkUpload} />
       </div>
       
       {/* Compact Legend */}
