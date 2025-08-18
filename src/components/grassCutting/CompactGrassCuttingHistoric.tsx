@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { GrassCuttingSiteData } from "@/types/grassCutting";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,48 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
   const [dateFilter, setDateFilter] = useState<string>('all');
   const [editingEntries, setEditingEntries] = useState<Set<string>>(new Set());
 
+  // Move all hooks before any conditional logic
+  const filteredEntries = useMemo(() => {
+    if (!data || !data.historicEntries) return [];
+    
+    let entries = data.historicEntries;
+
+    // Filter by search term
+    if (searchTerm) {
+      entries = entries.filter(entry => 
+        entry.date.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        entry.remarks.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        entry.rainfallMM.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Filter by date range
+    if (dateFilter !== 'all') {
+      const today = new Date();
+      const filterDate = new Date();
+      
+      switch (dateFilter) {
+        case 'week':
+          filterDate.setDate(today.getDate() - 7);
+          break;
+        case 'month':
+          filterDate.setMonth(today.getMonth() - 1);
+          break;
+        case 'quarter':
+          filterDate.setMonth(today.getMonth() - 3);
+          break;
+      }
+      
+      entries = entries.filter(entry => {
+        const entryDate = new Date(entry.date);
+        return entryDate >= filterDate;
+      });
+    }
+
+    return entries;
+  }, [data?.historicEntries, searchTerm, dateFilter]);
+
+  // Now handle the conditional return after all hooks
   if (!data) {
     return (
       <div className="bg-white rounded border p-4 text-center text-gray-500 text-sm">
@@ -154,44 +197,6 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
     link.click();
     document.body.removeChild(link);
   };
-
-  const filteredEntries = useMemo(() => {
-    let entries = data.historicEntries;
-
-    // Filter by search term
-    if (searchTerm) {
-      entries = entries.filter(entry => 
-        entry.date.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        entry.remarks.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        entry.rainfallMM.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Filter by date range
-    if (dateFilter !== 'all') {
-      const today = new Date();
-      const filterDate = new Date();
-      
-      switch (dateFilter) {
-        case 'week':
-          filterDate.setDate(today.getDate() - 7);
-          break;
-        case 'month':
-          filterDate.setMonth(today.getMonth() - 1);
-          break;
-        case 'quarter':
-          filterDate.setMonth(today.getMonth() - 3);
-          break;
-      }
-      
-      entries = entries.filter(entry => {
-        const entryDate = new Date(entry.date);
-        return entryDate >= filterDate;
-      });
-    }
-
-    return entries;
-  }, [data.historicEntries, searchTerm, dateFilter]);
 
   const getColumnWidth = (values: any[], defaultWidth: string = "w-16") => {
     const maxLength = Math.max(...values.map(v => String(v).length), 0);
