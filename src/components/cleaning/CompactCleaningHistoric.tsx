@@ -314,7 +314,7 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
 
   return (
     <div className="bg-white rounded border">
-      <div className="bg-[#1e3a8a] px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
+      <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
         <span>Historic Cleaning Data</span>
         <div className="flex gap-2">
           <Button
