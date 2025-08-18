@@ -23,6 +23,30 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
     '4': true
   });
 
+  // Function to determine which blocks should be visible based on search
+  const getVisibleBlocks = useMemo(() => {
+    if (!data) return [];
+    
+    if (!searchTerm) {
+      return data.blocks; // Show all blocks if no search term
+    }
+    
+    const searchLower = searchTerm.toLowerCase();
+    
+    // Check if searching for a specific block
+    const blockMatches = data.blocks.filter(block => {
+      return block.name.toLowerCase().includes(searchLower) || 
+             `block ${block.id}`.toLowerCase().includes(searchLower);
+    });
+    
+    if (blockMatches.length > 0) {
+      return blockMatches; // Return only matching blocks
+    }
+    
+    // If not searching for blocks specifically, show all blocks
+    return data.blocks;
+  }, [data?.blocks, searchTerm]);
+
   // Enhanced filtering with search capabilities
   const filteredEntries = useMemo(() => {
     if (!data || !data.historicEntries) return [];
@@ -183,7 +207,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
     if (!data) return;
 
     const headers = ['Date', 'Field'];
-    data.blocks.forEach(block => {
+    getVisibleBlocks.forEach(block => {
       block.inverters.forEach(inverter => {
         headers.push(`${block.name}-${inverter.id}`);
       });
@@ -193,7 +217,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
     const rows: string[][] = [];
     
     const totalStringsRow = ['', 'Total Strings'];
-    data.blocks.forEach(block => {
+    getVisibleBlocks.forEach(block => {
       block.inverters.forEach(inverter => {
         totalStringsRow.push(String(inverter.totalStrings));
       });
@@ -202,7 +226,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
     rows.push(totalStringsRow);
 
     const cyclesRow = ['', 'Cycles Completed'];
-    data.blocks.forEach(block => {
+    getVisibleBlocks.forEach(block => {
       block.inverters.forEach(inverter => {
         cyclesRow.push((inverter.grassCuttingDone / inverter.totalStrings).toFixed(2));
       });
@@ -212,7 +236,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
 
     filteredEntries.forEach(entry => {
       const row = [entry.date, 'Historic Data'];
-      data.blocks.forEach(block => {
+      getVisibleBlocks.forEach(block => {
         block.inverters.forEach(inverter => {
           const value = entry.inverterData[`${block.id}-${inverter.id}`] || 0;
           row.push(String(value));
@@ -317,7 +341,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
           <thead className="sticky top-0">
             <tr className="bg-blue-900 text-white">
               <th className="px-2 py-1 text-left font-medium border border-gray-300 w-32">Field</th>
-              {data.blocks.map(block => (
+              {getVisibleBlocks.map(block => (
                 <CollapsibleBlockHeader
                   key={block.id}
                   blockName={block.name}
@@ -335,7 +359,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
             </tr>
             <tr className="bg-blue-800 text-white">
               <th className="px-2 py-1 text-left font-medium border border-gray-300">Inverter</th>
-              {data.blocks.map(block => (
+              {getVisibleBlocks.map(block => (
                 expandedBlocks[block.id] ? (
                   block.inverters.map(inverter => (
                     <th key={`${block.id}-${inverter.id}`} className="px-2 py-1 text-center font-medium border border-gray-300 w-16">
@@ -359,7 +383,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
             {/* Total Strings */}
             <tr className="bg-blue-50">
               <td className="px-2 py-1 font-medium border border-gray-300">Total Strings</td>
-              {data.blocks.map(block => (
+              {getVisibleBlocks.map(block => (
                 expandedBlocks[block.id] ? (
                   block.inverters.map(inverter => (
                     <td key={`total-${block.id}-${inverter.id}`} className="px-2 py-1 text-center border border-gray-300 bg-blue-100">
@@ -382,7 +406,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
             {/* Total Strings Cleaned */}
             <tr className="bg-purple-50">
               <td className="px-2 py-1 font-medium border border-gray-300">Total Strings Cleaned</td>
-              {data.blocks.map(block => (
+              {getVisibleBlocks.map(block => (
                 expandedBlocks[block.id] ? (
                   block.inverters.map(inverter => (
                     <td key={`cleaned-${block.id}-${inverter.id}`} className="px-2 py-1 text-center border border-gray-300 bg-purple-100">
@@ -405,7 +429,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
             {/* Cycles Completed */}
             <tr className="bg-green-50">
               <td className="px-2 py-1 font-medium border border-gray-300">Cycles Completed</td>
-              {data.blocks.map(block => (
+              {getVisibleBlocks.map(block => (
                 expandedBlocks[block.id] ? (
                   block.inverters.map(inverter => (
                     <td key={`cycles-${block.id}-${inverter.id}`} className="px-2 py-1 text-center border border-gray-300 bg-green-100">
@@ -452,7 +476,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
                       </button>
                     </div>
                   </td>
-                  {data.blocks.map(block => (
+                  {getVisibleBlocks.map(block => (
                     expandedBlocks[block.id] ? (
                       block.inverters.map(inverter => {
                         const cellKey = `${entry.date}-${block.id}-${inverter.id}`;
@@ -490,7 +514,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
             
             {filteredEntries.length === 0 && (
               <tr>
-                <td colSpan={data.blocks.reduce((acc, block) => acc + (expandedBlocks[block.id] ? block.inverters.length : 1), 0) + 6} className="px-2 py-4 text-center text-gray-500">
+                <td colSpan={getVisibleBlocks.reduce((acc, block) => acc + (expandedBlocks[block.id] ? block.inverters.length : 1), 0) + 6} className="px-2 py-4 text-center text-gray-500">
                   {searchTerm || dateFilter !== 'all' ? 'No matching records found' : 'No historic entries found'}
                 </td>
               </tr>
