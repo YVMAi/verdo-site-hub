@@ -1,13 +1,15 @@
+
 import React, { useState, useMemo } from 'react';
 import { ClientSiteSelector } from "@/components/ClientSiteSelector";
 import { CompactGrassCuttingDataEntry } from "@/components/grassCutting/CompactGrassCuttingDataEntry";
 import { CompactGrassCuttingHistoric } from "@/components/grassCutting/CompactGrassCuttingHistoric";
-import { Client, Site } from "@/types/generation";
+import { Site } from "@/types/generation";
 import { GrassCuttingSiteData } from "@/types/grassCutting";
 import { mockGrassCuttingData } from "@/data/mockGrassCuttingData";
+import { useClient } from '@/contexts/ClientContext';
 
 const GrassCutting = () => {
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const { selectedClient } = useClient();
   const [selectedSite, setSelectedSite] = useState<Site | null>(null);
 
   const currentData: GrassCuttingSiteData | null = useMemo(() => {
@@ -27,7 +29,6 @@ const GrassCutting = () => {
       <ClientSiteSelector
         selectedClient={selectedClient}
         selectedSite={selectedSite}
-        onClientChange={setSelectedClient}
         onSiteChange={setSelectedSite}
       />
 

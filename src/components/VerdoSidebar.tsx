@@ -1,9 +1,10 @@
-
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Menu, X, Zap, Settings, Scissors, Droplets, Search, Leaf, ChevronDown, BarChart3, Plus } from 'lucide-react';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ClientSelector } from './ClientSelector';
+import { useClient } from '@/contexts/ClientContext';
 
 const overviewItems = [{
   title: "Overview",
@@ -42,13 +43,13 @@ const operationsItems = [{
 }];
 
 export function VerdoSidebar() {
-  const {
-    state
-  } = useSidebar();
+  const { state } = useSidebar();
   const [operationsOpen, setOperationsOpen] = useState(true);
   const isCollapsed = state === "collapsed";
+  const { selectedClient, setSelectedClient } = useClient();
   
-  return <Sidebar className="verdo-sidebar border-r-0 shadow-xl w-[248px] group-data-[collapsible=icon]:w-16" collapsible="icon">
+  return (
+    <Sidebar className="verdo-sidebar border-r-0 shadow-xl w-[248px] group-data-[collapsible=icon]:w-16" collapsible="icon">
       <SidebarContent className="bg-verdo-navy">
         {/* Header */}
         <div className={`${isCollapsed ? 'px-2 py-4' : 'px-4 py-5'} border-b border-verdo-navy-light/20`}>
@@ -56,12 +57,21 @@ export function VerdoSidebar() {
             <div className="w-8 h-8 bg-verdo-jade rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
               <Leaf className="w-5 h-5 text-white" />
             </div>
-            {!isCollapsed && <div>
+            {!isCollapsed && (
+              <div>
                 <h1 className="text-xl font-semibold text-white">Verdo</h1>
                 <p className="text-xs text-verdo-jade opacity-90">by TruGreen</p>
-              </div>}
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Client Selector */}
+        <ClientSelector
+          selectedClient={selectedClient}
+          onClientChange={setSelectedClient}
+          isCollapsed={isCollapsed}
+        />
 
         {/* Overview Section */}
         <SidebarGroup className="px-3 py-3">
@@ -165,5 +175,6 @@ export function VerdoSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>}
       </SidebarContent>
-    </Sidebar>;
+    </Sidebar>
+  );
 }

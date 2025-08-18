@@ -1,32 +1,18 @@
 
 import React, { useState } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DataEntryTable } from '@/components/generation/DataEntryTable';
 import { HistoricDataTable } from '@/components/generation/HistoricDataTable';
-import { mockClients, mockSites, tabConfigs } from '@/data/mockGenerationData';
-import { Client, Site, TabType } from '@/types/generation';
-import { Building, MapPin } from 'lucide-react';
+import { ClientSiteSelector } from '@/components/ClientSiteSelector';
+import { tabConfigs } from '@/data/mockGenerationData';
+import { Site, TabType } from '@/types/generation';
+import { Building } from 'lucide-react';
+import { useClient } from '@/contexts/ClientContext';
 
 const GenerationData = () => {
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const { selectedClient } = useClient();
   const [selectedSite, setSite] = useState<Site | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('meter-reading');
-
-  const availableSites = selectedClient 
-    ? mockSites.filter(site => site.clientId === selectedClient.id)
-    : [];
-
-  const handleClientChange = (clientId: string) => {
-    const client = mockClients.find(c => c.id === clientId) || null;
-    setSelectedClient(client);
-    setSite(null); // Reset site when client changes
-  };
-
-  const handleSiteChange = (siteId: string) => {
-    const site = availableSites.find(s => s.id === siteId) || null;
-    setSite(site);
-  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -38,62 +24,12 @@ const GenerationData = () => {
         </p>
       </div>
 
-      {/* Client & Site Selection */}
-      <div className="bg-card border rounded-lg p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium flex items-center gap-2">
-              <Building className="h-4 w-4" />
-              Client
-            </label>
-            <Select onValueChange={handleClientChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a client..." />
-              </SelectTrigger>
-              <SelectContent>
-                {mockClients.map(client => (
-                  <SelectItem key={client.id} value={client.id}>
-                    {client.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              Site
-            </label>
-            <Select onValueChange={handleSiteChange} disabled={!selectedClient}>
-              <SelectTrigger>
-                <SelectValue placeholder={selectedClient ? "Select a site..." : "Select client first"} />
-              </SelectTrigger>
-              <SelectContent>
-                {availableSites.map(site => (
-                  <SelectItem key={site.id} value={site.id}>
-                    {site.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {selectedClient && selectedSite && (
-          <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-            <div className="flex items-center justify-between text-sm">
-              <div>
-                <span className="font-medium">Selected:</span> {selectedClient.name} → {selectedSite.name}
-              </div>
-              <div className="text-muted-foreground">
-                Edit window: {selectedClient.allowedEditDays} days • 
-                Columns: {selectedSite.columns.length}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+      {/* Site Selection */}
+      <ClientSiteSelector
+        selectedClient={selectedClient}
+        selectedSite={selectedSite}
+        onSiteChange={setSite}
+      />
 
       {/* Tabs and Data Tables */}
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabType)}>
@@ -136,8 +72,10 @@ const GenerationData = () => {
             <div>
               <h3 className="text-lg font-semibold mb-2">Get Started</h3>
               <p className="text-muted-foreground max-w-md mx-auto">
-                Select a client and site from the dropdowns above to begin entering and viewing generation data.
-                Each site has customized columns and data validation rules.
+                {!selectedClient 
+                  ? "Select a client from the sidebar to begin entering and viewing generation data."
+                  : "Select a site from the dropdown above to begin entering and viewing generation data."
+                }
               </p>
             </div>
           </div>

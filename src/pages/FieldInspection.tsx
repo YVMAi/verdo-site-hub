@@ -2,10 +2,11 @@
 import React, { useState } from 'react';
 import { ComingSoonCard } from "@/components/ComingSoonCard";
 import { ClientSiteSelector } from "@/components/ClientSiteSelector";
-import { Client, Site } from "@/types/generation";
+import { Site } from "@/types/generation";
+import { useClient } from '@/contexts/ClientContext';
 
 const FieldInspection = () => {
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const { selectedClient } = useClient();
   const [selectedSite, setSelectedSite] = useState<Site | null>(null);
 
   return (
@@ -18,7 +19,6 @@ const FieldInspection = () => {
       <ClientSiteSelector
         selectedClient={selectedClient}
         selectedSite={selectedSite}
-        onClientChange={setSelectedClient}
         onSiteChange={setSelectedSite}
       />
       

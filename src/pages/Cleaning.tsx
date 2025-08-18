@@ -1,14 +1,16 @@
+
 import React, { useState, useMemo } from 'react';
 import { ClientSiteSelector } from "@/components/ClientSiteSelector";
 import { CompactCleaningDataEntry } from "@/components/cleaning/CompactCleaningDataEntry";
 import { CompactCleaningHistoric } from "@/components/cleaning/CompactCleaningHistoric";
-import { Client, Site } from "@/types/generation";
+import { Site } from "@/types/generation";
 import { CleaningSiteData } from "@/types/cleaning";
 import { mockCleaningData } from "@/data/mockCleaningData";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useClient } from '@/contexts/ClientContext';
 
 const Cleaning = () => {
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const { selectedClient } = useClient();
   const [selectedSite, setSelectedSite] = useState<Site | null>(null);
   const [wetDryType, setWetDryType] = useState<'wet' | 'dry'>('wet');
 
@@ -31,7 +33,6 @@ const Cleaning = () => {
           <ClientSiteSelector
             selectedClient={selectedClient}
             selectedSite={selectedSite}
-            onClientChange={setSelectedClient}
             onSiteChange={setSelectedSite}
           />
         </div>
