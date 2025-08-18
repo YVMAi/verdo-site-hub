@@ -535,21 +535,23 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
         </div>
       </div>
       
-      {/* Compact Legend */}
-      <div className="px-3 py-2 bg-gray-50 border-b text-xs flex gap-4">
-        <span className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-blue-100 border border-blue-300"></div>
-          Static
-        </span>
-        <span className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-green-100 border border-green-300"></div>
-          Calculated
-        </span>
-        <span className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-yellow-100 border border-yellow-300"></div>
-          Input
-        </span>
-      </div>
+      {/* Compact Legend - only show in table view */}
+      {viewMode === 'table' && (
+        <div className="px-3 py-2 bg-gray-50 border-b text-xs flex gap-4">
+          <span className="flex items-center gap-1">
+            <div className="w-3 h-3 bg-blue-100 border border-blue-300"></div>
+            Static
+          </span>
+          <span className="flex items-center gap-1">
+            <div className="w-3 h-3 bg-green-100 border border-green-300"></div>
+            Calculated
+          </span>
+          <span className="flex items-center gap-1">
+            <div className="w-3 h-3 bg-yellow-100 border border-yellow-300"></div>
+            Input
+          </span>
+        </div>
+      )}
 
       {viewMode === 'table' ? renderTableView() : renderFormView()}
     </div>
