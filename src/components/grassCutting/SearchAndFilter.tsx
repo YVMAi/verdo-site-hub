@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Search, X, Filter, Calendar } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, X, Filter, Calendar, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -18,9 +18,24 @@ interface SearchAndFilterProps {
 }
 
 const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
+  { value: '01', label: 'Jan' },
+  { value: '02', label: 'Feb' },
+  { value: '03', label: 'Mar' },
+  { value: '04', label: 'Apr' },
+  { value: '05', label: 'May' },
+  { value: '06', label: 'Jun' },
+  { value: '07', label: 'Jul' },
+  { value: '08', label: 'Aug' },
+  { value: '09', label: 'Sep' },
+  { value: '10', label: 'Oct' },
+  { value: '11', label: 'Nov' },
+  { value: '12', label: 'Dec' }
 ];
+
+const YEARS = Array.from({ length: 10 }, (_, i) => {
+  const year = new Date().getFullYear() - i;
+  return { value: year.toString(), label: year.toString() };
+});
 
 export const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
   searchTerm,
@@ -31,17 +46,27 @@ export const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
   selectedMonths = [],
   onMonthsChange
 }) => {
-  const handleMonthToggle = (month: string) => {
-    if (!onMonthsChange) return;
+  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
+  const [selectedMonthsFilter, setSelectedMonthsFilter] = useState<string[]>([]);
+
+  const handleMonthToggle = (monthValue: string) => {
+    const monthYear = `${selectedYear}-${monthValue}`;
+    let updatedMonths: string[];
     
-    if (selectedMonths.includes(month)) {
-      onMonthsChange(selectedMonths.filter(m => m !== month));
+    if (selectedMonthsFilter.includes(monthYear)) {
+      updatedMonths = selectedMonthsFilter.filter(m => m !== monthYear);
     } else {
-      onMonthsChange([...selectedMonths, month]);
+      updatedMonths = [...selectedMonthsFilter, monthYear];
+    }
+    
+    setSelectedMonthsFilter(updatedMonths);
+    if (onMonthsChange) {
+      onMonthsChange(updatedMonths);
     }
   };
 
   const clearMonths = () => {
+    setSelectedMonthsFilter([]);
     if (onMonthsChange) {
       onMonthsChange([]);
     }
@@ -61,9 +86,14 @@ export const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
         onRemove: () => onDateFilterChange('all')
       });
     }
-    if (selectedMonths.length > 0) {
+    if (selectedMonthsFilter.length > 0) {
+      const monthLabels = selectedMonthsFilter.map(monthYear => {
+        const [year, month] = monthYear.split('-');
+        const monthLabel = MONTHS.find(m => m.value === month)?.label || month;
+        return `${monthLabel} ${year}`;
+      });
       chips.push({
-        label: `Months: ${selectedMonths.join(', ')}`,
+        label: `Months: ${monthLabels.join(', ')}`,
         onRemove: clearMonths
       });
     }
@@ -113,14 +143,16 @@ export const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className="h-8 text-xs">
                   <Calendar className="w-4 h-4 mr-1" />
-                  Months {selectedMonths.length > 0 && `(${selectedMonths.length})`}
+                  Select Months
+                  <ChevronDown className="w-3 h-3 ml-1" />
+                  {selectedMonthsFilter.length > 0 && ` (${selectedMonthsFilter.length})`}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-56" align="end">
-                <div className="space-y-2">
+              <PopoverContent className="w-80" align="end">
+                <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h4 className="font-medium text-sm">Select Months</h4>
-                    {selectedMonths.length > 0 && (
+                    {selectedMonthsFilter.length > 0 && (
                       <Button
                         variant="ghost"
                         size="sm"
@@ -131,22 +163,47 @@ export const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
                       </Button>
                     )}
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    {MONTHS.map((month) => (
-                      <div key={month} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={month}
-                          checked={selectedMonths.includes(month)}
-                          onCheckedChange={() => handleMonthToggle(month)}
-                        />
-                        <label
-                          htmlFor={month}
-                          className="text-xs font-normal cursor-pointer"
-                        >
-                          {month.substring(0, 3)}
-                        </label>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs font-medium text-gray-700">Year</label>
+                      <Select value={selectedYear} onValueChange={setSelectedYear}>
+                        <SelectTrigger className="w-full h-8 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {YEARS.map((year) => (
+                            <SelectItem key={year.value} value={year.value}>
+                              {year.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <label className="text-xs font-medium text-gray-700 mb-2 block">Months</label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {MONTHS.map((month) => {
+                          const monthYear = `${selectedYear}-${month.value}`;
+                          return (
+                            <div key={month.value} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`${selectedYear}-${month.value}`}
+                                checked={selectedMonthsFilter.includes(monthYear)}
+                                onCheckedChange={() => handleMonthToggle(month.value)}
+                              />
+                              <label
+                                htmlFor={`${selectedYear}-${month.value}`}
+                                className="text-xs font-normal cursor-pointer"
+                              >
+                                {month.label}
+                              </label>
+                            </div>
+                          );
+                        })}
                       </div>
-                    ))}
+                    </div>
                   </div>
                 </div>
               </PopoverContent>
