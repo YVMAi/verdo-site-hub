@@ -167,7 +167,7 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
                       variant={"outline"}
                       className={cn(
                         "h-6 px-2 justify-start text-left font-normal text-xs",
-                        "bg-transparent border-0 hover:bg-white"
+                        "bg-white border border-gray-300 text-gray-900 hover:bg-gray-50"
                       )}
                     >
                       <CalendarIcon className="mr-1 h-3 w-3" />
