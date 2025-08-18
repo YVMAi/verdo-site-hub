@@ -6,7 +6,6 @@ import { CompactCleaningHistoric } from "@/components/cleaning/CompactCleaningHi
 import { Site } from "@/types/generation";
 import { CleaningSiteData } from "@/types/cleaning";
 import { mockCleaningData } from "@/data/mockCleaningData";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useClient } from '@/contexts/ClientContext';
 
 const Cleaning = () => {
@@ -28,30 +27,14 @@ const Cleaning = () => {
         <p className="text-gray-600 text-sm">Track and manage solar module cleaning operations</p>
       </div>
       
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
-        <div className="flex-1">
-          <ClientSiteSelector
-            selectedClient={selectedClient}
-            selectedSite={selectedSite}
-            onSiteChange={setSelectedSite}
-          />
-        </div>
-        
-        <div className="w-full sm:w-48">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Cleaning Type
-          </label>
-          <Select value={wetDryType} onValueChange={(value: 'wet' | 'dry') => setWetDryType(value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="wet">Wet Cleaning</SelectItem>
-              <SelectItem value="dry">Dry Cleaning</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+      <ClientSiteSelector
+        selectedClient={selectedClient}
+        selectedSite={selectedSite}
+        onSiteChange={setSelectedSite}
+        cleaningType={wetDryType}
+        onCleaningTypeChange={setWetDryType}
+        showCleaningType={true}
+      />
 
       <div className="space-y-4">
         <CompactCleaningDataEntry data={currentData} />
