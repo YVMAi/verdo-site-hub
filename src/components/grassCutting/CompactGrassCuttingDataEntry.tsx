@@ -79,7 +79,7 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
       <div className="px-3 py-2 bg-gray-50 border-b text-xs flex gap-4">
         <span className="flex items-center gap-1">
           <div className="w-3 h-3 bg-blue-100 border border-blue-300"></div>
-          Status
+          Static
         </span>
         <span className="flex items-center gap-1">
           <div className="w-3 h-3 bg-green-100 border border-green-300"></div>

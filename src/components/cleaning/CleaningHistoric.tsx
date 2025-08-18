@@ -27,7 +27,7 @@ export const CleaningHistoric: React.FC<CleaningHistoricProps> = ({ data, onData
         <div className="flex flex-wrap gap-4 text-sm">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-blue-100 border border-blue-300"></div>
-            <span>Status Fields</span>
+            <span>Static Fields</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-green-100 border border-green-300"></div>
