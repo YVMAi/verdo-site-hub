@@ -70,7 +70,7 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
 
   return (
     <div className="bg-white rounded border">
-      <div className="bg-blue-600 px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
+      <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
         <span>Enter Grass Cutting Data</span>
         <BulkUploadModal onUpload={handleBulkUpload} />
       </div>
