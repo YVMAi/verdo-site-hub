@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { GrassCuttingSiteData } from "@/types/grassCutting";
 
 interface CompactGrassCuttingHistoricProps {
@@ -7,6 +8,9 @@ interface CompactGrassCuttingHistoricProps {
 }
 
 export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricProps> = ({ data }) => {
+  const [editingCell, setEditingCell] = useState<string | null>(null);
+  const [editValues, setEditValues] = useState<{[key: string]: string}>({});
+
   if (!data) {
     return (
       <div className="bg-white rounded border p-4 text-center text-gray-500 text-sm">
@@ -14,6 +18,72 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
       </div>
     );
   }
+
+  const handleCellClick = (cellKey: string, currentValue: any) => {
+    setEditingCell(cellKey);
+    setEditValues(prev => ({ ...prev, [cellKey]: String(currentValue) }));
+  };
+
+  const handleCellBlur = (cellKey: string) => {
+    setEditingCell(null);
+    // Here you would typically save the value back to your data source
+    console.log(`Saving ${cellKey}: ${editValues[cellKey]}`);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent, cellKey: string) => {
+    if (e.key === 'Enter') {
+      handleCellBlur(cellKey);
+    }
+  };
+
+  const getColumnWidth = (values: any[], defaultWidth: string = "w-16") => {
+    const maxLength = Math.max(...values.map(v => String(v).length), 0);
+    if (maxLength > 8) return "w-24";
+    if (maxLength > 4) return "w-20";
+    return defaultWidth;
+  };
+
+  const renderEditableCell = (cellKey: string, value: any, className: string = "", isRemarks: boolean = false) => {
+    const isEditing = editingCell === cellKey;
+    
+    if (isEditing) {
+      if (isRemarks) {
+        return (
+          <textarea
+            className={`w-full h-auto min-h-6 text-xs border border-blue-500 bg-white p-1 resize-none ${className}`}
+            style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
+            value={editValues[cellKey] || String(value)}
+            onChange={(e) => setEditValues(prev => ({ ...prev, [cellKey]: e.target.value }))}
+            onBlur={() => handleCellBlur(cellKey)}
+            onKeyPress={(e) => handleKeyPress(e, cellKey)}
+            autoFocus
+          />
+        );
+      }
+      
+      return (
+        <input
+          type="text"
+          className={`w-full h-6 text-center text-xs border border-blue-500 bg-white ${className}`}
+          value={editValues[cellKey] || String(value)}
+          onChange={(e) => setEditValues(prev => ({ ...prev, [cellKey]: e.target.value }))}
+          onBlur={() => handleCellBlur(cellKey)}
+          onKeyPress={(e) => handleKeyPress(e, cellKey)}
+          autoFocus
+        />
+      );
+    }
+
+    return (
+      <div
+        className={`w-full h-6 text-center text-xs cursor-pointer hover:bg-blue-50 flex items-center justify-center ${className} ${isRemarks ? 'whitespace-pre-wrap break-words' : ''}`}
+        onClick={() => handleCellClick(cellKey, value)}
+        style={isRemarks ? { minHeight: '24px', textAlign: 'left', padding: '2px' } : {}}
+      >
+        {value}
+      </div>
+    );
+  };
 
   return (
     <div className="bg-white rounded border">
@@ -51,7 +121,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
               <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-600">Actual</th>
               <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-600">Deviation</th>
               <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-yellow-500">Rainfall</th>
-              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-yellow-500">Remarks</th>
+              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-yellow-500 w-32">Remarks</th>
             </tr>
             <tr className="bg-blue-800 text-white">
               <th className="px-2 py-1 text-left font-medium border border-gray-300">Inverter</th>
@@ -87,23 +157,6 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
               <td className="px-2 py-1 border border-gray-300"></td>
             </tr>
 
-            {/* Grass Cutting Done */}
-            <tr className="bg-blue-50">
-              <td className="px-2 py-1 font-medium border border-gray-300">Grass Cutting Done</td>
-              {data.blocks.map(block => (
-                block.inverters.map(inverter => (
-                  <td key={`done-${block.id}-${inverter.id}`} className="px-2 py-1 text-center border border-gray-300 bg-blue-100">
-                    {inverter.grassCuttingDone}
-                  </td>
-                ))
-              ))}
-              <td className="px-2 py-1 border border-gray-300"></td>
-              <td className="px-2 py-1 border border-gray-300"></td>
-              <td className="px-2 py-1 border border-gray-300"></td>
-              <td className="px-2 py-1 border border-gray-300"></td>
-              <td className="px-2 py-1 border border-gray-300"></td>
-            </tr>
-
             {/* Cycles Completed */}
             <tr className="bg-green-50">
               <td className="px-2 py-1 font-medium border border-gray-300">Cycles Completed</td>
@@ -121,7 +174,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
               <td className="px-2 py-1 border border-gray-300"></td>
             </tr>
 
-            {/* Historic Entries */}
+            {/* Historic Entries - Now Editable */}
             {data.historicEntries.map((entry, index) => (
               <tr key={entry.date} className="bg-yellow-50">
                 <td className="px-2 py-1 font-medium border border-gray-300">
@@ -129,26 +182,30 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
                   {entry.date}
                 </td>
                 {data.blocks.map(block => (
-                  block.inverters.map(inverter => (
-                    <td key={`entry-${entry.date}-${block.id}-${inverter.id}`} className="px-2 py-1 text-center border border-gray-300 bg-yellow-100">
-                      {entry.inverterData[`${block.id}-${inverter.id}`] || 0}
-                    </td>
-                  ))
+                  block.inverters.map(inverter => {
+                    const cellKey = `${entry.date}-${block.id}-${inverter.id}`;
+                    const value = entry.inverterData[`${block.id}-${inverter.id}`] || 0;
+                    return (
+                      <td key={cellKey} className="px-2 py-1 border border-gray-300 bg-yellow-100">
+                        {renderEditableCell(cellKey, value)}
+                      </td>
+                    );
+                  })
                 ))}
-                <td className="px-2 py-1 text-center border border-gray-300 bg-green-100">
-                  {entry.plannedStrings}
+                <td className="px-2 py-1 border border-gray-300 bg-green-100">
+                  {renderEditableCell(`${entry.date}-planned`, entry.plannedStrings)}
                 </td>
-                <td className="px-2 py-1 text-center border border-gray-300 bg-green-100">
-                  {entry.dailyActual}
+                <td className="px-2 py-1 border border-gray-300 bg-green-100">
+                  {renderEditableCell(`${entry.date}-actual`, entry.dailyActual)}
                 </td>
-                <td className="px-2 py-1 text-center border border-gray-300 bg-green-100">
-                  {entry.deviation}
+                <td className="px-2 py-1 border border-gray-300 bg-green-100">
+                  {renderEditableCell(`${entry.date}-deviation`, entry.deviation)}
                 </td>
-                <td className="px-2 py-1 text-center border border-gray-300 bg-yellow-100">
-                  {entry.rainfallMM}
+                <td className="px-2 py-1 border border-gray-300 bg-yellow-100">
+                  {renderEditableCell(`${entry.date}-rainfall`, entry.rainfallMM)}
                 </td>
-                <td className="px-2 py-1 text-center border border-gray-300 bg-yellow-100">
-                  {entry.remarks}
+                <td className="px-2 py-1 border border-gray-300 bg-yellow-100">
+                  {renderEditableCell(`${entry.date}-remarks`, entry.remarks, "", true)}
                 </td>
               </tr>
             ))}

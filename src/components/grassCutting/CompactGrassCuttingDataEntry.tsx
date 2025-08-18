@@ -1,5 +1,12 @@
-import React from 'react';
+
+import React, { useState } from 'react';
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 import { GrassCuttingSiteData } from "@/types/grassCutting";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 interface CompactGrassCuttingDataEntryProps {
   data: GrassCuttingSiteData | null;
@@ -7,6 +14,11 @@ interface CompactGrassCuttingDataEntryProps {
 }
 
 export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntryProps> = ({ data }) => {
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [inputValues, setInputValues] = useState<{[key: string]: string}>({});
+  const [rainfall, setRainfall] = useState<string>("");
+  const [remarks, setRemarks] = useState<string>("");
+
   if (!data) {
     return (
       <div className="bg-white rounded border p-4 text-center text-gray-500 text-sm">
@@ -15,14 +27,15 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
     );
   }
 
-  const currentEntry = data.dailyEntries[0] || {
-    date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' }),
-    inverterData: {},
-    plannedStrings: 0,
-    dailyActual: 0,
-    deviation: 0,
-    rainfallMM: "",
-    remarks: ""
+  const handleInputChange = (key: string, value: string) => {
+    setInputValues(prev => ({ ...prev, [key]: value }));
+  };
+
+  const getColumnWidth = (key: string, defaultWidth: string = "w-16") => {
+    const value = inputValues[key] || "";
+    if (value.length > 8) return "w-24";
+    if (value.length > 4) return "w-20";
+    return defaultWidth;
   };
 
   return (
@@ -61,13 +74,13 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
               <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-600">Actual</th>
               <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-600">Deviation</th>
               <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-yellow-500">Rainfall</th>
-              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-yellow-500">Remarks</th>
+              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-yellow-500 w-32">Remarks</th>
             </tr>
             <tr className="bg-blue-800 text-white">
               <th className="px-2 py-1 text-left font-medium border border-gray-300">Inverter</th>
               {data.blocks.map(block => (
                 block.inverters.map(inverter => (
-                  <th key={`${block.id}-${inverter.id}`} className="px-2 py-1 text-center font-medium border border-gray-300 w-16">
+                  <th key={`${block.id}-${inverter.id}`} className={cn("px-2 py-1 text-center font-medium border border-gray-300", getColumnWidth(`${block.id}-${inverter.id}`))}>
                     {inverter.id}
                   </th>
                 ))
@@ -85,25 +98,8 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
               <td className="px-2 py-1 font-medium border border-gray-300">Total Strings</td>
               {data.blocks.map(block => (
                 block.inverters.map(inverter => (
-                  <td key={`total-${block.id}-${inverter.id}`} className="px-2 py-1 text-center border border-gray-300 bg-blue-100">
+                  <td key={`total-${block.id}-${inverter.id}`} className={cn("px-2 py-1 text-center border border-gray-300 bg-blue-100", getColumnWidth(`${block.id}-${inverter.id}`))}>
                     {inverter.totalStrings}
-                  </td>
-                ))
-              ))}
-              <td className="px-2 py-1 border border-gray-300"></td>
-              <td className="px-2 py-1 border border-gray-300"></td>
-              <td className="px-2 py-1 border border-gray-300"></td>
-              <td className="px-2 py-1 border border-gray-300"></td>
-              <td className="px-2 py-1 border border-gray-300"></td>
-            </tr>
-
-            {/* Grass Cutting Done */}
-            <tr className="bg-blue-50">
-              <td className="px-2 py-1 font-medium border border-gray-300">Grass Cutting Done</td>
-              {data.blocks.map(block => (
-                block.inverters.map(inverter => (
-                  <td key={`done-${block.id}-${inverter.id}`} className="px-2 py-1 text-center border border-gray-300 bg-blue-100">
-                    {inverter.grassCuttingDone}
                   </td>
                 ))
               ))}
@@ -119,7 +115,7 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
               <td className="px-2 py-1 font-medium border border-gray-300">% Completed</td>
               {data.blocks.map(block => (
                 block.inverters.map(inverter => (
-                  <td key={`percent-${block.id}-${inverter.id}`} className="px-2 py-1 text-center border border-gray-300 bg-green-100">
+                  <td key={`percent-${block.id}-${inverter.id}`} className={cn("px-2 py-1 text-center border border-gray-300 bg-green-100", getColumnWidth(`${block.id}-${inverter.id}`))}>
                     {inverter.percentCompleted}%
                   </td>
                 ))
@@ -131,39 +127,70 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
               <td className="px-2 py-1 border border-gray-300"></td>
             </tr>
 
-            {/* Daily Entry */}
+            {/* Daily Entry with Date Picker */}
             <tr className="bg-yellow-50">
-              <td className="px-2 py-1 font-medium border border-gray-300">&lt;Input&gt; {currentEntry.date}</td>
-              {data.blocks.map(block => (
-                block.inverters.map(inverter => (
-                  <td key={`input-${block.id}-${inverter.id}`} className="px-2 py-1 text-center border border-gray-300 bg-yellow-100">
-                    <input 
-                      type="number" 
-                      className="w-full h-6 text-center text-xs border-0 bg-transparent focus:bg-white"
-                      defaultValue={currentEntry.inverterData[`${block.id}-${inverter.id}`] || 0}
+              <td className="px-2 py-1 font-medium border border-gray-300">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "h-6 px-2 justify-start text-left font-normal text-xs",
+                        "bg-transparent border-0 hover:bg-white"
+                      )}
+                    >
+                      <CalendarIcon className="mr-1 h-3 w-3" />
+                      {format(selectedDate, "dd-MMM-yy")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={(date) => date && setSelectedDate(date)}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
                     />
-                  </td>
-                ))
+                  </PopoverContent>
+                </Popover>
+              </td>
+              {data.blocks.map(block => (
+                block.inverters.map(inverter => {
+                  const key = `${block.id}-${inverter.id}`;
+                  return (
+                    <td key={`input-${key}`} className={cn("px-2 py-1 text-center border border-gray-300 bg-yellow-100", getColumnWidth(key))}>
+                      <input 
+                        type="number" 
+                        className="w-full h-6 text-center text-xs border-0 bg-transparent focus:bg-white"
+                        value={inputValues[key] || ""}
+                        onChange={(e) => handleInputChange(key, e.target.value)}
+                      />
+                    </td>
+                  );
+                })
               ))}
               <td className="px-2 py-1 text-center border border-gray-300 bg-green-100">
-                {currentEntry.plannedStrings}
+                {Object.values(inputValues).reduce((sum, val) => sum + (parseInt(val) || 0), 0)}
               </td>
               <td className="px-2 py-1 text-center border border-gray-300 bg-green-100">
-                {currentEntry.dailyActual}
+                {Object.values(inputValues).reduce((sum, val) => sum + (parseInt(val) || 0), 0)}
               </td>
               <td className="px-2 py-1 text-center border border-gray-300 bg-green-100">
-                {currentEntry.deviation}
+                0
               </td>
               <td className="px-2 py-1 text-center border border-gray-300 bg-yellow-100">
                 <input 
                   className="w-full h-6 text-center text-xs border-0 bg-transparent focus:bg-white"
-                  placeholder={currentEntry.rainfallMM}
+                  value={rainfall}
+                  onChange={(e) => setRainfall(e.target.value)}
                 />
               </td>
-              <td className="px-2 py-1 text-center border border-gray-300 bg-yellow-100">
-                <input 
-                  className="w-full h-6 text-center text-xs border-0 bg-transparent focus:bg-white"
-                  placeholder={currentEntry.remarks}
+              <td className="px-2 py-1 border border-gray-300 bg-yellow-100">
+                <textarea 
+                  className="w-full h-6 text-xs border-0 bg-transparent focus:bg-white resize-none"
+                  style={{ minHeight: '24px', whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
+                  value={remarks}
+                  onChange={(e) => setRemarks(e.target.value)}
                 />
               </td>
             </tr>
