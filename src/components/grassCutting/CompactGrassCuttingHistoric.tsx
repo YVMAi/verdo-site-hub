@@ -1,9 +1,8 @@
-
 import React, { useState, useMemo } from 'react';
 import { GrassCuttingSiteData } from "@/types/grassCutting";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Download, Search, Filter } from "lucide-react";
+import { Download, Search, Filter, Edit2, Save, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface CompactGrassCuttingHistoricProps {
@@ -16,6 +15,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
   const [editValues, setEditValues] = useState<{[key: string]: string}>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState<string>('all');
+  const [editingEntries, setEditingEntries] = useState<Set<string>>(new Set());
 
   if (!data) {
     return (
@@ -25,9 +25,25 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
     );
   }
 
+  const toggleEntryEditing = (date: string) => {
+    setEditingEntries(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(date)) {
+        newSet.delete(date);
+        setEditingCell(null);
+      } else {
+        newSet.add(date);
+      }
+      return newSet;
+    });
+  };
+
   const handleCellClick = (cellKey: string, currentValue: any) => {
-    setEditingCell(cellKey);
-    setEditValues(prev => ({ ...prev, [cellKey]: String(currentValue) }));
+    const [date] = cellKey.split('-', 1);
+    if (editingEntries.has(date)) {
+      setEditingCell(cellKey);
+      setEditValues(prev => ({ ...prev, [cellKey]: String(currentValue) }));
+    }
   };
 
   const handleCellBlur = (cellKey: string) => {
@@ -185,7 +201,9 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
   };
 
   const renderEditableCell = (cellKey: string, value: any, className: string = "", isRemarks: boolean = false) => {
-    const isEditing = editingCell === cellKey;
+    const [date] = cellKey.split('-', 1);
+    const isEntryEditable = editingEntries.has(date);
+    const isEditing = editingCell === cellKey && isEntryEditable;
     
     if (isEditing) {
       if (isRemarks) {
@@ -217,8 +235,8 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
 
     return (
       <div
-        className={`w-full h-6 text-center text-xs cursor-pointer hover:bg-blue-50 flex items-center justify-center ${className} ${isRemarks ? 'whitespace-pre-wrap break-words' : ''}`}
-        onClick={() => handleCellClick(cellKey, value)}
+        className={`w-full h-6 text-center text-xs ${isEntryEditable ? 'cursor-pointer hover:bg-blue-50' : ''} flex items-center justify-center ${className} ${isRemarks ? 'whitespace-pre-wrap break-words' : ''}`}
+        onClick={() => isEntryEditable && handleCellClick(cellKey, value)}
         style={isRemarks ? { minHeight: '24px', textAlign: 'left', padding: '2px' } : {}}
       >
         {value}
@@ -338,6 +356,23 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
               <td className="px-2 py-1 border border-gray-300"></td>
             </tr>
 
+            {/* Total Strings Cleaned */}
+            <tr className="bg-purple-50">
+              <td className="px-2 py-1 font-medium border border-gray-300">Total Strings Cleaned</td>
+              {data.blocks.map(block => (
+                block.inverters.map(inverter => (
+                  <td key={`cleaned-${block.id}-${inverter.id}`} className="px-2 py-1 text-center border border-gray-300 bg-purple-100">
+                    {inverter.grassCuttingDone}
+                  </td>
+                ))
+              ))}
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+            </tr>
+
             {/* Cycles Completed */}
             <tr className="bg-green-50">
               <td className="px-2 py-1 font-medium border border-gray-300">Cycles Completed</td>
@@ -355,41 +390,61 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
               <td className="px-2 py-1 border border-gray-300"></td>
             </tr>
 
-            {/* Historic Entries - Now Fully Editable */}
-            {filteredEntries.map((entry, index) => (
-              <tr key={entry.date} className="bg-yellow-50">
-                <td className="px-2 py-1 font-medium border border-gray-300">
-                  <span className="text-xs bg-orange-200 px-1 rounded mr-1">EDIT</span>
-                  {entry.date}
-                </td>
-                {data.blocks.map(block => (
-                  block.inverters.map(inverter => {
-                    const cellKey = `${entry.date}-${block.id}-${inverter.id}`;
-                    const value = entry.inverterData[`${block.id}-${inverter.id}`] || 0;
-                    return (
-                      <td key={cellKey} className="px-2 py-1 border border-gray-300 bg-yellow-100">
-                        {renderEditableCell(cellKey, value)}
-                      </td>
-                    );
-                  })
-                ))}
-                <td className="px-2 py-1 border border-gray-300 bg-green-100">
-                  {renderEditableCell(`${entry.date}-planned`, entry.plannedStrings)}
-                </td>
-                <td className="px-2 py-1 border border-gray-300 bg-green-100">
-                  {renderEditableCell(`${entry.date}-actual`, entry.dailyActual)}
-                </td>
-                <td className="px-2 py-1 border border-gray-300 bg-green-100">
-                  {renderEditableCell(`${entry.date}-deviation`, entry.deviation)}
-                </td>
-                <td className="px-2 py-1 border border-gray-300 bg-yellow-100">
-                  {renderEditableCell(`${entry.date}-rainfall`, entry.rainfallMM)}
-                </td>
-                <td className="px-2 py-1 border border-gray-300 bg-yellow-100">
-                  {renderEditableCell(`${entry.date}-remarks`, entry.remarks, "", true)}
-                </td>
-              </tr>
-            ))}
+            {/* Historic Entries */}
+            {filteredEntries.map((entry, index) => {
+              const isEditable = editingEntries.has(entry.date);
+              return (
+                <tr key={entry.date} className={isEditable ? "bg-yellow-50" : "bg-gray-50"}>
+                  <td className="px-2 py-1 font-medium border border-gray-300">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        {isEditable && (
+                          <span className="text-xs bg-orange-200 px-1 rounded mr-1">EDIT</span>
+                        )}
+                        {entry.date}
+                      </div>
+                      <button
+                        onClick={() => toggleEntryEditing(entry.date)}
+                        className="ml-2 p-1 hover:bg-gray-200 rounded transition-colors"
+                        title={isEditable ? "Save changes" : "Edit entry"}
+                      >
+                        {isEditable ? (
+                          <Save className="w-3 h-3 text-green-600" />
+                        ) : (
+                          <Edit2 className="w-3 h-3 text-blue-600" />
+                        )}
+                      </button>
+                    </div>
+                  </td>
+                  {data.blocks.map(block => (
+                    block.inverters.map(inverter => {
+                      const cellKey = `${entry.date}-${block.id}-${inverter.id}`;
+                      const value = entry.inverterData[`${block.id}-${inverter.id}`] || 0;
+                      return (
+                        <td key={cellKey} className={`px-2 py-1 border border-gray-300 ${isEditable ? 'bg-yellow-100' : 'bg-gray-100'}`}>
+                          {renderEditableCell(cellKey, value)}
+                        </td>
+                      );
+                    })
+                  ))}
+                  <td className={`px-2 py-1 border border-gray-300 ${isEditable ? 'bg-green-100' : 'bg-gray-100'}`}>
+                    {renderEditableCell(`${entry.date}-planned`, entry.plannedStrings)}
+                  </td>
+                  <td className={`px-2 py-1 border border-gray-300 ${isEditable ? 'bg-green-100' : 'bg-gray-100'}`}>
+                    {renderEditableCell(`${entry.date}-actual`, entry.dailyActual)}
+                  </td>
+                  <td className={`px-2 py-1 border border-gray-300 ${isEditable ? 'bg-green-100' : 'bg-gray-100'}`}>
+                    {renderEditableCell(`${entry.date}-deviation`, entry.deviation)}
+                  </td>
+                  <td className={`px-2 py-1 border border-gray-300 ${isEditable ? 'bg-yellow-100' : 'bg-gray-100'}`}>
+                    {renderEditableCell(`${entry.date}-rainfall`, entry.rainfallMM)}
+                  </td>
+                  <td className={`px-2 py-1 border border-gray-300 ${isEditable ? 'bg-yellow-100' : 'bg-gray-100'}`}>
+                    {renderEditableCell(`${entry.date}-remarks`, entry.remarks, "", true)}
+                  </td>
+                </tr>
+              );
+            })}
             
             {filteredEntries.length === 0 && (
               <tr>
