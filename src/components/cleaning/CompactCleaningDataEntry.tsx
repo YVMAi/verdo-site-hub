@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { format } from "date-fns";
 import { CalendarIcon, Save, Upload, Table, FileText, Plus, Trash2 } from "lucide-react";
@@ -28,7 +27,7 @@ interface FormRow {
 }
 
 export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> = ({ data, onDataChange }) => {
-  const [viewMode, setViewMode] = useState<'table' | 'form'>('table');
+  const [viewMode, setViewMode] = useState<'table' | 'form'>('form');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [editValues, setEditValues] = useState<{[key: string]: string}>({});
   const [rainfall, setRainfall] = useState<string>("");
