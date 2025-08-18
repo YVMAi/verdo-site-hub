@@ -1,9 +1,14 @@
 
 import React, { useState } from 'react';
+import { format } from "date-fns";
+import { CalendarIcon, Save, Upload, Table, FileText } from "lucide-react";
 import { CleaningSiteData, CleaningDailyEntry } from "@/types/cleaning";
 import { Button } from "@/components/ui/button";
-import { Save, Upload, Table, FormInput } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { BulkUploadModal } from '../grassCutting/BulkUploadModal';
+import { cn } from "@/lib/utils";
 
 interface CompactCleaningDataEntryProps {
   data: CleaningSiteData | null;
@@ -12,8 +17,10 @@ interface CompactCleaningDataEntryProps {
 
 export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> = ({ data, onDataChange }) => {
   const [viewMode, setViewMode] = useState<'table' | 'form'>('table');
-  const [showBulkUpload, setShowBulkUpload] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [editValues, setEditValues] = useState<{[key: string]: string}>({});
+  const [rainfall, setRainfall] = useState<string>("");
+  const [remarks, setRemarks] = useState<string>("");
 
   if (!data) {
     return (
@@ -43,8 +50,8 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
       const updatedEntry: CleaningDailyEntry = {
         ...currentEntry,
         inverterData: { ...currentEntry.inverterData },
-        rainfallMM: editValues['rainfall'] || currentEntry.rainfallMM,
-        remarks: editValues['remarks'] || currentEntry.remarks
+        rainfallMM: rainfall || currentEntry.rainfallMM,
+        remarks: remarks || currentEntry.remarks
       };
 
       // Update inverter data
@@ -72,6 +79,34 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
       onDataChange(newData);
       console.log('Saved cleaning data entry');
     }
+  };
+
+  const handleBulkUpload = (uploadedData: any[]) => {
+    console.log('Bulk upload data:', uploadedData);
+    uploadedData.forEach(row => {
+      if (row['Block-Inverter'] && row['Daily Cleaning']) {
+        setEditValues(prev => ({
+          ...prev,
+          [row['Block-Inverter']]: row['Daily Cleaning']
+        }));
+      }
+      if (row['Rainfall MM']) {
+        setRainfall(row['Rainfall MM']);
+      }
+      if (row['Remarks']) {
+        setRemarks(row['Remarks']);
+      }
+      if (row['Date']) {
+        try {
+          const date = new Date(row['Date']);
+          if (!isNaN(date.getTime())) {
+            setSelectedDate(date);
+          }
+        } catch (e) {
+          console.warn('Invalid date format:', row['Date']);
+        }
+      }
+    });
   };
 
   const renderTableView = () => (
@@ -161,7 +196,31 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
 
           {/* Daily Entry */}
           <tr className="bg-yellow-50">
-            <td className="px-2 py-1 font-medium border border-gray-300">&lt;Input&gt; {currentEntry.date}</td>
+            <td className="px-2 py-1 font-medium border border-gray-300">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "h-6 px-2 justify-start text-left font-normal text-xs",
+                      "bg-white border border-gray-300 text-gray-900 hover:bg-gray-50"
+                    )}
+                  >
+                    <CalendarIcon className="mr-1 h-3 w-3" />
+                    {format(selectedDate, "dd-MMM-yy")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => date && setSelectedDate(date)}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </td>
             {data.blocks.map(block => (
               block.inverters.map(inverter => {
                 const key = `${block.id}-${inverter.id}`;
@@ -190,14 +249,16 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
               <input 
                 className="w-full h-6 text-center text-xs border-0 bg-transparent focus:bg-white"
                 placeholder={currentEntry.rainfallMM}
-                onChange={(e) => handleInputChange('rainfall', e.target.value)}
+                value={rainfall}
+                onChange={(e) => setRainfall(e.target.value)}
               />
             </td>
             <td className="px-2 py-1 text-center border border-gray-300 bg-yellow-100">
               <input 
                 className="w-full h-6 text-center text-xs border-0 bg-transparent focus:bg-white"
                 placeholder={currentEntry.remarks}
-                onChange={(e) => handleInputChange('remarks', e.target.value)}
+                value={remarks}
+                onChange={(e) => setRemarks(e.target.value)}
               />
             </td>
           </tr>
@@ -240,7 +301,8 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
             type="text"
             className="w-full h-8 px-2 text-xs border border-gray-300 rounded focus:border-blue-500 focus:outline-none"
             placeholder={currentEntry.rainfallMM}
-            onChange={(e) => handleInputChange('rainfall', e.target.value)}
+            value={rainfall}
+            onChange={(e) => setRainfall(e.target.value)}
           />
         </div>
         <div>
@@ -249,7 +311,8 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
             type="text"
             className="w-full h-8 px-2 text-xs border border-gray-300 rounded focus:border-blue-500 focus:outline-none"
             placeholder={currentEntry.remarks}
-            onChange={(e) => handleInputChange('remarks', e.target.value)}
+            value={remarks}
+            onChange={(e) => setRemarks(e.target.value)}
           />
         </div>
       </div>
@@ -261,40 +324,36 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
       <div className="bg-[#1e3a8a] px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
         <span>Enter Cleaning Data</span>
         <div className="flex gap-2">
-          <Button
-            onClick={() => setViewMode(viewMode === 'table' ? 'form' : 'table')}
-            variant="outline"
-            size="sm"
-            className="bg-white text-[#1e3a8a] hover:bg-gray-100"
+          <ToggleGroup 
+            type="single" 
+            value={viewMode} 
+            onValueChange={(value) => value && setViewMode(value as "form" | "table")}
+            className="bg-white/10 rounded p-1"
           >
-            {viewMode === 'table' ? (
-              <>
-                <FormInput className="w-4 h-4 mr-1" />
-                Form
-              </>
-            ) : (
-              <>
-                <Table className="w-4 h-4 mr-1" />
-                Table
-              </>
-            )}
-          </Button>
-          <Button
-            onClick={() => setShowBulkUpload(true)}
-            variant="outline"
-            size="sm"
-            className="bg-white text-[#1e3a8a] hover:bg-gray-100"
-          >
-            <Upload className="w-4 h-4 mr-1" />
-            Bulk Upload
-          </Button>
-          <Button
+            <ToggleGroupItem 
+              value="form" 
+              size="sm"
+              className="text-white data-[state=on]:bg-white data-[state=on]:text-[#1e3a8a] px-3 py-1 text-xs"
+            >
+              <FileText className="h-3 w-3 mr-1" />
+              Form
+            </ToggleGroupItem>
+            <ToggleGroupItem 
+              value="table" 
+              size="sm"
+              className="text-white data-[state=on]:bg-white data-[state=on]:text-[#1e3a8a] px-3 py-1 text-xs"
+            >
+              <Table className="h-3 w-3 mr-1" />
+              Table
+            </ToggleGroupItem>
+          </ToggleGroup>
+          <BulkUploadModal onUpload={handleBulkUpload} />
+          <Button 
             onClick={handleSave}
-            variant="outline"
-            size="sm"
-            className="bg-white text-[#1e3a8a] hover:bg-gray-100"
+            size="sm" 
+            className="gap-2 bg-green-600 hover:bg-green-700 text-white px-3 py-1 h-8 text-xs"
           >
-            <Save className="w-4 h-4 mr-1" />
+            <Save className="h-3 w-3" />
             Save
           </Button>
         </div>
@@ -317,17 +376,6 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
       </div>
 
       {viewMode === 'table' ? renderTableView() : renderFormView()}
-
-      <BulkUploadModal
-        isOpen={showBulkUpload}
-        onClose={() => setShowBulkUpload(false)}
-        onUpload={(data) => {
-          console.log('Bulk upload data:', data);
-          setShowBulkUpload(false);
-        }}
-        title="Bulk Upload Cleaning Data"
-        description="Upload a CSV file with cleaning data. The file should contain columns for each inverter and additional fields."
-      />
     </div>
   );
 };
