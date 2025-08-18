@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Upload, Download, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -99,7 +98,7 @@ export const BulkUploadModal: React.FC<BulkUploadModalProps> = ({ onUpload }) =>
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button variant="outline" size="sm" className="gap-2 bg-white border-white text-blue-900 hover:bg-gray-50">
           <Upload className="h-4 w-4" />
           Bulk Upload
         </Button>

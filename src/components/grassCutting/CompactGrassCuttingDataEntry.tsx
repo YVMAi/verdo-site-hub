@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Save } from "lucide-react";
 import { GrassCuttingSiteData } from "@/types/grassCutting";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -30,6 +29,24 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
 
   const handleInputChange = (key: string, value: string) => {
     setInputValues(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleSave = () => {
+    const dataToSave = {
+      date: format(selectedDate, "dd-MMM-yy"),
+      inverterData: inputValues,
+      rainfall,
+      remarks,
+      totalPlanned: Object.values(inputValues).reduce((sum, val) => sum + (parseInt(val) || 0), 0),
+      totalActual: Object.values(inputValues).reduce((sum, val) => sum + (parseInt(val) || 0), 0),
+    };
+    
+    console.log('Saving grass cutting data:', dataToSave);
+    // Here you would typically call an API or update the parent component
+    if (onDataChange) {
+      // This would update the parent with the new data
+      // For now, just log the save action
+    }
   };
 
   const handleBulkUpload = (uploadedData: any[]) => {
@@ -72,7 +89,17 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
     <div className="bg-white rounded border">
       <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
         <span>Enter Grass Cutting Data</span>
-        <BulkUploadModal onUpload={handleBulkUpload} />
+        <div className="flex gap-2">
+          <BulkUploadModal onUpload={handleBulkUpload} />
+          <Button 
+            onClick={handleSave}
+            size="sm" 
+            className="gap-2 bg-green-600 hover:bg-green-700 text-white"
+          >
+            <Save className="h-4 w-4" />
+            Save
+          </Button>
+        </div>
       </div>
       
       {/* Compact Legend */}
