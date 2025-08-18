@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { GrassCuttingSiteData } from "@/types/grassCutting";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
   const [editValues, setEditValues] = useState<{[key: string]: string}>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState<string>('all');
+  const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
   const [editingEntries, setEditingEntries] = useState<Set<string>>(new Set());
   const [expandedBlocks, setExpandedBlocks] = useState<{[key: string]: boolean}>({
     '1': true,
@@ -62,9 +64,6 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
         
         // Search in remarks
         if (entry.remarks.toLowerCase().includes(searchLower)) return true;
-        
-        // Search in rainfall
-        if (entry.rainfallMM.toLowerCase().includes(searchLower)) return true;
         
         // Search in block names
         if (searchLower.includes('block')) {
@@ -119,8 +118,17 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
       });
     }
 
+    // Month filtering
+    if (selectedMonths.length > 0) {
+      entries = entries.filter(entry => {
+        const entryDate = new Date(entry.date);
+        const monthName = entryDate.toLocaleDateString('en-US', { month: 'long' });
+        return selectedMonths.includes(monthName);
+      });
+    }
+
     return entries;
-  }, [data?.historicEntries, searchTerm, dateFilter]);
+  }, [data?.historicEntries, searchTerm, dateFilter, selectedMonths]);
 
   if (!data) {
     return (
@@ -178,8 +186,6 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
           entry.dailyActual = Number(editValues[cellKey]) || 0;
         } else if (field === 'deviation') {
           entry.deviation = Number(editValues[cellKey]) || 0;
-        } else if (field === 'rainfall') {
-          entry.rainfallMM = editValues[cellKey];
         } else if (field === 'remarks') {
           entry.remarks = editValues[cellKey];
         } else {
@@ -212,7 +218,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
         headers.push(`${block.name}-${inverter.id}`);
       });
     });
-    headers.push('Planned', 'Actual', 'Deviation', 'Rainfall', 'Remarks');
+    headers.push('Planned', 'Actual', 'Deviation', 'Remarks');
 
     const rows: string[][] = [];
     
@@ -222,7 +228,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
         totalStringsRow.push(String(inverter.totalStrings));
       });
     });
-    totalStringsRow.push('', '', '', '', '');
+    totalStringsRow.push('', '', '', '');
     rows.push(totalStringsRow);
 
     const cyclesRow = ['', 'Cycles Completed'];
@@ -231,7 +237,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
         cyclesRow.push((inverter.grassCuttingDone / inverter.totalStrings).toFixed(2));
       });
     });
-    cyclesRow.push('', '', '', '', '');
+    cyclesRow.push('', '', '', '');
     rows.push(cyclesRow);
 
     filteredEntries.forEach(entry => {
@@ -246,7 +252,6 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
         String(entry.plannedStrings),
         String(entry.dailyActual),
         String(entry.deviation),
-        entry.rainfallMM,
         entry.remarks
       );
       rows.push(row);
@@ -334,6 +339,8 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
         dateFilter={dateFilter}
         onDateFilterChange={setDateFilter}
         onClearSearch={clearSearch}
+        selectedMonths={selectedMonths}
+        onMonthsChange={setSelectedMonths}
       />
 
       <div className="overflow-x-auto" style={{ maxHeight: '500px' }}>
@@ -354,7 +361,6 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
               <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-600">Planned</th>
               <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-600">Actual</th>
               <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-600">Deviation</th>
-              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-yellow-500">Rainfall</th>
               <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-yellow-500 w-32">Remarks</th>
             </tr>
             <tr className="bg-blue-800 text-white">
@@ -372,7 +378,6 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
                   </th>
                 )
               ))}
-              <th className="px-2 py-1 border border-gray-300"></th>
               <th className="px-2 py-1 border border-gray-300"></th>
               <th className="px-2 py-1 border border-gray-300"></th>
               <th className="px-2 py-1 border border-gray-300"></th>
@@ -400,7 +405,6 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
               <td className="px-2 py-1 border border-gray-300"></td>
               <td className="px-2 py-1 border border-gray-300"></td>
               <td className="px-2 py-1 border border-gray-300"></td>
-              <td className="px-2 py-1 border border-gray-300"></td>
             </tr>
 
             {/* Total Strings Cleaned */}
@@ -419,7 +423,6 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
                   </td>
                 )
               ))}
-              <td className="px-2 py-1 border border-gray-300"></td>
               <td className="px-2 py-1 border border-gray-300"></td>
               <td className="px-2 py-1 border border-gray-300"></td>
               <td className="px-2 py-1 border border-gray-300"></td>
@@ -443,7 +446,6 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
                   </td>
                 )
               ))}
-              <td className="px-2 py-1 border border-gray-300"></td>
               <td className="px-2 py-1 border border-gray-300"></td>
               <td className="px-2 py-1 border border-gray-300"></td>
               <td className="px-2 py-1 border border-gray-300"></td>
@@ -503,9 +505,6 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
                     {renderEditableCell(`${entry.date}-deviation`, entry.deviation)}
                   </td>
                   <td className={`px-2 py-1 border border-gray-300 ${isEditable ? 'bg-yellow-100' : 'bg-gray-100'}`}>
-                    {renderEditableCell(`${entry.date}-rainfall`, entry.rainfallMM)}
-                  </td>
-                  <td className={`px-2 py-1 border border-gray-300 ${isEditable ? 'bg-yellow-100' : 'bg-gray-100'}`}>
                     {renderEditableCell(`${entry.date}-remarks`, entry.remarks, "", true)}
                   </td>
                 </tr>
@@ -514,8 +513,8 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
             
             {filteredEntries.length === 0 && (
               <tr>
-                <td colSpan={getVisibleBlocks.reduce((acc, block) => acc + (expandedBlocks[block.id] ? block.inverters.length : 1), 0) + 6} className="px-2 py-4 text-center text-gray-500">
-                  {searchTerm || dateFilter !== 'all' ? 'No matching records found' : 'No historic entries found'}
+                <td colSpan={getVisibleBlocks.reduce((acc, block) => acc + (expandedBlocks[block.id] ? block.inverters.length : 1), 0) + 5} className="px-2 py-4 text-center text-gray-500">
+                  {searchTerm || dateFilter !== 'all' || selectedMonths.length > 0 ? 'No matching records found' : 'No historic entries found'}
                 </td>
               </tr>
             )}

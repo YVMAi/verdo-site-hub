@@ -1,9 +1,11 @@
 
 import React from 'react';
-import { Search, X, Filter } from 'lucide-react';
+import { Search, X, Filter, Calendar } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface SearchAndFilterProps {
   searchTerm: string;
@@ -11,15 +13,40 @@ interface SearchAndFilterProps {
   dateFilter: string;
   onDateFilterChange: (value: string) => void;
   onClearSearch: () => void;
+  selectedMonths?: string[];
+  onMonthsChange?: (months: string[]) => void;
 }
+
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
 
 export const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
   searchTerm,
   onSearchChange,
   dateFilter,
   onDateFilterChange,
-  onClearSearch
+  onClearSearch,
+  selectedMonths = [],
+  onMonthsChange
 }) => {
+  const handleMonthToggle = (month: string) => {
+    if (!onMonthsChange) return;
+    
+    if (selectedMonths.includes(month)) {
+      onMonthsChange(selectedMonths.filter(m => m !== month));
+    } else {
+      onMonthsChange([...selectedMonths, month]);
+    }
+  };
+
+  const clearMonths = () => {
+    if (onMonthsChange) {
+      onMonthsChange([]);
+    }
+  };
+
   const getFilterChips = () => {
     const chips = [];
     if (searchTerm) {
@@ -34,6 +61,12 @@ export const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
         onRemove: () => onDateFilterChange('all')
       });
     }
+    if (selectedMonths.length > 0) {
+      chips.push({
+        label: `Months: ${selectedMonths.join(', ')}`,
+        onRemove: clearMonths
+      });
+    }
     return chips;
   };
 
@@ -45,7 +78,7 @@ export const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
         <div className="flex-1 relative">
           <Search className="w-4 h-4 absolute left-2 top-2 text-gray-400" />
           <Input
-            placeholder="Search by date, block, inverter, rainfall, remarks..."
+            placeholder="Search by date, block, inverter, remarks..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             className="pl-8 h-8 text-xs"
@@ -74,6 +107,51 @@ export const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
               <SelectItem value="quarter">Last Quarter</SelectItem>
             </SelectContent>
           </Select>
+          
+          {onMonthsChange && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 text-xs">
+                  <Calendar className="w-4 h-4 mr-1" />
+                  Months {selectedMonths.length > 0 && `(${selectedMonths.length})`}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56" align="end">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium text-sm">Select Months</h4>
+                    {selectedMonths.length > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearMonths}
+                        className="h-6 px-2 text-xs"
+                      >
+                        Clear
+                      </Button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {MONTHS.map((month) => (
+                      <div key={month} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={month}
+                          checked={selectedMonths.includes(month)}
+                          onCheckedChange={() => handleMonthToggle(month)}
+                        />
+                        <label
+                          htmlFor={month}
+                          className="text-xs font-normal cursor-pointer"
+                        >
+                          {month.substring(0, 3)}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
         </div>
       </div>
       

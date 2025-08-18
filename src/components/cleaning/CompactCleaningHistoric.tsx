@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { CleaningSiteData } from "@/types/cleaning";
 import { Button } from "@/components/ui/button";
@@ -16,6 +15,7 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
   const [editValues, setEditValues] = useState<{[key: string]: string}>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState<string>('all');
+  const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
   const [editingEntries, setEditingEntries] = useState<Set<string>>(new Set());
   const [expandedBlocks, setExpandedBlocks] = useState<{[key: string]: boolean}>({
     'block-1': true,
@@ -120,8 +120,17 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
       });
     }
 
+    // Month filtering
+    if (selectedMonths.length > 0) {
+      entries = entries.filter(entry => {
+        const entryDate = new Date(entry.date);
+        const monthName = entryDate.toLocaleDateString('en-US', { month: 'long' });
+        return selectedMonths.includes(monthName);
+      });
+    }
+
     return entries;
-  }, [data?.historicEntries, searchTerm, dateFilter]);
+  }, [data?.historicEntries, searchTerm, dateFilter, selectedMonths]);
 
   if (!data) {
     return (
@@ -335,6 +344,8 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
         dateFilter={dateFilter}
         onDateFilterChange={setDateFilter}
         onClearSearch={clearSearch}
+        selectedMonths={selectedMonths}
+        onMonthsChange={setSelectedMonths}
       />
 
       <div className="overflow-x-auto" style={{ maxHeight: '500px' }}>
@@ -516,7 +527,7 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
             {filteredEntries.length === 0 && (
               <tr>
                 <td colSpan={getVisibleBlocks.reduce((acc, block) => acc + (expandedBlocks[block.id] ? block.inverters.length : 1), 0) + 6} className="px-2 py-4 text-center text-gray-500">
-                  {searchTerm || dateFilter !== 'all' ? 'No matching records found' : 'No historic entries found'}
+                  {searchTerm || dateFilter !== 'all' || selectedMonths.length > 0 ? 'No matching records found' : 'No historic entries found'}
                 </td>
               </tr>
             )}
