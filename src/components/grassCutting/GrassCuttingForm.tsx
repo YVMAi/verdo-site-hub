@@ -148,6 +148,7 @@ export const GrassCuttingForm: React.FC<GrassCuttingFormProps> = ({ data, onData
                 mode="single"
                 selected={selectedDate}
                 onSelect={(date) => date && setSelectedDate(date)}
+                disabled={(date) => date > new Date()}
                 initialFocus
                 className={cn("p-3 pointer-events-auto")}
               />

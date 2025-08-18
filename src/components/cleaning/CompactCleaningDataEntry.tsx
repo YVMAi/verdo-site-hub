@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { format } from "date-fns";
 import { CalendarIcon, Save, Upload, Table, FileText, Plus, Trash2 } from "lucide-react";
@@ -315,6 +314,7 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
                     mode="single"
                     selected={selectedDate}
                     onSelect={(date) => date && setSelectedDate(date)}
+                    disabled={(date) => date > new Date()}
                     initialFocus
                     className={cn("p-3 pointer-events-auto")}
                   />
@@ -390,6 +390,7 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
               mode="single"
               selected={selectedDate}
               onSelect={(date) => date && setSelectedDate(date)}
+              disabled={(date) => date > new Date()}
               initialFocus
               className={cn("p-3 pointer-events-auto")}
             />
