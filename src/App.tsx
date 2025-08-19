@@ -12,6 +12,7 @@ import GrassCutting from "./pages/GrassCutting";
 import Cleaning from "./pages/Cleaning";
 import FieldInspection from "./pages/FieldInspection";
 import Vegetation from "./pages/Vegetation";
+import Operations from "./pages/Operations";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
               <Route path="/cleaning" element={<Cleaning />} />
               <Route path="/field-inspection" element={<FieldInspection />} />
               <Route path="/vegetation" element={<Vegetation />} />
+              <Route path="/operations" element={<Operations />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppLayout>
