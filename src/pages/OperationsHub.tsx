@@ -11,12 +11,14 @@ import {
   CheckCircle2, 
   Clock,
   BarChart3,
-  Circle
+  Circle,
+  Lock
 } from "lucide-react";
 import { GrassCuttingTab } from "@/components/operations/GrassCuttingTab";
 import { CleaningTab } from "@/components/operations/CleaningTab";
 import { ComingSoonTab } from "@/components/operations/ComingSoonTab";
 import { AllOperationsSummary } from "@/components/operations/AllOperationsSummary";
+import { ClientSiteSelector } from "@/components/ClientSiteSelector";
 import { useClientContext } from "@/contexts/ClientContext";
 
 const operations = [
@@ -25,46 +27,55 @@ const operations = [
     name: 'Grass Cutting',
     icon: Scissors,
     status: 'completed',
-    description: 'Track and manage grass cutting operations'
+    description: 'Track and manage grass cutting operations',
+    enabled: true
   },
   {
     id: 'cleaning',
     name: 'Cleaning',
     icon: Droplets,
     status: 'in-progress',
-    description: 'Monitor solar panel cleaning activities'
+    description: 'Monitor solar panel cleaning activities',
+    enabled: true
   },
   {
     id: 'inspection',
     name: 'Inspection',
     icon: Search,
     status: 'pending',
-    description: 'Field inspection and maintenance logs'
+    description: 'Field inspection and maintenance logs',
+    enabled: false
   },
   {
     id: 'vegetation',
     name: 'Vegetation Control',
     icon: Leaf,
     status: 'pending',
-    description: 'Vegetation management and control'
+    description: 'Vegetation management and control',
+    enabled: false
   },
   {
     id: 'summary',
     name: 'Summary',
     icon: BarChart3,
     status: 'available',
-    description: 'Review and export all operations'
+    description: 'Review and export all operations',
+    enabled: false
   }
 ];
 
 export default function OperationsHub() {
   const [activeTab, setActiveTab] = useState('grass-cutting');
+  const { selectedClient, selectedSite, setSelectedSite } = useClientContext();
   
   const completedOperations = operations.filter(op => op.status === 'completed').length;
   const totalOperations = operations.length - 1; // Exclude summary tab
   const progressPercentage = (completedOperations / totalOperations) * 100;
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: string, enabled: boolean) => {
+    if (!enabled) {
+      return <Lock className="w-3 h-3 text-gray-400" />;
+    }
     switch (status) {
       case 'completed':
         return <CheckCircle2 className="w-3 h-3 text-green-500" />;
@@ -74,17 +85,6 @@ export default function OperationsHub() {
         return <Circle className="w-3 h-3 text-gray-400" />;
       default:
         return null;
-    }
-  };
-
-  const getTabVariant = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'default';
-      case 'in-progress':
-        return 'secondary';
-      default:
-        return 'outline';
     }
   };
 
@@ -113,6 +113,15 @@ export default function OperationsHub() {
         </div>
       </div>
 
+      {/* Site Selection Above Tabs */}
+      <div className="bg-gray-50 border-b px-4 py-3">
+        <ClientSiteSelector 
+          selectedClient={selectedClient}
+          selectedSite={selectedSite}
+          onSiteChange={setSelectedSite}
+        />
+      </div>
+
       {/* Compact Operations Tabs */}
       <div className="flex-1 bg-white">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
@@ -124,11 +133,12 @@ export default function OperationsHub() {
                   <TabsTrigger
                     key={operation.id}
                     value={operation.id}
-                    className="flex items-center gap-2 h-8 px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 text-gray-600 text-xs"
+                    disabled={!operation.enabled}
+                    className={`flex items-center gap-2 h-8 px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 text-gray-600 text-xs ${!operation.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     <IconComponent className="w-4 h-4" />
                     <span className="font-medium">{operation.name}</span>
-                    {getStatusIcon(operation.status)}
+                    {getStatusIcon(operation.status, operation.enabled)}
                   </TabsTrigger>
                 );
               })}
