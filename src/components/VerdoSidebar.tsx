@@ -1,6 +1,7 @@
+
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Menu, X, Zap, Settings, Scissors, Droplets, Search, Leaf, ChevronDown, BarChart3, Plus } from 'lucide-react';
+import { Menu, X, Zap, Settings, Scissors, Droplets, Search, Leaf, ChevronDown, BarChart3, Plus, ClipboardList } from 'lucide-react';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ClientSelector } from './ClientSelector';
@@ -21,6 +22,11 @@ const monitoringItems = [{
 }];
 
 const operationsItems = [{
+  title: "Daily operations data",
+  url: "/operations",
+  icon: ClipboardList,
+  description: "Centralized operations management"
+}, {
   title: "Grass Cutting",
   url: "/grass-cutting",
   icon: Scissors,
