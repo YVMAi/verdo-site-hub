@@ -12,6 +12,7 @@ import GrassCutting from "./pages/GrassCutting";
 import Cleaning from "./pages/Cleaning";
 import FieldInspection from "./pages/FieldInspection";
 import Vegetation from "./pages/Vegetation";
+import OperationsHub from "./pages/OperationsHub";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/generation" element={<GenerationData />} />
+              <Route path="/operations" element={<OperationsHub />} />
               <Route path="/grass-cutting" element={<GrassCutting />} />
               <Route path="/cleaning" element={<Cleaning />} />
               <Route path="/field-inspection" element={<FieldInspection />} />
