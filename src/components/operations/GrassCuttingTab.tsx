@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CompactGrassCuttingDataEntry } from "@/components/grassCutting/CompactGrassCuttingDataEntry";
@@ -11,7 +10,7 @@ export const GrassCuttingTab: React.FC = () => {
   const [subTab, setSubTab] = useState('entry');
 
   const siteData = selectedClient && selectedSite 
-    ? mockGrassCuttingData[selectedClient]?.[selectedSite] || null
+    ? mockGrassCuttingData[selectedClient.id]?.[selectedSite.id] || null
     : null;
 
   return (

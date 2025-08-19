@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CleaningDataEntry } from "@/components/cleaning/CleaningDataEntry";
@@ -11,7 +10,7 @@ export const CleaningTab: React.FC = () => {
   const [subTab, setSubTab] = useState('entry');
 
   const siteData = selectedClient && selectedSite 
-    ? mockCleaningData[selectedClient]?.[selectedSite] || null
+    ? mockCleaningData[selectedClient.id]?.[selectedSite.id] || null
     : null;
 
   return (
