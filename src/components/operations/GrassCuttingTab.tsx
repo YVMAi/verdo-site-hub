@@ -3,12 +3,11 @@ import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CompactGrassCuttingDataEntry } from "@/components/grassCutting/CompactGrassCuttingDataEntry";
 import { CompactGrassCuttingHistoric } from "@/components/grassCutting/CompactGrassCuttingHistoric";
-import { ClientSiteSelector } from "@/components/ClientSiteSelector";
 import { useClientContext } from "@/contexts/ClientContext";
 import { mockGrassCuttingData } from "@/data/mockGrassCuttingData";
 
 export const GrassCuttingTab: React.FC = () => {
-  const { selectedClient, selectedSite, setSelectedSite } = useClientContext();
+  const { selectedClient, selectedSite } = useClientContext();
   const [subTab, setSubTab] = useState('entry');
 
   const siteData = selectedClient && selectedSite 
@@ -23,15 +22,6 @@ export const GrassCuttingTab: React.FC = () => {
           <h2 className="text-lg font-bold text-gray-900">Grass Cutting Management</h2>
           <p className="text-sm text-gray-600">Track and manage grass cutting operations</p>
         </div>
-      </div>
-
-      {/* Compact Client Site Selector */}
-      <div className="bg-gray-50 rounded-lg p-3">
-        <ClientSiteSelector 
-          selectedClient={selectedClient}
-          selectedSite={selectedSite}
-          onSiteChange={setSelectedSite}
-        />
       </div>
 
       {/* Compact Tabs */}
