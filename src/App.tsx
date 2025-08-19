@@ -8,10 +8,7 @@ import { AppLayout } from "./components/AppLayout";
 import { ClientProvider } from "./contexts/ClientContext";
 import Index from "./pages/Index";
 import GenerationData from "./pages/GenerationData";
-import GrassCutting from "./pages/GrassCutting";
-import Cleaning from "./pages/Cleaning";
-import FieldInspection from "./pages/FieldInspection";
-import Vegetation from "./pages/Vegetation";
+import Operations from "./pages/Operations";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,10 +24,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/generation" element={<GenerationData />} />
-              <Route path="/grass-cutting" element={<GrassCutting />} />
-              <Route path="/cleaning" element={<Cleaning />} />
-              <Route path="/field-inspection" element={<FieldInspection />} />
-              <Route path="/vegetation" element={<Vegetation />} />
+              <Route path="/operations" element={<Operations />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppLayout>
