@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -9,9 +10,9 @@ import {
   Leaf, 
   CheckCircle2, 
   Clock,
-  BarChart3
+  BarChart3,
+  Circle
 } from "lucide-react";
-import { ClientSiteSelector } from "@/components/ClientSiteSelector";
 import { GrassCuttingTab } from "@/components/operations/GrassCuttingTab";
 import { CleaningTab } from "@/components/operations/CleaningTab";
 import { ComingSoonTab } from "@/components/operations/ComingSoonTab";
@@ -49,16 +50,15 @@ const operations = [
   },
   {
     id: 'summary',
-    name: 'All Operations Summary',
+    name: 'Summary',
     icon: BarChart3,
     status: 'available',
-    description: 'Review and export all daily operations'
+    description: 'Review and export all operations'
   }
 ];
 
 export default function OperationsHub() {
   const [activeTab, setActiveTab] = useState('grass-cutting');
-  const { selectedClient, selectedSite, setSelectedSite } = useClientContext();
   
   const completedOperations = operations.filter(op => op.status === 'completed').length;
   const totalOperations = operations.length - 1; // Exclude summary tab
@@ -67,98 +67,84 @@ export default function OperationsHub() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
-        return <CheckCircle2 className="w-4 h-4 text-green-500" />;
+        return <CheckCircle2 className="w-3 h-3 text-green-500" />;
       case 'in-progress':
-        return <Clock className="w-4 h-4 text-yellow-500" />;
+        return <Clock className="w-3 h-3 text-yellow-500" />;
       case 'pending':
-        return <Clock className="w-4 h-4 text-gray-400" />;
+        return <Circle className="w-3 h-3 text-gray-400" />;
       default:
         return null;
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getTabVariant = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-200">Completed</Badge>;
+        return 'default';
       case 'in-progress':
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-700 border-yellow-200">In Progress</Badge>;
-      case 'pending':
-        return <Badge variant="outline" className="text-gray-600">Pending</Badge>;
+        return 'secondary';
       default:
-        return null;
+        return 'outline';
     }
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header Section */}
-      <div className="space-y-4">
+    <div className="h-full flex flex-col">
+      {/* Compact Header */}
+      <div className="bg-white border-b px-4 py-3">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Operations Hub</h1>
-            <p className="text-gray-600 mt-1">Centralized daily operations management</p>
+            <h1 className="text-xl font-bold text-gray-900">Operations Hub</h1>
+            <p className="text-sm text-gray-600">Centralized daily operations management</p>
           </div>
           
-          {/* Daily Progress Tracker */}
-          <div className="bg-white rounded-lg border p-4 min-w-[280px]">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700">Today's Progress</span>
-              <span className="text-sm text-gray-500">{completedOperations} of {totalOperations} completed</span>
+          {/* Compact Progress Tracker */}
+          <div className="bg-gray-50 rounded-lg border px-3 py-2 min-w-[240px]">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-medium text-gray-700">Today's Progress</span>
+              <span className="text-xs text-gray-500">{completedOperations}/{totalOperations}</span>
             </div>
-            <Progress value={progressPercentage} className="h-2" />
-            <div className="flex items-center gap-2 mt-2">
-              <CheckCircle2 className="w-4 h-4 text-green-500" />
+            <Progress value={progressPercentage} className="h-1.5" />
+            <div className="flex items-center gap-1 mt-1">
+              <CheckCircle2 className="w-3 h-3 text-green-500" />
               <span className="text-xs text-gray-600">{Math.round(progressPercentage)}% Complete</span>
             </div>
           </div>
         </div>
-
-        {/* Client Site Selector */}
-        <ClientSiteSelector 
-          selectedClient={selectedClient}
-          selectedSite={selectedSite}
-          onSiteChange={setSelectedSite}
-        />
       </div>
 
-      {/* Operations Tabs */}
-      <div className="bg-white rounded-lg border">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="border-b bg-gray-50 px-6 py-3">
-            <TabsList className="grid w-full grid-cols-5 bg-transparent h-auto p-0 gap-2">
+      {/* Compact Operations Tabs */}
+      <div className="flex-1 bg-white">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+          <div className="border-b bg-gray-50/50 px-4 py-2">
+            <TabsList className="grid w-full grid-cols-5 bg-transparent h-auto p-0 gap-1">
               {operations.map((operation) => {
                 const IconComponent = operation.icon;
                 return (
                   <TabsTrigger
                     key={operation.id}
                     value={operation.id}
-                    className="flex-col gap-2 h-auto p-3 data-[state=active]:bg-white data-[state=active]:shadow-sm border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 text-gray-600"
+                    className="flex items-center gap-2 h-8 px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 text-gray-600 text-xs"
                   >
-                    <div className="flex items-center gap-2">
-                      <IconComponent className="w-5 h-5" />
-                      {getStatusIcon(operation.status)}
-                    </div>
-                    <div className="text-center">
-                      <div className="font-medium text-sm">{operation.name}</div>
-                      {operation.id !== 'summary' && getStatusBadge(operation.status)}
-                    </div>
+                    <IconComponent className="w-4 h-4" />
+                    <span className="font-medium">{operation.name}</span>
+                    {getStatusIcon(operation.status)}
                   </TabsTrigger>
                 );
               })}
             </TabsList>
           </div>
 
-          <div className="p-6">
-            <TabsContent value="grass-cutting" className="mt-0">
+          <div className="flex-1 overflow-hidden">
+            <TabsContent value="grass-cutting" className="h-full m-0 p-3">
               <GrassCuttingTab />
             </TabsContent>
 
-            <TabsContent value="cleaning" className="mt-0">
+            <TabsContent value="cleaning" className="h-full m-0 p-3">
               <CleaningTab />
             </TabsContent>
 
-            <TabsContent value="inspection" className="mt-0">
+            <TabsContent value="inspection" className="h-full m-0 p-3">
               <ComingSoonTab 
                 title="Field Inspection" 
                 description="Comprehensive field inspection and maintenance logging system"
@@ -166,7 +152,7 @@ export default function OperationsHub() {
               />
             </TabsContent>
 
-            <TabsContent value="vegetation" className="mt-0">
+            <TabsContent value="vegetation" className="h-full m-0 p-3">
               <ComingSoonTab 
                 title="Vegetation Control" 
                 description="Advanced vegetation management and control operations"
@@ -174,7 +160,7 @@ export default function OperationsHub() {
               />
             </TabsContent>
 
-            <TabsContent value="summary" className="mt-0">
+            <TabsContent value="summary" className="h-full m-0 p-3">
               <AllOperationsSummary />
             </TabsContent>
           </div>
