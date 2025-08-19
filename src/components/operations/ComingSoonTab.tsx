@@ -2,6 +2,8 @@
 import React from 'react';
 import { LucideIcon } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
+import { ClientSiteSelector } from "@/components/ClientSiteSelector";
+import { useClientContext } from "@/contexts/ClientContext";
 
 interface ComingSoonTabProps {
   title: string;
@@ -10,12 +12,21 @@ interface ComingSoonTabProps {
 }
 
 export const ComingSoonTab: React.FC<ComingSoonTabProps> = ({ title, description, icon: Icon }) => {
+  const { selectedClient, selectedSite, setSelectedSite } = useClientContext();
+
   return (
     <div className="space-y-4">
       <div>
         <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
         <p className="text-gray-600">{description}</p>
       </div>
+
+      {/* Client Site Selector */}
+      <ClientSiteSelector 
+        selectedClient={selectedClient}
+        selectedSite={selectedSite}
+        onSiteChange={setSelectedSite}
+      />
 
       <Card className="border-dashed border-2 border-gray-300">
         <CardContent className="flex flex-col items-center justify-center py-16 text-center">

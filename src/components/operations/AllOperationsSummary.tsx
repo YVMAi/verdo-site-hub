@@ -3,6 +3,8 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ClientSiteSelector } from "@/components/ClientSiteSelector";
+import { useClientContext } from "@/contexts/ClientContext";
 import { 
   Download, 
   CheckCircle2, 
@@ -50,6 +52,8 @@ const operationsSummary = [
 ];
 
 export const AllOperationsSummary: React.FC = () => {
+  const { selectedClient, selectedSite, setSelectedSite } = useClientContext();
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
@@ -94,6 +98,13 @@ export const AllOperationsSummary: React.FC = () => {
           </Button>
         </div>
       </div>
+
+      {/* Client Site Selector */}
+      <ClientSiteSelector 
+        selectedClient={selectedClient}
+        selectedSite={selectedSite}
+        onSiteChange={setSelectedSite}
+      />
 
       {/* Operations Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -1,12 +1,14 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CleaningDataEntry } from "@/components/cleaning/CleaningDataEntry";
 import { CleaningHistoric } from "@/components/cleaning/CleaningHistoric";
+import { ClientSiteSelector } from "@/components/ClientSiteSelector";
 import { useClientContext } from "@/contexts/ClientContext";
 import { mockCleaningData } from "@/data/mockCleaningData";
 
 export const CleaningTab: React.FC = () => {
-  const { selectedClient, selectedSite } = useClientContext();
+  const { selectedClient, selectedSite, setSelectedSite } = useClientContext();
   const [subTab, setSubTab] = useState('entry');
 
   const siteData = selectedClient && selectedSite 
@@ -21,6 +23,13 @@ export const CleaningTab: React.FC = () => {
           <p className="text-gray-600">Monitor solar panel cleaning activities</p>
         </div>
       </div>
+
+      {/* Client Site Selector */}
+      <ClientSiteSelector 
+        selectedClient={selectedClient}
+        selectedSite={selectedSite}
+        onSiteChange={setSelectedSite}
+      />
 
       <Tabs value={subTab} onValueChange={setSubTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
