@@ -217,6 +217,8 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
 
   const handleKeyPress = (e: React.KeyboardEvent, cellKey: string) => {
     if (e.key === 'Enter') {
+      e.preventDefault();
+      e.stopPropagation();
       handleCellBlur(cellKey);
     }
   };
@@ -297,7 +299,7 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
             value={editValues[cellKey] || String(value)}
             onChange={(e) => setEditValues(prev => ({ ...prev, [cellKey]: e.target.value }))}
             onBlur={() => handleCellBlur(cellKey)}
-            onKeyPress={(e) => handleKeyPress(e, cellKey)}
+            onKeyDown={(e) => handleKeyPress(e, cellKey)}
             autoFocus
           />
         );
@@ -310,7 +312,7 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
           value={editValues[cellKey] || String(value)}
           onChange={(e) => setEditValues(prev => ({ ...prev, [cellKey]: e.target.value }))}
           onBlur={() => handleCellBlur(cellKey)}
-          onKeyPress={(e) => handleKeyPress(e, cellKey)}
+          onKeyDown={(e) => handleKeyPress(e, cellKey)}
           autoFocus
         />
       );
