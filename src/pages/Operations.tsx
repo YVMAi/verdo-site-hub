@@ -1,293 +1,335 @@
 
-import React, { useState, useMemo } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { ClientSiteSelector } from "@/components/ClientSiteSelector";
-import { CompactGrassCuttingDataEntry } from "@/components/grassCutting/CompactGrassCuttingDataEntry";
-import { CompactCleaningDataEntry } from "@/components/cleaning/CompactCleaningDataEntry";
-import { ComingSoonCard } from "@/components/ComingSoonCard";
-import { Site } from "@/types/generation";
-import { GrassCuttingSiteData } from "@/types/grassCutting";
-import { CleaningSiteData } from "@/types/cleaning";
-import { mockGrassCuttingData } from "@/data/mockGrassCuttingData";
-import { mockCleaningData } from "@/data/mockCleaningData";
-import { useClient } from '@/contexts/ClientContext';
+import React, { useState, useContext } from 'react';
+import { ClientContext } from '@/contexts/ClientContext';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { 
   Scissors, 
   Droplets, 
   Search, 
   Leaf, 
-  CheckCircle2, 
-  Clock, 
-  Save,
-  FileText,
-  ChevronRight
-} from "lucide-react";
+  FileText, 
+  CheckCircle2,
+  Calendar,
+  MapPin
+} from 'lucide-react';
+import { CompactGrassCuttingDataEntry } from '@/components/grassCutting/CompactGrassCuttingDataEntry';
+import { CompactGrassCuttingHistoric } from '@/components/grassCutting/CompactGrassCuttingHistoric';
+import { CompactCleaningDataEntry } from '@/components/cleaning/CompactCleaningDataEntry';
+import { CompactCleaningHistoric } from '@/components/cleaning/CompactCleaningHistoric';
+import { ComingSoonCard } from '@/components/ComingSoonCard';
+import { mockGrassCuttingData } from '@/data/mockGrassCuttingData';
+import { mockCleaningData } from '@/data/mockCleaningData';
 
-interface OperationStatus {
-  id: string;
+type OperationType = 'grassCutting' | 'cleaning' | 'inspection' | 'vegetation' | 'summary';
+
+interface OperationTab {
+  id: OperationType;
   name: string;
   icon: React.ComponentType<any>;
-  completed: boolean;
   progress: number;
+  color: string;
 }
 
-const Operations = () => {
-  const { selectedClient } = useClient();
-  const [selectedSite, setSelectedSite] = useState<Site | null>(null);
-  const [activeTab, setActiveTab] = useState("grass-cutting");
-  const [wetDryType, setWetDryType] = useState<'wet' | 'dry'>('wet');
+const operationTabs: OperationTab[] = [
+  {
+    id: 'grassCutting',
+    name: 'Grass Cutting',
+    icon: Scissors,
+    progress: 30,
+    color: 'bg-blue-500'
+  },
+  {
+    id: 'cleaning',
+    name: 'Cleaning',
+    icon: Droplets,
+    progress: 60,
+    color: 'bg-cyan-500'
+  },
+  {
+    id: 'inspection',
+    name: 'Inspection',
+    icon: Search,
+    progress: 100,
+    color: 'bg-green-500'
+  },
+  {
+    id: 'vegetation',
+    name: 'Vegetation',
+    icon: Leaf,
+    progress: 0,
+    color: 'bg-orange-500'
+  },
+  {
+    id: 'summary',
+    name: 'Summary',
+    icon: FileText,
+    progress: 0,
+    color: 'bg-purple-500'
+  }
+];
 
-  // Mock operation status - in real app this would come from API/state
-  const [operationStatuses, setOperationStatuses] = useState<OperationStatus[]>([
-    { id: "grass-cutting", name: "Grass Cutting", icon: Scissors, completed: false, progress: 30 },
-    { id: "cleaning", name: "Cleaning", icon: Droplets, completed: false, progress: 60 },
-    { id: "inspection", name: "Inspection", icon: Search, completed: true, progress: 100 },
-    { id: "vegetation", name: "Vegetation", icon: Leaf, completed: false, progress: 0 },
-  ]);
+export const Operations: React.FC = () => {
+  const { selectedClient, selectedSite } = useContext(ClientContext);
+  const [activeTab, setActiveTab] = useState<OperationType>('grassCutting');
+  const [selectedSiteForOps, setSelectedSiteForOps] = useState(selectedSite);
 
-  const grassCuttingData: GrassCuttingSiteData | null = useMemo(() => {
-    if (!selectedClient || !selectedSite) return null;
-    const key = `${selectedClient.id}-${selectedSite.id}`;
-    return mockGrassCuttingData[key] || null;
-  }, [selectedClient, selectedSite]);
+  const overallProgress = Math.round(operationTabs.reduce((acc, tab) => acc + tab.progress, 0) / operationTabs.length);
+  const completedOperations = operationTabs.filter(tab => tab.progress === 100).length;
 
-  const cleaningData: CleaningSiteData | null = useMemo(() => {
-    if (!selectedClient || !selectedSite) return null;
-    const key = `${selectedClient.id}-${selectedSite.id}-${wetDryType}`;
-    return mockCleaningData[key] || null;
-  }, [selectedClient, selectedSite, wetDryType]);
-
-  const completedOperations = operationStatuses.filter(op => op.completed).length;
-  const totalOperations = operationStatuses.length;
-  const overallProgress = (completedOperations / totalOperations) * 100;
-
-  const handleSaveAll = () => {
-    // Mock save functionality
-    console.log("Saving all operations...");
-  };
-
-  const getTabIcon = (operationId: string, completed: boolean) => {
-    const operation = operationStatuses.find(op => op.id === operationId);
-    if (!operation) return null;
+  const renderTabContent = () => {
+    const currentSiteData = selectedSiteForOps || selectedSite;
     
-    const IconComponent = operation.icon;
-    return completed ? (
-      <CheckCircle2 className="w-4 h-4 text-green-600" />
-    ) : (
-      <IconComponent className="w-4 h-4" />
-    );
+    switch (activeTab) {
+      case 'grassCutting':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg">
+                  <Scissors className="w-5 h-5 text-blue-600" />
+                </div>
+                <h2 className="text-xl font-semibold">Grass Cutting Operations</h2>
+              </div>
+            </div>
+            
+            <CompactGrassCuttingDataEntry 
+              data={mockGrassCuttingData[currentSiteData || 'site1']} 
+            />
+            
+            <div className="mt-8">
+              <h3 className="text-lg font-medium mb-4">Historic Data</h3>
+              <CompactGrassCuttingHistoric 
+                data={mockGrassCuttingData[currentSiteData || 'site1']} 
+              />
+            </div>
+          </div>
+        );
+        
+      case 'cleaning':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 bg-cyan-100 rounded-lg">
+                  <Droplets className="w-5 h-5 text-cyan-600" />
+                </div>
+                <h2 className="text-xl font-semibold">Cleaning Operations</h2>
+              </div>
+            </div>
+            
+            <CompactCleaningDataEntry 
+              data={mockCleaningData[currentSiteData || 'site1']} 
+            />
+            
+            <div className="mt-8">
+              <h3 className="text-lg font-medium mb-4">Historic Data</h3>
+              <CompactCleaningHistoric 
+                data={mockCleaningData[currentSiteData || 'site1']} 
+              />
+            </div>
+          </div>
+        );
+        
+      case 'inspection':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-10 h-10 bg-green-100 rounded-lg">
+                <Search className="w-5 h-5 text-green-600" />
+              </div>
+              <h2 className="text-xl font-semibold">Inspection Operations</h2>
+            </div>
+            <ComingSoonCard />
+          </div>
+        );
+        
+      case 'vegetation':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-10 h-10 bg-orange-100 rounded-lg">
+                <Leaf className="w-5 h-5 text-orange-600" />
+              </div>
+              <h2 className="text-xl font-semibold">Vegetation Control</h2>
+            </div>
+            <ComingSoonCard />
+          </div>
+        );
+        
+      case 'summary':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-10 h-10 bg-purple-100 rounded-lg">
+                <FileText className="w-5 h-5 text-purple-600" />
+              </div>
+              <h2 className="text-xl font-semibold">Operations Summary</h2>
+            </div>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Today's Operations Overview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {operationTabs.slice(0, 4).map((tab) => (
+                    <div key={tab.id} className="text-center p-4 border rounded-lg">
+                      <tab.icon className="w-8 h-8 mx-auto mb-2 text-gray-600" />
+                      <h4 className="font-medium">{tab.name}</h4>
+                      <div className="mt-2">
+                        <Progress value={tab.progress} className="h-2" />
+                        <span className="text-sm text-gray-500 mt-1 block">{tab.progress}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="mt-6 p-4 bg-green-50 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-green-600" />
+                    <span className="font-medium">Ready to Submit</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {completedOperations} of {operationTabs.length - 1} operations completed
+                  </p>
+                  <Button className="mt-3 bg-green-600 hover:bg-green-700">
+                    Submit All Operations
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+        
+      default:
+        return null;
+    }
   };
 
   return (
-    <div className="max-w-full mx-auto h-full">
-      {/* Header Section */}
-      <div className="mb-6">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div className="flex flex-col h-full bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Operations Hub</h1>
-            <p className="text-gray-600">Streamlined daily operations data entry</p>
+            <h1 className="text-2xl font-bold text-gray-900">Operations Hub</h1>
+            <p className="text-gray-600 mt-1">Streamlined daily operations data entry</p>
           </div>
           
-          {/* Progress Summary */}
-          <div className="bg-white rounded-lg border p-4 lg:min-w-[300px]">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700">Today's Progress</span>
-              <Badge variant={completedOperations === totalOperations ? "default" : "secondary"}>
-                {completedOperations} of {totalOperations} completed
-              </Badge>
+          <div className="flex items-center gap-6">
+            {/* Progress Summary */}
+            <div className="text-right">
+              <div className="text-sm font-medium text-gray-700">Today's Progress</div>
+              <div className="flex items-center gap-2 mt-1">
+                <Progress value={overallProgress} className="w-24 h-2" />
+                <span className="text-sm text-gray-600">{completedOperations} of 4 completed</span>
+              </div>
+              <div className="text-xs text-gray-500 mt-1">{overallProgress}% complete</div>
             </div>
-            <Progress value={overallProgress} className="h-2 mb-2" />
-            <p className="text-xs text-gray-500">{Math.round(overallProgress)}% complete</p>
+          </div>
+        </div>
+        
+        {/* Site Selection */}
+        <div className="flex items-center gap-4 mt-4">
+          <div className="flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-gray-500" />
+            <span className="text-sm font-medium text-gray-700">Site</span>
+          </div>
+          <Select value={selectedSiteForOps || selectedSite || ''} onValueChange={setSelectedSiteForOps}>
+            <SelectTrigger className="w-64">
+              <SelectValue placeholder="Select a site..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="site1">Desert Solar Farm A</SelectItem>
+              <SelectItem value="site2">Mountain Solar Farm B</SelectItem>
+              <SelectItem value="site3">Coastal Solar Farm C</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <div className="text-sm text-gray-600">
+            Selected: {selectedClient?.name || 'Solar Energy Corp'} → {selectedSiteForOps === 'site1' ? 'Desert Solar Farm A' : selectedSiteForOps === 'site2' ? 'Mountain Solar Farm B' : 'Coastal Solar Farm C'}
+          </div>
+          
+          <div className="ml-auto flex items-center gap-2 text-sm text-gray-600">
+            <Calendar className="w-4 h-4" />
+            <span>Edit window: 30 days • Columns: 6</span>
           </div>
         </div>
       </div>
 
-      {/* Site Selection */}
-      <div className="mb-6">
-        <ClientSiteSelector
-          selectedClient={selectedClient}
-          selectedSite={selectedSite}
-          onSiteChange={setSelectedSite}
-          cleaningType={activeTab === "cleaning" ? wetDryType : undefined}
-          onCleaningTypeChange={activeTab === "cleaning" ? setWetDryType : undefined}
-          showCleaningType={activeTab === "cleaning"}
-        />
+      {/* Operation Tabs */}
+      <div className="bg-white border-b border-gray-200 px-6">
+        <div className="flex space-x-1">
+          {operationTabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-t-lg transition-colors relative ${
+                activeTab === tab.id
+                  ? 'bg-blue-50 text-blue-700 border-t border-l border-r border-blue-200'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+              }`}
+            >
+              <tab.icon className="w-4 h-4" />
+              <span>{tab.name}</span>
+              
+              {tab.id !== 'summary' && (
+                <div className="flex items-center gap-1">
+                  <div className={`w-2 h-2 rounded-full ${tab.progress === 100 ? 'bg-green-500' : tab.progress > 0 ? 'bg-yellow-500' : 'bg-gray-300'}`} />
+                  <span className="text-xs">{tab.progress}%</span>
+                </div>
+              )}
+              
+              {tab.id !== 'summary' && (
+                <div className="absolute bottom-0 left-4 right-4 h-1 bg-gray-200 rounded-full">
+                  <div 
+                    className={`h-full rounded-full transition-all duration-300 ${tab.color}`}
+                    style={{ width: `${tab.progress}%` }}
+                  />
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Operations Tabs */}
-      <div className="bg-white rounded-lg border overflow-hidden">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
-          {/* Tab Navigation */}
-          <div className="border-b bg-gray-50 px-6 py-4">
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 gap-1 bg-transparent h-auto p-0">
-              {operationStatuses.map((operation) => (
-                <TabsTrigger
-                  key={operation.id}
-                  value={operation.id}
-                  className="flex flex-col items-center gap-2 p-4 rounded-lg border bg-white hover:bg-gray-50 data-[state=active]:bg-blue-50 data-[state=active]:border-blue-200 data-[state=active]:text-blue-700"
-                >
-                  <div className="flex items-center gap-2">
-                    {getTabIcon(operation.id, operation.completed)}
-                    <span className="hidden sm:inline font-medium">{operation.name}</span>
-                  </div>
-                  <div className="w-full max-w-[80px]">
-                    <Progress value={operation.progress} className="h-1" />
-                    <span className="text-xs text-gray-500 mt-1">{operation.progress}%</span>
-                  </div>
-                </TabsTrigger>
-              ))}
-              
-              {/* Summary Tab */}
-              <TabsTrigger
-                value="summary"
-                className="flex flex-col items-center gap-2 p-4 rounded-lg border bg-white hover:bg-gray-50 data-[state=active]:bg-green-50 data-[state=active]:border-green-200 data-[state=active]:text-green-700"
-              >
-                <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4" />
-                  <span className="hidden sm:inline font-medium">Summary</span>
-                </div>
-                <Badge variant="outline" className="text-xs">
-                  Review
-                </Badge>
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          {/* Tab Content */}
-          <div className="p-6">
-            <TabsContent value="grass-cutting" className="mt-0">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <Scissors className="w-5 h-5 text-blue-600" />
-                  <h2 className="text-xl font-semibold">Grass Cutting Operations</h2>
-                  {operationStatuses.find(op => op.id === "grass-cutting")?.completed && (
-                    <CheckCircle2 className="w-5 h-5 text-green-600" />
-                  )}
-                </div>
-                <CompactGrassCuttingDataEntry data={grassCuttingData} />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="cleaning" className="mt-0">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <Droplets className="w-5 h-5 text-blue-600" />
-                  <h2 className="text-xl font-semibold">Cleaning Operations</h2>
-                  {operationStatuses.find(op => op.id === "cleaning")?.completed && (
-                    <CheckCircle2 className="w-5 h-5 text-green-600" />
-                  )}
-                </div>
-                <CompactCleaningDataEntry data={cleaningData} />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="inspection" className="mt-0">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <Search className="w-5 h-5 text-blue-600" />
-                  <h2 className="text-xl font-semibold">Field Inspection</h2>
-                  <CheckCircle2 className="w-5 h-5 text-green-600" />
-                </div>
-                <ComingSoonCard 
-                  title="Field Inspection Tools"
-                  description="Digital forms and checklists for conducting thorough field inspections and reporting."
-                />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="vegetation" className="mt-0">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <Leaf className="w-5 h-5 text-blue-600" />
-                  <h2 className="text-xl font-semibold">Vegetation Control</h2>
-                </div>
-                <ComingSoonCard 
-                  title="Vegetation Control"
-                  description="Track vegetation growth patterns and schedule maintenance to ensure optimal site performance."
-                />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="summary" className="mt-0">
-              <div className="space-y-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <FileText className="w-5 h-5 text-green-600" />
-                  <h2 className="text-xl font-semibold">Operations Summary</h2>
-                </div>
-                
-                {/* Summary Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {operationStatuses.map((operation) => {
-                    const IconComponent = operation.icon;
-                    return (
-                      <div key={operation.id} className="bg-gray-50 rounded-lg p-4 border">
-                        <div className="flex items-center justify-between mb-3">
-                          <IconComponent className="w-5 h-5 text-gray-600" />
-                          {operation.completed ? (
-                            <CheckCircle2 className="w-5 h-5 text-green-600" />
-                          ) : (
-                            <Clock className="w-5 h-5 text-orange-500" />
-                          )}
-                        </div>
-                        <h3 className="font-medium text-gray-900 mb-1">{operation.name}</h3>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">Progress</span>
-                          <span className={`font-medium ${operation.completed ? 'text-green-600' : 'text-gray-900'}`}>
-                            {operation.progress}%
-                          </span>
-                        </div>
-                        <Progress value={operation.progress} className="h-1 mt-2" />
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Summary Actions */}
-                <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
-                  <h3 className="font-semibold text-blue-900 mb-2">Ready to Submit?</h3>
-                  <p className="text-blue-700 text-sm mb-4">
-                    Review all operations data before final submission. You can export individual reports or submit all operations at once.
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <Button variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-100">
-                      Export All Reports
-                    </Button>
-                    <Button className="bg-blue-600 hover:bg-blue-700">
-                      Submit All Operations
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-          </div>
-        </Tabs>
+      {/* Content Area */}
+      <div className="flex-1 overflow-auto">
+        <div className="p-6">
+          {renderTabContent()}
+        </div>
       </div>
 
       {/* Persistent Action Bar */}
-      <div className="fixed bottom-4 right-4 lg:bottom-6 lg:right-6 z-50">
-        <div className="flex items-center gap-3 bg-white rounded-lg shadow-lg border p-3">
-          <Button
-            onClick={handleSaveAll}
-            className="bg-green-600 hover:bg-green-700 text-white shadow-md"
-          >
-            <Save className="w-4 h-4 mr-2" />
-            Save Progress
-          </Button>
-          <Button
-            onClick={() => setActiveTab("summary")}
-            variant="outline"
-            className="shadow-md"
-          >
-            Review All
-            <ChevronRight className="w-4 h-4 ml-2" />
-          </Button>
+      <div className="bg-white border-t border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Badge variant="outline" className="flex items-center gap-1">
+              <Calendar className="w-3 h-3" />
+              Today: {new Date().toLocaleDateString()}
+            </Badge>
+            <span className="text-sm text-gray-600">
+              Auto-save enabled
+            </span>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <Button variant="outline">
+              Save Progress
+            </Button>
+            <Button 
+              className="bg-green-600 hover:bg-green-700"
+              onClick={() => setActiveTab('summary')}
+            >
+              Review All →
+            </Button>
+          </div>
         </div>
       </div>
     </div>
   );
 };
-
-export default Operations;
