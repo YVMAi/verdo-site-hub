@@ -1,9 +1,21 @@
+
 import React, { useState, useMemo } from 'react';
 import { CleaningSiteData } from "@/types/cleaning";
 import { Button } from "@/components/ui/button";
-import { Download, Edit2, Save } from "lucide-react";
+import { Download, Edit2 } from "lucide-react";
 import { SearchAndFilter } from '../grassCutting/SearchAndFilter';
 import { CollapsibleBlockHeader } from '../grassCutting/CollapsibleBlockHeader';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface CompactCleaningHistoricProps {
   data: CleaningSiteData | null;
@@ -16,7 +28,7 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState<string>('all');
   const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
-  const [editingEntries, setEditingEntries] = useState<Set<string>>(new Set());
+  const [globalEditMode, setGlobalEditMode] = useState<boolean>(false);
   const [expandedBlocks, setExpandedBlocks] = useState<{[key: string]: boolean}>({
     'block-1': true,
     'block-2': true,
@@ -151,22 +163,18 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
     setSearchTerm('');
   };
 
-  const toggleEntryEditing = (date: string) => {
-    setEditingEntries(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(date)) {
-        newSet.delete(date);
-        setEditingCell(null);
-      } else {
-        newSet.add(date);
-      }
-      return newSet;
-    });
+  const enableGlobalEditMode = () => {
+    setGlobalEditMode(true);
+  };
+
+  const disableGlobalEditMode = () => {
+    setGlobalEditMode(false);
+    setEditingCell(null);
+    setEditValues({});
   };
 
   const handleCellClick = (cellKey: string, currentValue: any) => {
-    const [date] = cellKey.split('-', 1);
-    if (editingEntries.has(date)) {
+    if (globalEditMode) {
       setEditingCell(cellKey);
       setEditValues(prev => ({ ...prev, [cellKey]: String(currentValue) }));
     }
@@ -278,9 +286,7 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
   };
 
   const renderEditableCell = (cellKey: string, value: any, className: string = "", isRemarks: boolean = false) => {
-    const [date] = cellKey.split('-', 1);
-    const isEntryEditable = editingEntries.has(date);
-    const isEditing = editingCell === cellKey && isEntryEditable;
+    const isEditing = editingCell === cellKey && globalEditMode;
     
     if (isEditing) {
       if (isRemarks) {
@@ -312,8 +318,8 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
 
     return (
       <div
-        className={`w-full h-6 text-center text-xs ${isEntryEditable ? 'cursor-pointer hover:bg-blue-50' : ''} flex items-center justify-center ${className} ${isRemarks ? 'whitespace-pre-wrap break-words' : ''}`}
-        onClick={() => isEntryEditable && handleCellClick(cellKey, value)}
+        className={`w-full h-6 text-center text-xs ${globalEditMode ? 'cursor-pointer hover:bg-blue-50' : ''} flex items-center justify-center ${className} ${isRemarks ? 'whitespace-pre-wrap break-words' : ''}`}
+        onClick={() => globalEditMode && handleCellClick(cellKey, value)}
         style={isRemarks ? { minHeight: '24px', textAlign: 'left', padding: '2px' } : {}}
       >
         {value}
@@ -326,6 +332,46 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
       <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
         <span>Historic Cleaning Data</span>
         <div className="flex gap-2">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-white text-[#1e3a8a] hover:bg-gray-100"
+                disabled={globalEditMode}
+              >
+                <Edit2 className="w-4 h-4 mr-1" />
+                Edit Historic Data
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Enable Edit Mode</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will allow you to edit all historic data entries. Click on any cell to edit its value. 
+                  Are you sure you want to proceed?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={enableGlobalEditMode}>
+                  Enable Edit Mode
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          
+          {globalEditMode && (
+            <Button
+              onClick={disableGlobalEditMode}
+              variant="outline"
+              size="sm"
+              className="bg-red-100 text-red-600 hover:bg-red-200"
+            >
+              Exit Edit Mode
+            </Button>
+          )}
+          
           <Button
             onClick={exportToCSV}
             variant="outline"
@@ -337,6 +383,12 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
           </Button>
         </div>
       </div>
+      
+      {globalEditMode && (
+        <div className="bg-yellow-100 border-b px-3 py-2 text-sm text-yellow-800">
+          <strong>Edit Mode Active:</strong> Click on any cell to edit its value. Changes are saved automatically when you click outside the cell or press Enter.
+        </div>
+      )}
       
       <SearchAndFilter
         searchTerm={searchTerm}
@@ -463,66 +515,52 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
             </tr>
 
             {/* Historic Entries */}
-            {filteredEntries.map((entry, index) => {
-              const isEditable = editingEntries.has(entry.date);
-              return (
-                <tr key={entry.date} className={isEditable ? "bg-yellow-50" : "bg-gray-50"}>
-                  <td className="px-2 py-1 font-medium border border-gray-300">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        {isEditable && (
-                          <span className="text-xs bg-orange-200 px-1 rounded mr-1">EDIT</span>
-                        )}
-                        {entry.date}
-                      </div>
-                      <button
-                        onClick={() => toggleEntryEditing(entry.date)}
-                        className="ml-2 p-1 hover:bg-gray-200 rounded transition-colors"
-                        title={isEditable ? "Save changes" : "Edit entry"}
-                      >
-                        {isEditable ? (
-                          <Save className="w-3 h-3 text-green-600" />
-                        ) : (
-                          <Edit2 className="w-3 h-3 text-blue-600" />
-                        )}
-                      </button>
+            {filteredEntries.map((entry, index) => (
+              <tr key={entry.date} className={globalEditMode ? "bg-yellow-50" : "bg-gray-50"}>
+                <td className="px-2 py-1 font-medium border border-gray-300">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      {globalEditMode && (
+                        <span className="text-xs bg-orange-200 px-1 rounded mr-1">EDIT</span>
+                      )}
+                      {entry.date}
                     </div>
-                  </td>
-                  {getVisibleBlocks.map(block => (
-                    expandedBlocks[block.id] ? (
-                      block.inverters.map(inverter => {
-                        const cellKey = `${entry.date}-${block.id}-${inverter.id}`;
-                        const value = entry.inverterData[`${block.id}-${inverter.id}`] || 0;
-                        return (
-                          <td key={cellKey} className={`px-2 py-1 border border-gray-300 ${isEditable ? 'bg-yellow-100' : 'bg-gray-100'}`}>
-                            {renderEditableCell(cellKey, value)}
-                          </td>
-                        );
-                      })
-                    ) : (
-                      <td key={`${entry.date}-${block.id}-collapsed`} className={`px-2 py-1 border border-gray-300 ${isEditable ? 'bg-yellow-100' : 'bg-gray-100'} text-center text-xs`}>
-                        {block.inverters.reduce((sum, inv) => sum + (entry.inverterData[`${block.id}-${inv.id}`] || 0), 0)}
-                      </td>
-                    )
-                  ))}
-                  <td className={`px-2 py-1 border border-gray-300 ${isEditable ? 'bg-green-100' : 'bg-gray-100'}`}>
-                    {renderEditableCell(`${entry.date}-planned`, entry.plannedModules)}
-                  </td>
-                  <td className={`px-2 py-1 border border-gray-300 ${isEditable ? 'bg-green-100' : 'bg-gray-100'}`}>
-                    {renderEditableCell(`${entry.date}-cleaned`, entry.totalCleaned)}
-                  </td>
-                  <td className={`px-2 py-1 border border-gray-300 ${isEditable ? 'bg-green-100' : 'bg-gray-100'}`}>
-                    {renderEditableCell(`${entry.date}-uncleaned`, entry.totalUncleaned)}
-                  </td>
-                  <td className={`px-2 py-1 border border-gray-300 ${isEditable ? 'bg-yellow-100' : 'bg-gray-100'}`}>
-                    {renderEditableCell(`${entry.date}-rainfall`, entry.rainfallMM)}
-                  </td>
-                  <td className={`px-2 py-1 border border-gray-300 ${isEditable ? 'bg-yellow-100' : 'bg-gray-100'}`}>
-                    {renderEditableCell(`${entry.date}-remarks`, entry.remarks, "", true)}
-                  </td>
-                </tr>
-              );
-            })}
+                  </div>
+                </td>
+                {getVisibleBlocks.map(block => (
+                  expandedBlocks[block.id] ? (
+                    block.inverters.map(inverter => {
+                      const cellKey = `${entry.date}-${block.id}-${inverter.id}`;
+                      const value = entry.inverterData[`${block.id}-${inverter.id}`] || 0;
+                      return (
+                        <td key={cellKey} className={`px-2 py-1 border border-gray-300 ${globalEditMode ? 'bg-yellow-100' : 'bg-gray-100'}`}>
+                          {renderEditableCell(cellKey, value)}
+                        </td>
+                      );
+                    })
+                  ) : (
+                    <td key={`${entry.date}-${block.id}-collapsed`} className={`px-2 py-1 border border-gray-300 ${globalEditMode ? 'bg-yellow-100' : 'bg-gray-100'} text-center text-xs`}>
+                      {block.inverters.reduce((sum, inv) => sum + (entry.inverterData[`${block.id}-${inv.id}`] || 0), 0)}
+                    </td>
+                  )
+                ))}
+                <td className={`px-2 py-1 border border-gray-300 ${globalEditMode ? 'bg-green-100' : 'bg-gray-100'}`}>
+                  {renderEditableCell(`${entry.date}-planned`, entry.plannedModules)}
+                </td>
+                <td className={`px-2 py-1 border border-gray-300 ${globalEditMode ? 'bg-green-100' : 'bg-gray-100'}`}>
+                  {renderEditableCell(`${entry.date}-cleaned`, entry.totalCleaned)}
+                </td>
+                <td className={`px-2 py-1 border border-gray-300 ${globalEditMode ? 'bg-green-100' : 'bg-gray-100'}`}>
+                  {renderEditableCell(`${entry.date}-uncleaned`, entry.totalUncleaned)}
+                </td>
+                <td className={`px-2 py-1 border border-gray-300 ${globalEditMode ? 'bg-yellow-100' : 'bg-gray-100'}`}>
+                  {renderEditableCell(`${entry.date}-rainfall`, entry.rainfallMM)}
+                </td>
+                <td className={`px-2 py-1 border border-gray-300 ${globalEditMode ? 'bg-yellow-100' : 'bg-gray-100'}`}>
+                  {renderEditableCell(`${entry.date}-remarks`, entry.remarks, "", true)}
+                </td>
+              </tr>
+            ))}
             
             {filteredEntries.length === 0 && (
               <tr>
