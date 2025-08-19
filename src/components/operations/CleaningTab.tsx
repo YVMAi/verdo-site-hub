@@ -15,14 +15,8 @@ export const CleaningTab: React.FC = () => {
   const currentData: CleaningSiteData | null = useMemo(() => {
     if (!selectedClient || !selectedSite) return null;
     
-    const siteData = mockCleaningData[selectedClient.id]?.[selectedSite.id];
-    if (!siteData) return null;
-
-    // Return data with the selected cleaning type
-    return {
-      ...siteData,
-      wetDryType: cleaningType
-    };
+    const key = `${selectedClient.id}-${selectedSite.id}-${cleaningType}`;
+    return mockCleaningData[key] || null;
   }, [selectedClient, selectedSite, cleaningType]);
 
   const handleDataChange = (data: CleaningSiteData) => {
