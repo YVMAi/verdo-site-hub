@@ -1,6 +1,5 @@
-
-import React, { useState, useContext } from 'react';
-import { ClientContext } from '@/contexts/ClientContext';
+import React, { useState } from 'react';
+import { useClient } from '@/contexts/ClientContext';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -72,8 +71,8 @@ const operationTabs: OperationTab[] = [
   }
 ];
 
-export const Operations: React.FC = () => {
-  const { selectedClient, selectedSite } = useContext(ClientContext);
+const Operations: React.FC = () => {
+  const { selectedClient, selectedSite } = useClient();
   const [activeTab, setActiveTab] = useState<OperationType>('grassCutting');
   const [selectedSiteForOps, setSelectedSiteForOps] = useState(selectedSite);
 
@@ -143,7 +142,7 @@ export const Operations: React.FC = () => {
               </div>
               <h2 className="text-xl font-semibold">Inspection Operations</h2>
             </div>
-            <ComingSoonCard />
+            <ComingSoonCard title="Inspection Operations" />
           </div>
         );
         
@@ -156,7 +155,7 @@ export const Operations: React.FC = () => {
               </div>
               <h2 className="text-xl font-semibold">Vegetation Control</h2>
             </div>
-            <ComingSoonCard />
+            <ComingSoonCard title="Vegetation Control" />
           </div>
         );
         
@@ -333,3 +332,5 @@ export const Operations: React.FC = () => {
     </div>
   );
 };
+
+export default Operations;
