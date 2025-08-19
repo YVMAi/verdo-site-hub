@@ -1,22 +1,24 @@
 
-import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import React, { useState, useMemo } from 'react';
 import { CompactGrassCuttingDataEntry } from "@/components/grassCutting/CompactGrassCuttingDataEntry";
 import { CompactGrassCuttingHistoric } from "@/components/grassCutting/CompactGrassCuttingHistoric";
 import { useClientContext } from "@/contexts/ClientContext";
 import { mockGrassCuttingData } from "@/data/mockGrassCuttingData";
+import { GrassCuttingSiteData } from "@/types/grassCutting";
 
 export const GrassCuttingTab: React.FC = () => {
   const { selectedClient, selectedSite } = useClientContext();
-  const [subTab, setSubTab] = useState('entry');
 
-  const siteData = selectedClient && selectedSite 
-    ? mockGrassCuttingData[selectedClient.id]?.[selectedSite.id] || null
-    : null;
+  const currentData: GrassCuttingSiteData | null = useMemo(() => {
+    if (!selectedClient || !selectedSite) return null;
+    
+    const key = `${selectedClient.id}-${selectedSite.id}`;
+    return mockGrassCuttingData[key] || null;
+  }, [selectedClient, selectedSite]);
 
   return (
-    <div className="h-full flex flex-col space-y-3">
-      {/* Compact Header */}
+    <div className="h-full flex flex-col space-y-4">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-bold text-gray-900">Grass Cutting Management</h2>
@@ -24,22 +26,10 @@ export const GrassCuttingTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Compact Tabs */}
-      <div className="flex-1 flex flex-col">
-        <Tabs value={subTab} onValueChange={setSubTab} className="flex-1 flex flex-col">
-          <TabsList className="grid w-48 grid-cols-2 h-8">
-            <TabsTrigger value="entry" className="text-xs">Data Entry</TabsTrigger>
-            <TabsTrigger value="historic" className="text-xs">Historic Data</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="entry" className="flex-1 mt-3">
-            <CompactGrassCuttingDataEntry data={siteData} />
-          </TabsContent>
-
-          <TabsContent value="historic" className="flex-1 mt-3">
-            <CompactGrassCuttingHistoric data={siteData} />
-          </TabsContent>
-        </Tabs>
+      {/* Main Content */}
+      <div className="flex-1 space-y-4">
+        <CompactGrassCuttingDataEntry data={currentData} />
+        <CompactGrassCuttingHistoric data={currentData} />
       </div>
     </div>
   );
