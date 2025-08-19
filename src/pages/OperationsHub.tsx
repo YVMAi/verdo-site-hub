@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +16,7 @@ import { GrassCuttingTab } from "@/components/operations/GrassCuttingTab";
 import { CleaningTab } from "@/components/operations/CleaningTab";
 import { ComingSoonTab } from "@/components/operations/ComingSoonTab";
 import { AllOperationsSummary } from "@/components/operations/AllOperationsSummary";
+import { useClientContext } from "@/contexts/ClientContext";
 
 const operations = [
   {
@@ -58,6 +58,7 @@ const operations = [
 
 export default function OperationsHub() {
   const [activeTab, setActiveTab] = useState('grass-cutting');
+  const { selectedClient, selectedSite, setSelectedSite } = useClientContext();
   
   const completedOperations = operations.filter(op => op.status === 'completed').length;
   const totalOperations = operations.length - 1; // Exclude summary tab
@@ -114,7 +115,11 @@ export default function OperationsHub() {
         </div>
 
         {/* Client Site Selector */}
-        <ClientSiteSelector />
+        <ClientSiteSelector 
+          selectedClient={selectedClient}
+          selectedSite={selectedSite}
+          onSiteChange={setSelectedSite}
+        />
       </div>
 
       {/* Operations Tabs */}

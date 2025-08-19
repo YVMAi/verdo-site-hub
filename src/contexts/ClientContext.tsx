@@ -1,11 +1,13 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { Client } from '@/types/generation';
-import { mockClients } from '@/data/mockGenerationData';
+import { Client, Site } from '@/types/generation';
+import { mockClients, mockSites } from '@/data/mockGenerationData';
 
 interface ClientContextType {
   selectedClient: Client | null;
   setSelectedClient: (client: Client | null) => void;
+  selectedSite: Site | null;
+  setSelectedSite: (site: Site | null) => void;
 }
 
 const ClientContext = createContext<ClientContextType | undefined>(undefined);
@@ -18,12 +20,17 @@ export const useClient = () => {
   return context;
 };
 
+export const useClientContext = () => {
+  return useClient();
+};
+
 interface ClientProviderProps {
   children: ReactNode;
 }
 
 export const ClientProvider: React.FC<ClientProviderProps> = ({ children }) => {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [selectedSite, setSelectedSite] = useState<Site | null>(null);
 
   useEffect(() => {
     // Set the first client as selected by default
@@ -32,8 +39,31 @@ export const ClientProvider: React.FC<ClientProviderProps> = ({ children }) => {
     }
   }, [selectedClient]);
 
+  // Reset site when client changes
+  useEffect(() => {
+    if (selectedClient) {
+      const availableSites = mockSites.filter(site => site.clientId === selectedClient.id);
+      if (availableSites.length > 0) {
+        setSelectedSite(availableSites[0]);
+      } else {
+        setSelectedSite(null);
+      }
+    } else {
+      setSelectedSite(null);
+    }
+  }, [selectedClient]);
+
+  const handleSetSelectedSite = (site: Site | null) => {
+    setSelectedSite(site);
+  };
+
   return (
-    <ClientContext.Provider value={{ selectedClient, setSelectedClient }}>
+    <ClientContext.Provider value={{ 
+      selectedClient, 
+      setSelectedClient, 
+      selectedSite, 
+      setSelectedSite: handleSetSelectedSite 
+    }}>
       {children}
     </ClientContext.Provider>
   );
