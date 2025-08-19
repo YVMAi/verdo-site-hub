@@ -25,7 +25,7 @@ import { AllOperationsSummary } from "@/components/operations/AllOperationsSumma
 import { ClientSiteSelector } from "@/components/ClientSiteSelector";
 import { useClientContext } from "@/contexts/ClientContext";
 
-const getOperationsForSite = (siteId: string | null) => {
+const getOperationsForSite = (siteId: string | null, siteName: string | null) => {
   const baseOperations = [
     {
       id: 'grass-cutting',
@@ -61,8 +61,8 @@ const getOperationsForSite = (siteId: string | null) => {
     }
   ];
 
-  // Add additional operations based on site
-  if (siteId) {
+  // Check if this is "Desert Solar Farm B" (site id '2') - show all tabs
+  if (siteName === 'Desert Solar Farm B' || siteId === '2') {
     baseOperations.push(
       {
         id: 'ppm-tracking',
@@ -91,6 +91,7 @@ const getOperationsForSite = (siteId: string | null) => {
     );
   }
 
+  // Always add summary tab at the end
   baseOperations.push({
     id: 'summary',
     name: 'Summary',
@@ -107,7 +108,7 @@ export default function OperationsHub() {
   const [activeTab, setActiveTab] = useState('grass-cutting');
   const { selectedClient, selectedSite, setSelectedSite } = useClientContext();
   
-  const operations = getOperationsForSite(selectedSite?.id || null);
+  const operations = getOperationsForSite(selectedSite?.id || null, selectedSite?.name || null);
   const completedOperations = operations.filter(op => op.status === 'completed').length;
   const totalOperations = operations.length - 1; // Exclude summary tab
   const progressPercentage = (completedOperations / totalOperations) * 100;
