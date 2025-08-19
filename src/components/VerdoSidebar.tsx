@@ -11,17 +11,15 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
+  SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { 
   BarChart3, 
   Zap, 
-  Scissors, 
-  Droplets, 
-  Search, 
-  Leaf, 
   Settings,
-  LayoutDashboard
+  LayoutDashboard,
+  Star
 } from "lucide-react";
 
 const menuItems = [
@@ -38,10 +36,19 @@ const menuItems = [
     category: "monitoring"
   },
   {
-    title: "Operations",
+    title: "Operations Hub",
     url: "/operations", 
     icon: Settings,
     category: "operations"
+  }
+];
+
+const quickAccessItems = [
+  {
+    title: "Pin your favorites here",
+    url: "#",
+    icon: Star,
+    category: "quick-access"
   }
 ];
 
@@ -85,7 +92,22 @@ export function VerdoSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-3 py-4">
+      <SidebarContent className="px-3 py-4 flex-1">
+        {/* CLIENT Section - only show when expanded */}
+        {!isCollapsed && (
+          <SidebarGroup className="mb-6">
+            <SidebarGroupLabel className="text-xs font-semibold text-blue-300 uppercase tracking-wider px-3 mb-2">
+              CLIENT
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <div className="px-3 py-2 text-white font-medium">
+                Solar Energy Corp
+              </div>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {/* Main navigation items */}
         {Object.entries(groupedItems).map(([category, items]) => (
           <SidebarGroup key={category} className="mb-6">
             {getCategoryLabel(category) && !isCollapsed && (
@@ -99,7 +121,10 @@ export function VerdoSidebar() {
                   const Icon = item.icon;
                   return (
                     <SidebarMenuItem key={item.url}>
-                      <SidebarMenuButton asChild>
+                      <SidebarMenuButton 
+                        asChild
+                        tooltip={isCollapsed ? item.title : undefined}
+                      >
                         <NavLink
                           to={item.url}
                           className={({ isActive }) =>
@@ -122,6 +147,37 @@ export function VerdoSidebar() {
           </SidebarGroup>
         ))}
       </SidebarContent>
+
+      {/* Quick Access Footer */}
+      <SidebarFooter className="px-3 py-4 border-t border-blue-800">
+        <SidebarGroup>
+          {!isCollapsed && (
+            <SidebarGroupLabel className="text-xs font-semibold text-blue-300 uppercase tracking-wider px-3 mb-2">
+              QUICK ACCESS
+            </SidebarGroupLabel>
+          )}
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {quickAccessItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <SidebarMenuItem key={item.url}>
+                    <SidebarMenuButton 
+                      asChild
+                      tooltip={isCollapsed ? item.title : undefined}
+                    >
+                      <div className="flex items-center gap-3 px-3 py-2 text-blue-300 text-sm">
+                        <Icon className="w-5 h-5 flex-shrink-0" />
+                        {!isCollapsed && <span>{item.title}</span>}
+                      </div>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarFooter>
     </Sidebar>
   );
 }
