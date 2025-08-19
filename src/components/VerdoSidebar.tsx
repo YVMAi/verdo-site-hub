@@ -19,8 +19,12 @@ import {
   Zap, 
   Settings,
   LayoutDashboard,
-  Star
+  Star,
+  ChevronDown,
+  Building
 } from "lucide-react";
+import { ClientSelector } from "./ClientSelector";
+import { useClient } from "@/contexts/ClientContext";
 
 const menuItems = [
   {
@@ -55,6 +59,7 @@ const quickAccessItems = [
 export function VerdoSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
+  const { selectedClient, setSelectedClient } = useClient();
   
   const isCollapsed = state === "collapsed";
   const isActive = (path: string) => location.pathname === path;
@@ -93,19 +98,21 @@ export function VerdoSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="px-3 py-4 flex-1">
-        {/* CLIENT Section - only show when expanded */}
-        {!isCollapsed && (
-          <SidebarGroup className="mb-6">
+        {/* CLIENT Section */}
+        <SidebarGroup className="mb-6">
+          {!isCollapsed && (
             <SidebarGroupLabel className="text-xs font-semibold text-blue-300 uppercase tracking-wider px-3 mb-2">
               CLIENT
             </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <div className="px-3 py-2 text-white font-medium">
-                Solar Energy Corp
-              </div>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+          )}
+          <SidebarGroupContent>
+            <ClientSelector 
+              selectedClient={selectedClient} 
+              onClientChange={setSelectedClient}
+              isCollapsed={isCollapsed}
+            />
+          </SidebarGroupContent>
+        </SidebarGroup>
 
         {/* Main navigation items */}
         {Object.entries(groupedItems).map(([category, items]) => (
@@ -130,7 +137,7 @@ export function VerdoSidebar() {
                           className={({ isActive }) =>
                             `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm font-medium ${
                               isActive
-                                ? 'bg-white/10 text-white border-l-4 border-green-400'
+                                ? 'bg-white/10 text-white border-l-4 border-verdo-jade'
                                 : 'text-blue-200 hover:text-white hover:bg-white/5'
                             }`
                           }
