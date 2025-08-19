@@ -1,5 +1,4 @@
 
-import { useLocation } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { VerdoSidebar } from "./VerdoSidebar";
 import { Menu } from "lucide-react";
@@ -9,11 +8,8 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const location = useLocation();
-  const isOperationsPage = location.pathname === "/operations";
-  
   return (
-    <SidebarProvider defaultOpen={!isOperationsPage}>
+    <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         <VerdoSidebar />
         
@@ -34,7 +30,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           </div>
 
           {/* Main Content */}
-          <main className={`flex-1 ${isOperationsPage ? 'p-4 md:p-6' : 'p-6 md:p-8 md:pl-16'}`}>
+          <main className="flex-1 p-6 md:p-8 md:pl-16">
             {children}
           </main>
         </div>
