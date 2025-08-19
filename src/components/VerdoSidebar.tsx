@@ -42,37 +42,14 @@ const menuItems = [
     url: "/operations", 
     icon: Settings,
     category: "operations"
-  },
-  {
-    title: "Grass Cutting",
-    url: "/grass-cutting",
-    icon: Scissors,
-    category: "operations"
-  },
-  {
-    title: "Cleaning",
-    url: "/cleaning",
-    icon: Droplets,
-    category: "operations"
-  },
-  {
-    title: "Inspections",
-    url: "/field-inspection",
-    icon: Search,
-    category: "operations"
-  },
-  {
-    title: "Vegetation control",
-    url: "/vegetation",
-    icon: Leaf,
-    category: "operations"
   }
 ];
 
 export function VerdoSidebar() {
-  const { collapsed } = useSidebar();
+  const { state } = useSidebar();
   const location = useLocation();
   
+  const isCollapsed = state === "collapsed";
   const isActive = (path: string) => location.pathname === path;
   
   const groupedItems = menuItems.reduce((acc, item) => {
@@ -99,7 +76,7 @@ export function VerdoSidebar() {
           <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
             <BarChart3 className="w-5 h-5 text-verdo-navy" />
           </div>
-          {!collapsed && (
+          {!isCollapsed && (
             <div>
               <div className="font-bold text-lg text-white">Verdo</div>
               <div className="text-xs text-blue-300">by TruGreen</div>
@@ -111,7 +88,7 @@ export function VerdoSidebar() {
       <SidebarContent className="px-3 py-4">
         {Object.entries(groupedItems).map(([category, items]) => (
           <SidebarGroup key={category} className="mb-6">
-            {getCategoryLabel(category) && !collapsed && (
+            {getCategoryLabel(category) && !isCollapsed && (
               <SidebarGroupLabel className="text-xs font-semibold text-blue-300 uppercase tracking-wider px-3 mb-2">
                 {getCategoryLabel(category)}
               </SidebarGroupLabel>
@@ -134,7 +111,7 @@ export function VerdoSidebar() {
                           }
                         >
                           <Icon className="w-5 h-5 flex-shrink-0" />
-                          {!collapsed && <span>{item.title}</span>}
+                          {!isCollapsed && <span>{item.title}</span>}
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
