@@ -82,15 +82,15 @@ export function VerdoSidebar() {
   };
 
   return (
-    <Sidebar className="border-r border-border bg-verdo-navy text-white">
+    <Sidebar className="border-r border-border bg-verdo-navy text-verdo-jade">
       <SidebarHeader className="px-6 py-4 border-b border-blue-800">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-verdo-jade rounded-lg flex items-center justify-center">
             <BarChart3 className="w-5 h-5 text-verdo-navy" />
           </div>
           {!isCollapsed && (
             <div>
-              <div className="font-bold text-lg text-white">Verdo</div>
+              <div className="font-bold text-lg text-verdo-jade">Verdo</div>
               <div className="text-xs text-blue-300">by TruGreen</div>
             </div>
           )}
@@ -137,8 +137,8 @@ export function VerdoSidebar() {
                           className={({ isActive }) =>
                             `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm font-medium ${
                               isActive
-                                ? 'bg-white/10 text-white border-l-4 border-verdo-jade'
-                                : 'text-blue-200 hover:text-white hover:bg-white/5'
+                                ? 'bg-verdo-jade/10 text-verdo-jade border-l-4 border-verdo-jade'
+                                : 'text-blue-200 hover:text-verdo-jade hover:bg-verdo-jade/5'
                             }`
                           }
                         >
@@ -173,7 +173,7 @@ export function VerdoSidebar() {
                       asChild
                       tooltip={isCollapsed ? item.title : undefined}
                     >
-                      <div className="flex items-center gap-3 px-3 py-2 text-blue-300 text-sm">
+                      <div className="flex items-center gap-3 px-3 py-2 text-blue-300 text-sm hover:text-verdo-jade cursor-pointer">
                         <Icon className="w-5 h-5 flex-shrink-0" />
                         {!isCollapsed && <span>{item.title}</span>}
                       </div>
