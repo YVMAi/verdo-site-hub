@@ -21,12 +21,14 @@ const monitoringItems = [{
   description: "View today's output and trends"
 }];
 
-const operationsItems = [{
+const dailyOperationsItems = [{
   title: "Daily operations data",
   url: "/operations",
   icon: ClipboardList,
   description: "Centralized operations management"
-}, {
+}];
+
+const operationsItems = [{
   title: "Grass Cutting",
   url: "/grass-cutting",
   icon: Scissors,
@@ -105,6 +107,24 @@ export function VerdoSidebar() {
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
               {monitoringItems.map(item => <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild tooltip={isCollapsed ? item.title : undefined}>
+                    <NavLink to={item.url} className={({
+                  isActive
+                }) => `group flex items-center gap-3 px-3 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-verdo-navy-light/40 transition-all duration-200 font-medium relative ${isActive ? 'bg-verdo-jade/10 text-white shadow-lg before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:bg-verdo-jade before:rounded-r-full' : ''} ${isCollapsed ? 'justify-center w-12 h-12 p-0' : ''}`}>
+                      <item.icon className={`flex-shrink-0 ${isCollapsed ? 'w-5 h-5' : 'w-5 h-5'}`} />
+                      {!isCollapsed && <span className="font-medium truncate">{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>)}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Daily Operations Section */}
+        <SidebarGroup className="px-3">
+          <SidebarGroupContent>
+            <SidebarMenu className="space-y-1">
+              {dailyOperationsItems.map(item => <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={isCollapsed ? item.title : undefined}>
                     <NavLink to={item.url} className={({
                   isActive
