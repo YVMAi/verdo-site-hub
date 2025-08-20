@@ -119,9 +119,9 @@ export default function OperationsHub() {
     }
     switch (status) {
       case 'completed':
-        return <CheckCircle2 className="w-3 h-3 text-green-500" />;
+        return <CheckCircle2 className="w-3 h-3 text-green-600" />;
       case 'in-progress':
-        return <Clock className="w-3 h-3 text-yellow-500" />;
+        return <Clock className="w-3 h-3 text-orange-500" />;
       case 'pending':
         return <Circle className="w-3 h-3 text-gray-400" />;
       default:
@@ -130,56 +130,67 @@ export default function OperationsHub() {
   };
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Compact Header */}
-      <div className="bg-white border-b px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">Operations Hub</h1>
+    <div className="h-full flex flex-col bg-white">
+      {/* Redesigned Header with repositioned site selector */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4 relative">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">Operations Hub</h1>
             <p className="text-sm text-gray-600">Centralized daily operations management</p>
           </div>
           
-          {/* Compact Progress Tracker */}
-          <div className="bg-gray-50 rounded-lg border px-3 py-2 min-w-[240px]">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-medium text-gray-700">Today's Progress</span>
-              <span className="text-xs text-gray-500">{completedOperations}/{totalOperations}</span>
+          {/* Repositioned Site Selector and Progress - Top Right */}
+          <div className="flex items-center gap-6">
+            {/* Compact Site Selector */}
+            <div className="min-w-[250px]">
+              <ClientSiteSelector 
+                selectedClient={selectedClient}
+                selectedSite={selectedSite}
+                onSiteChange={setSelectedSite}
+              />
             </div>
-            <Progress value={progressPercentage} className="h-1.5" />
-            <div className="flex items-center gap-1 mt-1">
-              <CheckCircle2 className="w-3 h-3 text-green-500" />
-              <span className="text-xs text-gray-600">{Math.round(progressPercentage)}% Complete</span>
+            
+            {/* Compact Progress Indicator */}
+            <div className="bg-gray-50 rounded-lg border border-gray-200 px-4 py-2 min-w-[200px]">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-medium text-gray-700">Today's Progress</span>
+                <span className="text-xs text-gray-500">{completedOperations}/{totalOperations}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Progress value={progressPercentage} className="h-2 flex-1" />
+                <span className="text-xs text-gray-600 font-medium">{Math.round(progressPercentage)}%</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Site Selection Above Tabs */}
-      <div className="bg-gray-50 border-b px-4 py-3">
-        <ClientSiteSelector 
-          selectedClient={selectedClient}
-          selectedSite={selectedSite}
-          onSiteChange={setSelectedSite}
-        />
-      </div>
-
-      {/* Scrollable Operations Tabs */}
+      {/* Improved Navigation Tabs */}
       <div className="flex-1 bg-white">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-          <div className="border-b bg-gray-50/50 px-4 py-2">
+          <div className="border-b border-gray-200 bg-white px-6 py-2">
             <ScrollArea className="w-full whitespace-nowrap">
-              <TabsList className="inline-flex h-auto p-0 gap-1 bg-transparent w-max">
+              <TabsList className="inline-flex h-auto p-0 gap-0 bg-transparent w-max">
                 {operations.map((operation) => {
                   const IconComponent = operation.icon;
+                  const isActive = activeTab === operation.id;
                   return (
                     <TabsTrigger
                       key={operation.id}
                       value={operation.id}
                       disabled={!operation.enabled}
-                      className={`flex items-center gap-2 h-8 px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 text-gray-600 text-xs whitespace-nowrap ${!operation.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      className={`
+                        flex items-center gap-2 h-10 px-4 border-b-3 font-medium text-sm whitespace-nowrap transition-all duration-200
+                        ${isActive 
+                          ? 'bg-blue-600 text-white border-blue-800 shadow-sm' 
+                          : 'bg-transparent text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-800'
+                        }
+                        ${!operation.enabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                        data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:border-blue-800
+                      `}
                     >
                       <IconComponent className="w-4 h-4" />
-                      <span className="font-medium">{operation.name}</span>
+                      <span>{operation.name}</span>
                       {getStatusIcon(operation.status, operation.enabled)}
                     </TabsTrigger>
                   );
@@ -189,16 +200,16 @@ export default function OperationsHub() {
             </ScrollArea>
           </div>
 
-          <div className="flex-1 overflow-hidden">
-            <TabsContent value="grass-cutting" className="h-full m-0 p-3">
+          <div className="flex-1 overflow-hidden bg-gray-50">
+            <TabsContent value="grass-cutting" className="h-full m-0 p-6">
               <GrassCuttingTab />
             </TabsContent>
 
-            <TabsContent value="cleaning" className="h-full m-0 p-3">
+            <TabsContent value="cleaning" className="h-full m-0 p-6">
               <CleaningTab />
             </TabsContent>
 
-            <TabsContent value="inspection" className="h-full m-0 p-3">
+            <TabsContent value="inspection" className="h-full m-0 p-6">
               <ComingSoonTab 
                 title="Field Inspection" 
                 description="Comprehensive field inspection and maintenance logging system"
@@ -206,7 +217,7 @@ export default function OperationsHub() {
               />
             </TabsContent>
 
-            <TabsContent value="vegetation" className="h-full m-0 p-3">
+            <TabsContent value="vegetation" className="h-full m-0 p-6">
               <ComingSoonTab 
                 title="Vegetation Control" 
                 description="Advanced vegetation management and control operations"
@@ -214,7 +225,7 @@ export default function OperationsHub() {
               />
             </TabsContent>
 
-            <TabsContent value="ppm-tracking" className="h-full m-0 p-3">
+            <TabsContent value="ppm-tracking" className="h-full m-0 p-6">
               <ComingSoonTab 
                 title="PPM Tracking" 
                 description="Preventive maintenance planning and tracking system"
@@ -222,7 +233,7 @@ export default function OperationsHub() {
               />
             </TabsContent>
 
-            <TabsContent value="spare-tracking" className="h-full m-0 p-3">
+            <TabsContent value="spare-tracking" className="h-full m-0 p-6">
               <ComingSoonTab 
                 title="Spare Tracking" 
                 description="Spare parts inventory and usage tracking"
@@ -230,7 +241,7 @@ export default function OperationsHub() {
               />
             </TabsContent>
 
-            <TabsContent value="pod" className="h-full m-0 p-3">
+            <TabsContent value="pod" className="h-full m-0 p-6">
               <ComingSoonTab 
                 title="POD" 
                 description="Proof of delivery documentation and management"
@@ -238,7 +249,7 @@ export default function OperationsHub() {
               />
             </TabsContent>
 
-            <TabsContent value="summary" className="h-full m-0 p-3">
+            <TabsContent value="summary" className="h-full m-0 p-6">
               <AllOperationsSummary />
             </TabsContent>
           </div>

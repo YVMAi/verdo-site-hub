@@ -17,17 +17,17 @@ export const GrassCuttingTab: React.FC = () => {
   }, [selectedClient, selectedSite]);
 
   return (
-    <div className="h-full flex flex-col space-y-4">
-      {/* Header */}
+    <div className="h-full flex flex-col space-y-6">
+      {/* Simplified Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-gray-900">Grass Cutting Management</h2>
-          <p className="text-sm text-gray-600">Track and manage grass cutting operations</p>
+          <h2 className="text-xl font-bold text-gray-900">Grass Cutting Management</h2>
+          <p className="text-sm text-gray-600 mt-1">Track and manage grass cutting operations</p>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 space-y-4">
+      {/* Main Content with improved spacing */}
+      <div className="flex-1 space-y-6">
         <CompactGrassCuttingDataEntry data={currentData} />
         <CompactGrassCuttingHistoric data={currentData} />
       </div>
