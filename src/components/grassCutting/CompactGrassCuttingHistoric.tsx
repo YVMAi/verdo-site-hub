@@ -330,10 +330,10 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
                   onToggle={() => toggleBlock(block.id)}
                 />
               ))}
-              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-600 w-20">Planned</th>
-              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-600 w-20">Actual</th>
-              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-600 w-20">Deviation</th>
-              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-yellow-500 w-32">Remarks</th>
+              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-verdo-navy w-20">Planned</th>
+              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-verdo-navy w-20">Actual</th>
+              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-verdo-navy w-20">Deviation</th>
+              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-verdo-navy w-32">Remarks</th>
             </tr>
             {Object.keys(expandedBlocks).some(key => expandedBlocks[key]) && (
               <tr className="bg-verdo-navy-light text-white">
