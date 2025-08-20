@@ -166,10 +166,6 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
                       {block.name}
                     </th>
                   ))}
-                  <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-600">Planned</th>
-                  <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-600">Actual</th>
-                  <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-600">Deviation</th>
-                  <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-yellow-500">Rainfall</th>
                   <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-yellow-500 w-32">Remarks</th>
                 </tr>
                 <tr className="bg-[hsl(var(--verdo-navy-light))] text-white">
@@ -181,10 +177,6 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
                       </th>
                     ))
                   ))}
-                  <th className="px-2 py-1 border border-gray-300"></th>
-                  <th className="px-2 py-1 border border-gray-300"></th>
-                  <th className="px-2 py-1 border border-gray-300"></th>
-                  <th className="px-2 py-1 border border-gray-300"></th>
                   <th className="px-2 py-1 border border-gray-300"></th>
                 </tr>
               </thead>
@@ -199,10 +191,6 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
                     ))
                   ))}
                   <td className="px-2 py-1 border border-gray-300"></td>
-                  <td className="px-2 py-1 border border-gray-300"></td>
-                  <td className="px-2 py-1 border border-gray-300"></td>
-                  <td className="px-2 py-1 border border-gray-300"></td>
-                  <td className="px-2 py-1 border border-gray-300"></td>
                 </tr>
 
                 <tr className="bg-green-50">
@@ -214,10 +202,6 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
                       </td>
                     ))
                   ))}
-                  <td className="px-2 py-1 border border-gray-300"></td>
-                  <td className="px-2 py-1 border border-gray-300"></td>
-                  <td className="px-2 py-1 border border-gray-300"></td>
-                  <td className="px-2 py-1 border border-gray-300"></td>
                   <td className="px-2 py-1 border border-gray-300"></td>
                 </tr>
 
@@ -262,22 +246,6 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
                       );
                     })
                   ))}
-                  <td className="px-2 py-1 text-center border border-gray-300 bg-green-100">
-                    {Object.values(inputValues).reduce((sum, val) => sum + (parseInt(val) || 0), 0)}
-                  </td>
-                  <td className="px-2 py-1 text-center border border-gray-300 bg-green-100">
-                    {Object.values(inputValues).reduce((sum, val) => sum + (parseInt(val) || 0), 0)}
-                  </td>
-                  <td className="px-2 py-1 text-center border border-gray-300 bg-green-100">
-                    0
-                  </td>
-                  <td className="px-2 py-1 text-center border border-gray-300 bg-yellow-100">
-                    <input 
-                      className="w-full h-6 text-center text-xs border-0 bg-transparent focus:bg-white"
-                      value={rainfall}
-                      onChange={(e) => setRainfall(e.target.value)}
-                    />
-                  </td>
                   <td className="px-2 py-1 border border-gray-300 bg-yellow-100">
                     <textarea 
                       className="w-full h-6 text-xs border-0 bg-transparent focus:bg-white resize-none"
