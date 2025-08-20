@@ -446,7 +446,10 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
                       const hasChanges = editedData[editKey] !== undefined;
                       
                       return (
-                        <td key={`${block.id}-${inverter.id}`} className="px-2 py-1 text-center border border-gray-300">
+                        <td key={`${block.id}-${inverter.id}`} className={cn(
+                          "px-2 py-1 text-center border border-gray-300",
+                          isEditMode && value !== '-' && "bg-blue-100"
+                        )}>
                           {isEditMode && value !== '-' ? (
                             <Input
                               type="number"
@@ -468,64 +471,28 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
                       .filter(key => key.startsWith(`${block.id}-`))
                       .reduce((sum, key) => sum + (Number(entry.inverterData[key]) || 0), 0);
                     return (
-                      <td key={block.id} className="px-2 py-1 text-center border border-gray-300">
+                      <td key={block.id} className={cn(
+                        "px-2 py-1 text-center border border-gray-300",
+                        isEditMode && "bg-blue-100"
+                      )}>
                         {blockTotal}
                       </td>
                     );
                   }
                 })}
                 <td className="px-2 py-1 text-center border border-gray-300 bg-green-50">
-                  {isEditMode ? (
-                    <Input
-                      type="number"
-                      value={editedData[`${index}-plannedStrings`] !== undefined 
-                        ? editedData[`${index}-plannedStrings`] 
-                        : entry.plannedStrings}
-                      onChange={(e) => handleCellEdit(index, 'plannedStrings', e.target.value)}
-                      className={cn(
-                        "h-6 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring text-center",
-                        editedData[`${index}-plannedStrings`] !== undefined && "bg-yellow-50 border border-yellow-300"
-                      )}
-                    />
-                  ) : (
-                    entry.plannedStrings
-                  )}
+                  {entry.plannedStrings}
                 </td>
                 <td className="px-2 py-1 text-center border border-gray-300 bg-green-50">
-                  {isEditMode ? (
-                    <Input
-                      type="number"
-                      value={editedData[`${index}-dailyActual`] !== undefined 
-                        ? editedData[`${index}-dailyActual`] 
-                        : entry.dailyActual}
-                      onChange={(e) => handleCellEdit(index, 'dailyActual', e.target.value)}
-                      className={cn(
-                        "h-6 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring text-center",
-                        editedData[`${index}-dailyActual`] !== undefined && "bg-yellow-50 border border-yellow-300"
-                      )}
-                    />
-                  ) : (
-                    entry.dailyActual
-                  )}
+                  {entry.dailyActual}
                 </td>
                 <td className="px-2 py-1 text-center border border-gray-300 bg-green-50">
-                  {isEditMode ? (
-                    <Input
-                      type="number"
-                      value={editedData[`${index}-deviation`] !== undefined 
-                        ? editedData[`${index}-deviation`] 
-                        : entry.deviation}
-                      onChange={(e) => handleCellEdit(index, 'deviation', e.target.value)}
-                      className={cn(
-                        "h-6 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring text-center",
-                        editedData[`${index}-deviation`] !== undefined && "bg-yellow-50 border border-yellow-300"
-                      )}
-                    />
-                  ) : (
-                    entry.deviation
-                  )}
+                  {entry.deviation}
                 </td>
-                <td className="px-2 py-1 border border-gray-300">
+                <td className={cn(
+                  "px-2 py-1 border border-gray-300",
+                  isEditMode && "bg-blue-100"
+                )}>
                   {isEditMode ? (
                     <Input
                       value={editedData[`${index}-remarks`] !== undefined 
