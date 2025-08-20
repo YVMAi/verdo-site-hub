@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { format, parseISO, parse } from "date-fns";
-import { Calendar, Filter, ChevronDown, ChevronRight, Search, RefreshCw, Save, Download, Edit } from "lucide-react";
+import { Calendar, Filter, ChevronDown, ChevronRight, Search, Save, Download, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -270,12 +270,6 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
               </DialogContent>
             </Dialog>
             <span className="text-xs mt-1">Export</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <Button variant="outline" size="sm" className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0">
-              <RefreshCw className="h-4 w-4" />
-            </Button>
-            <span className="text-xs mt-1">Refresh</span>
           </div>
         </div>
       </div>
