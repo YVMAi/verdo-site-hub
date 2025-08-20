@@ -224,24 +224,30 @@ export const GrassCuttingForm: React.FC<GrassCuttingFormProps> = ({ data, onData
                         </span>
                       </td>
                       <td className="border border-gray-300 p-1 text-center">
-                        <div className="flex gap-1 justify-center">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => removeRow(row.id)}
-                            disabled={rows.length === 1}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50 h-6 w-6 p-0"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={addRow}
-                            className="text-green-600 hover:text-green-700 hover:bg-green-50 h-6 w-6 p-0"
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
+                        <div className="flex flex-col gap-1 items-center">
+                          <div className="flex gap-1 justify-center">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => removeRow(row.id)}
+                              disabled={rows.length === 1}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50 h-6 w-6 p-0"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={addRow}
+                              className="text-green-600 hover:text-green-700 hover:bg-green-50 h-6 w-6 p-0"
+                            >
+                              <Plus className="h-3 w-3" />
+                            </Button>
+                          </div>
+                          <div className="flex gap-2 text-xs text-gray-600">
+                            <span>Delete</span>
+                            <span>Add</span>
+                          </div>
                         </div>
                       </td>
                     </tr>
