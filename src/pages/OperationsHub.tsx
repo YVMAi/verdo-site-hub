@@ -178,7 +178,7 @@ export default function OperationsHub() {
                       key={operation.id}
                       value={operation.id}
                       disabled={!operation.enabled}
-                      className={`flex items-center gap-2 h-8 px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 text-gray-600 text-xs whitespace-nowrap ${!operation.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      className={`flex items-center gap-2 h-8 px-3 data-[state=active]:bg-[hsl(var(--verdo-navy))] data-[state=active]:text-white data-[state=active]:shadow-sm border data-[state=active]:border-[hsl(var(--verdo-navy))] text-gray-600 text-xs whitespace-nowrap ${!operation.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                       <IconComponent className="w-4 h-4" />
                       <span className="font-medium">{operation.name}</span>
