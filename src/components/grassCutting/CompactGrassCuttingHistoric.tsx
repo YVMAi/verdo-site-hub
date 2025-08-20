@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { format, parseISO, parse } from "date-fns";
 import { Calendar, Filter, ChevronDown, ChevronRight, Search, RefreshCw, Save, Download, Edit } from "lucide-react";
@@ -165,108 +164,119 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
     <div className="bg-white rounded border">
       <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
         <span>Historic Grass Cutting Data</span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           {hasUnsavedChanges && (
-            <Button 
-              onClick={handleSaveChanges} 
-              size="sm" 
-              variant="secondary"
-              className="h-7 text-xs"
-            >
-              <Save className="h-3 w-3 mr-1" />
-              Save
-            </Button>
-          )}
-          <Button 
-            onClick={() => setIsEditMode(!isEditMode)} 
-            variant="ghost" 
-            size="sm" 
-            className="h-7 w-7 p-0 rounded-full hover:bg-white/10"
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 rounded-full hover:bg-white/10">
-                <Download className="h-4 w-4" />
+            <div className="flex flex-col items-center">
+              <Button 
+                onClick={handleSaveChanges} 
+                variant="outline"
+                size="sm" 
+                className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0"
+              >
+                <Save className="h-4 w-4" />
               </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Export Historic Data</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="text-sm text-muted-foreground">
-                  Select the date range for which you want to export historic grass cutting data:
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Start Date</label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !exportStartDate && "text-muted-foreground"
-                          )}
-                        >
-                          <Calendar className="mr-2 h-4 w-4" />
-                          {exportStartDate ? format(exportStartDate, "PPP") : "Pick start date"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <CalendarComponent
-                          mode="single"
-                          selected={exportStartDate}
-                          onSelect={setExportStartDate}
-                          initialFocus
-                          className="p-3 pointer-events-auto"
-                        />
-                      </PopoverContent>
-                    </Popover>
+              <span className="text-xs mt-1">Save</span>
+            </div>
+          )}
+          <div className="flex flex-col items-center">
+            <Button 
+              onClick={() => setIsEditMode(!isEditMode)} 
+              variant="outline" 
+              size="sm" 
+              className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            <span className="text-xs mt-1">Edit</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0">
+                  <Download className="h-4 w-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Export Historic Data</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="text-sm text-muted-foreground">
+                    Select the date range for which you want to export historic grass cutting data:
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">End Date</label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !exportEndDate && "text-muted-foreground"
-                          )}
-                        >
-                          <Calendar className="mr-2 h-4 w-4" />
-                          {exportEndDate ? format(exportEndDate, "PPP") : "Pick end date"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <CalendarComponent
-                          mode="single"
-                          selected={exportEndDate}
-                          onSelect={setExportEndDate}
-                          initialFocus
-                          className="p-3 pointer-events-auto"
-                        />
-                      </PopoverContent>
-                    </Popover>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Start Date</label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !exportStartDate && "text-muted-foreground"
+                            )}
+                          >
+                            <Calendar className="mr-2 h-4 w-4" />
+                            {exportStartDate ? format(exportStartDate, "PPP") : "Pick start date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <CalendarComponent
+                            mode="single"
+                            selected={exportStartDate}
+                            onSelect={setExportStartDate}
+                            initialFocus
+                            className="p-3 pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">End Date</label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !exportEndDate && "text-muted-foreground"
+                            )}
+                          >
+                            <Calendar className="mr-2 h-4 w-4" />
+                            {exportEndDate ? format(exportEndDate, "PPP") : "Pick end date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <CalendarComponent
+                            mode="single"
+                            selected={exportEndDate}
+                            onSelect={setExportEndDate}
+                            initialFocus
+                            className="p-3 pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleExport}>
+                      Export CSV
+                    </Button>
                   </div>
                 </div>
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleExport}>
-                    Export CSV
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 rounded-full hover:bg-white/10">
-            <RefreshCw className="h-4 w-4" />
-          </Button>
+              </DialogContent>
+            </Dialog>
+            <span className="text-xs mt-1">Export</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <Button variant="outline" size="sm" className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0">
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+            <span className="text-xs mt-1">Refresh</span>
+          </div>
         </div>
       </div>
 
