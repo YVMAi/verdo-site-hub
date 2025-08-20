@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { format, parseISO } from "date-fns";
+import { format, parseISO, parse } from "date-fns";
 import { Calendar, Filter, ChevronDown, ChevronRight, Search, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,30 @@ import { CollapsibleBlockHeader } from "./CollapsibleBlockHeader";
 interface CompactGrassCuttingHistoricProps {
   data: GrassCuttingSiteData | null;
 }
+
+// Helper function to parse the date format used in the data (dd-MMM-yy)
+const parseDateString = (dateString: string): Date => {
+  try {
+    // First try to parse as ISO format
+    const isoDate = parseISO(dateString);
+    if (!isNaN(isoDate.getTime())) {
+      return isoDate;
+    }
+    
+    // If that fails, try to parse as dd-MMM-yy format
+    const parsedDate = parse(dateString, "dd-MMM-yy", new Date());
+    if (!isNaN(parsedDate.getTime())) {
+      return parsedDate;
+    }
+    
+    // If both fail, return current date as fallback
+    console.warn(`Unable to parse date: ${dateString}`);
+    return new Date();
+  } catch (error) {
+    console.warn(`Error parsing date: ${dateString}`, error);
+    return new Date();
+  }
+};
 
 export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricProps> = ({ data }) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -38,20 +62,24 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
 
     if (selectedMonth) {
       filteredEntries = filteredEntries.filter(entry => {
-        const entryDate = parseISO(entry.date);
+        const entryDate = parseDateString(entry.date);
         const entryMonth = format(entryDate, "MMM-yyyy");
         return entryMonth === selectedMonth;
       });
     }
 
-    return filteredEntries.sort((a, b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());
+    return filteredEntries.sort((a, b) => {
+      const dateA = parseDateString(a.date);
+      const dateB = parseDateString(b.date);
+      return dateB.getTime() - dateA.getTime();
+    });
   }, [data, searchTerm, selectedMonth]);
 
   const availableMonths = useMemo(() => {
     if (!data || !data.historicEntries) return [];
     const months = new Set<string>();
     data.historicEntries.forEach(entry => {
-      const entryDate = parseISO(entry.date);
+      const entryDate = parseDateString(entry.date);
       months.add(format(entryDate, "MMM-yyyy"));
     });
     return Array.from(months);
@@ -82,7 +110,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
             <SelectValue placeholder="Filter by month" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Months</SelectItem>
+            <SelectItem value="">All Months</SelectItem>
             {availableMonths.map(month => (
               <SelectItem key={month} value={month}>{month}</SelectItem>
             ))}
@@ -96,7 +124,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
       <div className="overflow-x-auto" style={{ maxHeight: '400px' }}>
         <table className="w-full text-xs border-collapse">
           <thead className="sticky top-0">
-            <tr className="bg-[hsl(var(--verdo-navy))] text-white">
+            <tr className="bg-verdo-navy text-white">
               <th className="px-2 py-1 text-left font-medium border border-gray-300 w-24">Date</th>
               {data?.blocks.map(block => (
                 <CollapsibleBlockHeader
@@ -113,7 +141,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
               <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-yellow-500 w-32">Remarks</th>
             </tr>
             {Object.keys(expandedBlocks).some(key => expandedBlocks[key]) && (
-              <tr className="bg-[hsl(var(--verdo-navy-light))] text-white">
+              <tr className="bg-verdo-navy-light text-white">
                 <th className="px-2 py-1 border border-gray-300"></th>
                 {data?.blocks.map(block => (
                   expandedBlocks[block.id] ? (
