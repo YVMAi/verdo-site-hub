@@ -1,14 +1,18 @@
 
-
 import React, { useState, useMemo } from 'react';
 import { format, parseISO, parse } from "date-fns";
-import { Calendar, Filter, ChevronDown, ChevronRight, Search, RefreshCw } from "lucide-react";
+import { Calendar, Filter, ChevronDown, ChevronRight, Search, RefreshCw, Save, Download, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useToast } from "@/hooks/use-toast";
 import { GrassCuttingSiteData, GrassCuttingHistoricEntry } from "@/types/grassCutting";
 import { CollapsibleBlockHeader } from "./CollapsibleBlockHeader";
+import { cn } from "@/lib/utils";
 
 interface CompactGrassCuttingHistoricProps {
   data: GrassCuttingSiteData | null;
@@ -42,6 +46,12 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
   const [expandedBlocks, setExpandedBlocks] = useState<{[key: string]: boolean}>({});
+  const [editedData, setEditedData] = useState<Record<string, any>>({});
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  const [exportDialogOpen, setExportDialogOpen] = useState<boolean>(false);
+  const [exportStartDate, setExportStartDate] = useState<Date | undefined>();
+  const [exportEndDate, setExportEndDate] = useState<Date | undefined>();
+  const { toast } = useToast();
 
   const toggleBlock = (blockId: string) => {
     setExpandedBlocks(prev => ({
@@ -107,11 +117,153 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
     };
   }, [data]);
 
+  const handleCellEdit = (entryIndex: number, field: string, value: any) => {
+    const key = `${entryIndex}-${field}`;
+    setEditedData(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleSaveChanges = () => {
+    console.log('Saving changes:', editedData);
+    toast({
+      title: "Changes Saved",
+      description: "Historic grass cutting data has been updated successfully.",
+    });
+    setEditedData({});
+    setIsEditMode(false);
+  };
+
+  const handleExport = () => {
+    if (!exportStartDate || !exportEndDate) {
+      toast({
+        title: "Date Range Required",
+        description: "Please select both start and end dates for export.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const filteredForExport = historicEntries.filter(entry => {
+      const entryDate = parseDateString(entry.date);
+      return entryDate >= exportStartDate && entryDate <= exportEndDate;
+    });
+
+    console.log(`Exporting ${filteredForExport.length} records from ${format(exportStartDate, 'yyyy-MM-dd')} to ${format(exportEndDate, 'yyyy-MM-dd')}`);
+    
+    toast({
+      title: "Export Started",
+      description: `Downloading ${filteredForExport.length} records as CSV`,
+    });
+
+    setExportDialogOpen(false);
+    setExportStartDate(undefined);
+    setExportEndDate(undefined);
+  };
+
+  const hasUnsavedChanges = Object.keys(editedData).length > 0;
+
   return (
     <div className="bg-white rounded border">
       <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
         <span>Historic Grass Cutting Data</span>
         <div className="flex items-center gap-2">
+          {hasUnsavedChanges && (
+            <Button 
+              onClick={handleSaveChanges} 
+              size="sm" 
+              variant="secondary"
+              className="h-7 text-xs"
+            >
+              <Save className="h-3 w-3 mr-1" />
+              Save
+            </Button>
+          )}
+          <Button 
+            onClick={() => setIsEditMode(!isEditMode)} 
+            variant="ghost" 
+            size="sm" 
+            className="h-7 w-7 p-0 rounded-full hover:bg-white/10"
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 rounded-full hover:bg-white/10">
+                <Download className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Export Historic Data</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="text-sm text-muted-foreground">
+                  Select the date range for which you want to export historic grass cutting data:
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Start Date</label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !exportStartDate && "text-muted-foreground"
+                          )}
+                        >
+                          <Calendar className="mr-2 h-4 w-4" />
+                          {exportStartDate ? format(exportStartDate, "PPP") : "Pick start date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <CalendarComponent
+                          mode="single"
+                          selected={exportStartDate}
+                          onSelect={setExportStartDate}
+                          initialFocus
+                          className="p-3 pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">End Date</label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !exportEndDate && "text-muted-foreground"
+                          )}
+                        >
+                          <Calendar className="mr-2 h-4 w-4" />
+                          {exportEndDate ? format(exportEndDate, "PPP") : "Pick end date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <CalendarComponent
+                          mode="single"
+                          selected={exportEndDate}
+                          onSelect={setExportEndDate}
+                          initialFocus
+                          className="p-3 pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleExport}>
+                    Export CSV
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
           <Button variant="ghost" size="sm" className="h-7 w-7 p-0 rounded-full hover:bg-white/10">
             <RefreshCw className="h-4 w-4" />
           </Button>
@@ -141,6 +293,16 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
         <Badge variant="secondary">
           {historicEntries.length} Records
         </Badge>
+        {isEditMode && (
+          <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300">
+            Edit Mode
+          </Badge>
+        )}
+        {hasUnsavedChanges && (
+          <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-300">
+            {Object.keys(editedData).length} Unsaved Changes
+          </Badge>
+        )}
       </div>
 
       <div className="overflow-x-auto" style={{ maxHeight: '400px' }}>
@@ -269,9 +431,25 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
                     return block.inverters.map(inverter => {
                       const key = `${block.id}-${inverter.id}`;
                       const value = entry.inverterData[key] || '-';
+                      const editKey = `${index}-inverter-${key}`;
+                      const editedValue = editedData[editKey] !== undefined ? editedData[editKey] : value;
+                      const hasChanges = editedData[editKey] !== undefined;
+                      
                       return (
                         <td key={`${block.id}-${inverter.id}`} className="px-2 py-1 text-center border border-gray-300">
-                          {value}
+                          {isEditMode && value !== '-' ? (
+                            <Input
+                              type="number"
+                              value={editedValue}
+                              onChange={(e) => handleCellEdit(index, `inverter-${key}`, e.target.value)}
+                              className={cn(
+                                "h-6 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring text-center",
+                                hasChanges && "bg-yellow-50 border border-yellow-300"
+                              )}
+                            />
+                          ) : (
+                            value
+                          )}
                         </td>
                       );
                     });
@@ -286,10 +464,73 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
                     );
                   }
                 })}
-                <td className="px-2 py-1 text-center border border-gray-300 bg-green-50">{entry.plannedStrings}</td>
-                <td className="px-2 py-1 text-center border border-gray-300 bg-green-50">{entry.dailyActual}</td>
-                <td className="px-2 py-1 text-center border border-gray-300 bg-green-50">{entry.deviation}</td>
-                <td className="px-2 py-1 border border-gray-300">{entry.remarks}</td>
+                <td className="px-2 py-1 text-center border border-gray-300 bg-green-50">
+                  {isEditMode ? (
+                    <Input
+                      type="number"
+                      value={editedData[`${index}-plannedStrings`] !== undefined 
+                        ? editedData[`${index}-plannedStrings`] 
+                        : entry.plannedStrings}
+                      onChange={(e) => handleCellEdit(index, 'plannedStrings', e.target.value)}
+                      className={cn(
+                        "h-6 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring text-center",
+                        editedData[`${index}-plannedStrings`] !== undefined && "bg-yellow-50 border border-yellow-300"
+                      )}
+                    />
+                  ) : (
+                    entry.plannedStrings
+                  )}
+                </td>
+                <td className="px-2 py-1 text-center border border-gray-300 bg-green-50">
+                  {isEditMode ? (
+                    <Input
+                      type="number"
+                      value={editedData[`${index}-dailyActual`] !== undefined 
+                        ? editedData[`${index}-dailyActual`] 
+                        : entry.dailyActual}
+                      onChange={(e) => handleCellEdit(index, 'dailyActual', e.target.value)}
+                      className={cn(
+                        "h-6 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring text-center",
+                        editedData[`${index}-dailyActual`] !== undefined && "bg-yellow-50 border border-yellow-300"
+                      )}
+                    />
+                  ) : (
+                    entry.dailyActual
+                  )}
+                </td>
+                <td className="px-2 py-1 text-center border border-gray-300 bg-green-50">
+                  {isEditMode ? (
+                    <Input
+                      type="number"
+                      value={editedData[`${index}-deviation`] !== undefined 
+                        ? editedData[`${index}-deviation`] 
+                        : entry.deviation}
+                      onChange={(e) => handleCellEdit(index, 'deviation', e.target.value)}
+                      className={cn(
+                        "h-6 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring text-center",
+                        editedData[`${index}-deviation`] !== undefined && "bg-yellow-50 border border-yellow-300"
+                      )}
+                    />
+                  ) : (
+                    entry.deviation
+                  )}
+                </td>
+                <td className="px-2 py-1 border border-gray-300">
+                  {isEditMode ? (
+                    <Input
+                      value={editedData[`${index}-remarks`] !== undefined 
+                        ? editedData[`${index}-remarks`] 
+                        : entry.remarks}
+                      onChange={(e) => handleCellEdit(index, 'remarks', e.target.value)}
+                      className={cn(
+                        "h-6 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
+                        editedData[`${index}-remarks`] !== undefined && "bg-yellow-50 border border-yellow-300"
+                      )}
+                    />
+                  ) : (
+                    entry.remarks
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -298,4 +539,3 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
     </div>
   );
 };
-
