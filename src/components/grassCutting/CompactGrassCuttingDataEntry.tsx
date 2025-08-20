@@ -115,15 +115,22 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
-        <div className="flex gap-2">
-          <BulkUploadModal onUpload={handleBulkUpload} />
-          <Button 
-            onClick={handleSave}
-            size="sm" 
-            className="bg-green-600 hover:bg-green-700 text-white w-8 h-8 p-0"
-          >
-            <Save className="h-4 w-4" />
-          </Button>
+        <div className="flex gap-4">
+          <div className="flex flex-col items-center">
+            <BulkUploadModal onUpload={handleBulkUpload} />
+            <span className="text-xs mt-1">Upload</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <Button 
+              onClick={handleSave}
+              variant="outline"
+              size="sm" 
+              className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0"
+            >
+              <Save className="h-4 w-4" />
+            </Button>
+            <span className="text-xs mt-1">Save</span>
+          </div>
         </div>
       </div>
       
