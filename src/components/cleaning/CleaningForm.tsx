@@ -211,23 +211,29 @@ export const CleaningForm: React.FC<CleaningFormProps> = ({ data, onDataChange }
               </div>
               
               <div className="px-2 py-2 flex items-center justify-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeFormRow(row.id)}
-                  disabled={formRows.length === 1}
-                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={addFormRow}
-                  className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
+                <div className="flex flex-col items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeFormRow(row.id)}
+                    disabled={formRows.length === 1}
+                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                  <span className="text-xs text-gray-600">Delete</span>
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={addFormRow}
+                    className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                  <span className="text-xs text-gray-600">Add</span>
+                </div>
               </div>
             </div>
           ))}
