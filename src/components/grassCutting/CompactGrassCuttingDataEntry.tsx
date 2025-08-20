@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { format } from "date-fns";
 import { CalendarIcon, Save, FileText, Table } from "lucide-react";
@@ -119,10 +120,9 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
           <Button 
             onClick={handleSave}
             size="sm" 
-            className="gap-2 bg-green-600 hover:bg-green-700 text-white"
+            className="bg-green-600 hover:bg-green-700 text-white w-8 h-8 p-0"
           >
             <Save className="h-4 w-4" />
-            Save
           </Button>
         </div>
       </div>

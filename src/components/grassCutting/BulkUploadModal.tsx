@@ -98,9 +98,8 @@ export const BulkUploadModal: React.FC<BulkUploadModalProps> = ({ onUpload }) =>
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2 bg-white border-white text-blue-900 hover:bg-gray-50">
+        <Button variant="outline" size="sm" className="bg-white border-white text-blue-900 hover:bg-gray-50 w-8 h-8 p-0">
           <Upload className="h-4 w-4" />
-          Bulk Upload
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
