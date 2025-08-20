@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { format } from "date-fns";
 import { CalendarIcon, Plus, Trash2 } from "lucide-react";
@@ -135,7 +134,7 @@ export const GrassCuttingForm: React.FC<GrassCuttingFormProps> = ({ data, onData
               <Button
                 variant="outline"
                 className={cn(
-                  "w-[200px] justify-start text-left font-normal h-8 text-xs",
+                  "w-[200px] justify-start text-left font-normal h-7 text-xs",
                   !selectedDate && "text-muted-foreground"
                 )}
               >
@@ -202,7 +201,7 @@ export const GrassCuttingForm: React.FC<GrassCuttingFormProps> = ({ data, onData
                           value={row.stringsCleaned}
                           onChange={(e) => handleRowChange(row.id, 'stringsCleaned', e.target.value)}
                           placeholder="0"
-                          className="h-8 text-xs text-center"
+                          className="h-7 text-xs text-center"
                         />
                       </td>
                       <td className="border border-gray-300 p-1">
@@ -210,7 +209,7 @@ export const GrassCuttingForm: React.FC<GrassCuttingFormProps> = ({ data, onData
                           value={row.remarks}
                           onChange={(e) => handleRowChange(row.id, 'remarks', e.target.value)}
                           placeholder="Enter remarks..."
-                          className="min-h-[32px] text-xs resize-none"
+                          className="min-h-[28px] text-xs resize-none"
                         />
                       </td>
                       <td className="border border-gray-300 p-1 text-center bg-blue-50">
@@ -230,7 +229,7 @@ export const GrassCuttingForm: React.FC<GrassCuttingFormProps> = ({ data, onData
                             size="sm"
                             onClick={() => removeRow(row.id)}
                             disabled={rows.length === 1}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50 h-6 w-6 p-0"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 h-5 w-5 p-0"
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>
@@ -238,7 +237,7 @@ export const GrassCuttingForm: React.FC<GrassCuttingFormProps> = ({ data, onData
                             variant="outline"
                             size="sm"
                             onClick={addRow}
-                            className="text-green-600 hover:text-green-700 hover:bg-green-50 h-6 w-6 p-0"
+                            className="text-green-600 hover:text-green-700 hover:bg-green-50 h-5 w-5 p-0"
                           >
                             <Plus className="h-3 w-3" />
                           </Button>
