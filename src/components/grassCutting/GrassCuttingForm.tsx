@@ -161,7 +161,7 @@ export const GrassCuttingForm: React.FC<GrassCuttingFormProps> = ({ data, onData
           <div className="overflow-x-auto">
             <table className="w-full border-collapse border border-gray-300 text-xs">
               <thead>
-                <tr className="bg-blue-900 text-white">
+                <tr className="bg-[hsl(var(--verdo-navy))] text-white">
                   <th className="border border-gray-300 px-2 py-1.5 text-left font-medium min-w-[120px]">Block</th>
                   <th className="border border-gray-300 px-2 py-1.5 text-left font-medium min-w-[120px]">Inverter</th>
                   <th className="border border-gray-300 px-2 py-1.5 text-left font-medium min-w-[100px]">Strings Cleaned</th>

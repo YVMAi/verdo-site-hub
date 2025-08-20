@@ -152,7 +152,7 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
           <div className="overflow-x-auto" style={{ maxHeight: '400px' }}>
             <table className="w-full text-xs border-collapse">
               <thead className="sticky top-0">
-                <tr className="bg-blue-900 text-white">
+                <tr className="bg-[hsl(var(--verdo-navy))] text-white">
                   <th className="px-2 py-1 text-left font-medium border border-gray-300 w-32">Field</th>
                   {data.blocks.map(block => (
                     <th key={block.id} className="px-2 py-1 text-center font-medium border border-gray-300" colSpan={block.inverters.length}>
@@ -165,7 +165,7 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
                   <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-yellow-500">Rainfall</th>
                   <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-yellow-500 w-32">Remarks</th>
                 </tr>
-                <tr className="bg-blue-800 text-white">
+                <tr className="bg-[hsl(var(--verdo-navy-light))] text-white">
                   <th className="px-2 py-1 text-left font-medium border border-gray-300">Inverter</th>
                   {data.blocks.map(block => (
                     block.inverters.map(inverter => (
