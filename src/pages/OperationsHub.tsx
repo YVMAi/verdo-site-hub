@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -182,11 +181,11 @@ export default function OperationsHub() {
                       className={`
                         flex items-center gap-2 h-10 px-4 border-b-3 font-medium text-sm whitespace-nowrap transition-all duration-200
                         ${isActive 
-                          ? 'bg-blue-600 text-white border-blue-800 shadow-sm' 
+                          ? 'bg-slate-800 text-white border-slate-900 shadow-sm' 
                           : 'bg-transparent text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-800'
                         }
                         ${!operation.enabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-                        data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:border-blue-800
+                        data-[state=active]:bg-slate-800 data-[state=active]:text-white data-[state=active]:border-slate-900
                       `}
                     >
                       <IconComponent className="w-4 h-4" />

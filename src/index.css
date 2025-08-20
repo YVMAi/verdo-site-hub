@@ -112,7 +112,7 @@
 
 /* Enhanced tab styling */
 .tab-active {
-  @apply bg-blue-600 text-white border-b-4 border-blue-800 font-semibold shadow-sm;
+  @apply bg-slate-800 text-white border-b-4 border-slate-900 font-semibold shadow-sm;
 }
 
 .tab-inactive {
