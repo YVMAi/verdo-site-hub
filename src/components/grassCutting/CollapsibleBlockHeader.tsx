@@ -28,7 +28,7 @@ export const CollapsibleBlockHeader: React.FC<CollapsibleBlockHeaderProps> = ({
           variant="ghost"
           size="sm"
           onClick={onToggle}
-          className="h-4 w-4 p-0 hover:bg-blue-800 text-white"
+          className="h-5 w-5 p-0 hover:bg-blue-800 text-white"
         >
           {isExpanded ? (
             <ChevronDown className="w-3 h-3" />

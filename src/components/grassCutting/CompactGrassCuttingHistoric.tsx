@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { GrassCuttingSiteData } from "@/types/grassCutting";
 import { Button } from "@/components/ui/button";
 import { Download, Edit2 } from "lucide-react";
+import { SearchAndFilter } from './SearchAndFilter';
 import { CollapsibleBlockHeader } from './CollapsibleBlockHeader';
 import {
   AlertDialog,
@@ -15,13 +16,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface CompactGrassCuttingHistoricProps {
   data: GrassCuttingSiteData | null;
@@ -31,7 +25,9 @@ interface CompactGrassCuttingHistoricProps {
 export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricProps> = ({ data, onDataChange }) => {
   const [editingCell, setEditingCell] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<{[key: string]: string}>({});
-  const [selectedMonth, setSelectedMonth] = useState<string>('current');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [dateFilter, setDateFilter] = useState<string>('all');
+  const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
   const [globalEditMode, setGlobalEditMode] = useState<boolean>(false);
   const [expandedBlocks, setExpandedBlocks] = useState<{[key: string]: boolean}>({
     '1': true,
@@ -40,58 +36,115 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
     '4': true
   });
 
-  // Generate month options
-  const monthOptions = useMemo(() => {
-    const months = [];
-    const currentDate = new Date();
-    
-    for (let i = 0; i < 12; i++) {
-      const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
-      const monthYear = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-      const value = i === 0 ? 'current' : `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      months.push({ label: monthYear, value });
-    }
-    
-    return months;
-  }, []);
-
-  // Function to determine which blocks should be visible
+  // Function to determine which blocks should be visible based on search
   const getVisibleBlocks = useMemo(() => {
     if (!data) return [];
+    
+    if (!searchTerm) {
+      return data.blocks; // Show all blocks if no search term
+    }
+    
+    const searchLower = searchTerm.toLowerCase();
+    
+    // Check if searching for a specific block
+    const blockMatches = data.blocks.filter(block => {
+      return block.name.toLowerCase().includes(searchLower) || 
+             `block ${block.id}`.toLowerCase().includes(searchLower);
+    });
+    
+    if (blockMatches.length > 0) {
+      return blockMatches; // Return only matching blocks
+    }
+    
+    // If not searching for blocks specifically, show all blocks
     return data.blocks;
-  }, [data?.blocks]);
+  }, [data?.blocks, searchTerm]);
 
-  // Simplified filtering - only by month
+  // Enhanced filtering with search capabilities
   const filteredEntries = useMemo(() => {
     if (!data || !data.historicEntries) return [];
     
     let entries = data.historicEntries;
 
-    // Month filtering
-    if (selectedMonth !== 'current') {
-      const [year, month] = selectedMonth.split('-');
+    // Enhanced search filtering
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
       entries = entries.filter(entry => {
-        const entryDate = new Date(entry.date);
-        return entryDate.getFullYear() === parseInt(year) && 
-               entryDate.getMonth() === parseInt(month) - 1;
+        // Search in date
+        if (entry.date.toLowerCase().includes(searchLower)) return true;
+        
+        // Search in remarks
+        if (entry.remarks.toLowerCase().includes(searchLower)) return true;
+        
+        // Search in block names
+        if (searchLower.includes('block')) {
+          data.blocks.forEach(block => {
+            if (block.name.toLowerCase().includes(searchLower)) return true;
+          });
+        }
+        
+        // Search in inverter IDs
+        if (searchLower.includes('inv')) {
+          return true;
+        }
+        
+        // Search in numerical values
+        const numericSearch = searchTerm.replace(/[^\d.-]/g, '');
+        if (numericSearch) {
+          // Check planned, actual, deviation
+          if (String(entry.plannedStrings).includes(numericSearch)) return true;
+          if (String(entry.dailyActual).includes(numericSearch)) return true;
+          if (String(entry.deviation).includes(numericSearch)) return true;
+          
+          // Check inverter data
+          for (const [key, value] of Object.entries(entry.inverterData)) {
+            if (String(value).includes(numericSearch)) return true;
+          }
+        }
+        
+        return false;
       });
-    } else {
-      // Show current month
-      const currentDate = new Date();
+    }
+
+    // Date range filtering
+    if (dateFilter !== 'all') {
+      const today = new Date();
+      const filterDate = new Date();
+      
+      switch (dateFilter) {
+        case 'week':
+          filterDate.setDate(today.getDate() - 7);
+          break;
+        case 'month':
+          filterDate.setMonth(today.getMonth() - 1);
+          break;
+        case 'quarter':
+          filterDate.setMonth(today.getMonth() - 3);
+          break;
+      }
+      
       entries = entries.filter(entry => {
         const entryDate = new Date(entry.date);
-        return entryDate.getFullYear() === currentDate.getFullYear() && 
-               entryDate.getMonth() === currentDate.getMonth();
+        return entryDate >= filterDate;
+      });
+    }
+
+    // Month filtering
+    if (selectedMonths.length > 0) {
+      entries = entries.filter(entry => {
+        const entryDate = new Date(entry.date);
+        const monthName = entryDate.toLocaleDateString('en-US', { month: 'long' });
+        return selectedMonths.includes(monthName);
       });
     }
 
     return entries;
-  }, [data?.historicEntries, selectedMonth]);
+  }, [data?.historicEntries, searchTerm, dateFilter, selectedMonths]);
 
   if (!data) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 text-center text-gray-500">
-        <p className="text-sm">Select client and site to view historic data</p>
+      <div className="bg-white rounded border p-4 text-center text-gray-500 text-sm">
+        Select client and site to view historic data
       </div>
     );
   }
@@ -101,6 +154,10 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
       ...prev,
       [blockId]: !prev[blockId]
     }));
+  };
+
+  const clearSearch = () => {
+    setSearchTerm('');
   };
 
   const enableGlobalEditMode = () => {
@@ -130,7 +187,13 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
       if (entryIndex !== -1) {
         const entry = { ...newData.historicEntries[entryIndex] };
         
-        if (field === 'remarks') {
+        if (field === 'planned') {
+          entry.plannedStrings = Number(editValues[cellKey]) || 0;
+        } else if (field === 'actual') {
+          entry.dailyActual = Number(editValues[cellKey]) || 0;
+        } else if (field === 'deviation') {
+          entry.deviation = Number(editValues[cellKey]) || 0;
+        } else if (field === 'remarks') {
           entry.remarks = editValues[cellKey];
         } else {
           const remainingKey = cellKey.replace(`${date}-`, '');
@@ -164,7 +227,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
         headers.push(`${block.name}-${inverter.id}`);
       });
     });
-    headers.push('Remarks');
+    headers.push('Planned', 'Actual', 'Deviation', 'Remarks');
 
     const rows: string[][] = [];
     
@@ -174,7 +237,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
         totalStringsRow.push(String(inverter.totalStrings));
       });
     });
-    totalStringsRow.push('');
+    totalStringsRow.push('', '', '', '');
     rows.push(totalStringsRow);
 
     const cyclesRow = ['', 'Cycles Completed'];
@@ -183,7 +246,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
         cyclesRow.push((inverter.grassCuttingDone / inverter.totalStrings).toFixed(2));
       });
     });
-    cyclesRow.push('');
+    cyclesRow.push('', '', '', '');
     rows.push(cyclesRow);
 
     filteredEntries.forEach(entry => {
@@ -194,7 +257,12 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
           row.push(String(value));
         });
       });
-      row.push(entry.remarks);
+      row.push(
+        String(entry.plannedStrings),
+        String(entry.dailyActual),
+        String(entry.deviation),
+        entry.remarks
+      );
       rows.push(row);
     });
 
@@ -220,7 +288,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
       if (isRemarks) {
         return (
           <textarea
-            className={`w-full h-auto min-h-6 text-xs border-2 border-blue-500 bg-white p-1 resize-none rounded ${className}`}
+            className={`w-full h-auto min-h-6 text-xs border border-blue-500 bg-white p-1 resize-none ${className}`}
             style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
             value={editValues[cellKey] || String(value)}
             onChange={(e) => setEditValues(prev => ({ ...prev, [cellKey]: e.target.value }))}
@@ -234,7 +302,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
       return (
         <input
           type="text"
-          className={`w-full h-6 text-center text-xs border-2 border-blue-500 bg-white rounded ${className}`}
+          className={`w-full h-6 text-center text-xs border border-blue-500 bg-white ${className}`}
           value={editValues[cellKey] || String(value)}
           onChange={(e) => setEditValues(prev => ({ ...prev, [cellKey]: e.target.value }))}
           onBlur={() => handleCellBlur(cellKey)}
@@ -246,7 +314,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
 
     return (
       <div
-        className={`w-full h-6 text-center text-xs ${globalEditMode ? 'cursor-pointer hover:bg-blue-50 rounded' : ''} flex items-center justify-center ${className} ${isRemarks ? 'whitespace-pre-wrap break-words' : ''}`}
+        className={`w-full h-6 text-center text-xs ${globalEditMode ? 'cursor-pointer hover:bg-blue-50' : ''} flex items-center justify-center ${className} ${isRemarks ? 'whitespace-pre-wrap break-words' : ''}`}
         onClick={() => globalEditMode && handleCellClick(cellKey, value)}
         style={isRemarks ? { minHeight: '24px', textAlign: 'left', padding: '2px' } : {}}
       >
@@ -256,34 +324,19 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-      {/* Redesigned Header */}
-      <div className="bg-gray-900 px-4 py-3 text-white font-medium text-sm flex justify-between items-center rounded-t-lg">
+    <div className="bg-white rounded border">
+      <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
         <span>Historic Grass Cutting Data</span>
-        <div className="flex gap-3 items-center">
-          {/* Simplified Month Filter */}
-          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-48 h-8 bg-white text-gray-900 text-xs">
-              <SelectValue placeholder="Select month" />
-            </SelectTrigger>
-            <SelectContent>
-              {monthOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value} className="text-xs">
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
+        <div className="flex gap-2">
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button
                 variant="outline"
                 size="sm"
-                className="bg-white text-blue-600 hover:bg-gray-50 h-8 text-xs"
+                className="bg-white text-blue-600 hover:bg-gray-100"
                 disabled={globalEditMode}
               >
-                <Edit2 className="w-3 h-3 mr-1" />
+                <Edit2 className="w-4 h-4 mr-1" />
                 Edit Historic Data
               </Button>
             </AlertDialogTrigger>
@@ -309,7 +362,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
               onClick={disableGlobalEditMode}
               variant="outline"
               size="sm"
-              className="bg-red-50 text-red-600 hover:bg-red-100 h-8 text-xs"
+              className="bg-red-100 text-red-600 hover:bg-red-200"
             >
               Exit Edit Mode
             </Button>
@@ -319,25 +372,35 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
             onClick={exportToCSV}
             variant="outline"
             size="sm"
-            className="bg-white text-blue-600 hover:bg-gray-50 h-8 text-xs"
+            className="bg-white text-blue-600 hover:bg-gray-100"
           >
-            <Download className="w-3 h-3 mr-1" />
+            <Download className="w-4 h-4 mr-1" />
             Export CSV
           </Button>
         </div>
       </div>
       
       {globalEditMode && (
-        <div className="bg-blue-50 border-b px-4 py-2 text-sm text-blue-800">
+        <div className="bg-yellow-100 border-b px-3 py-2 text-sm text-yellow-800">
           <strong>Edit Mode Active:</strong> Click on any cell to edit its value. Changes are saved automatically when you click outside the cell or press Enter.
         </div>
       )}
+      
+      <SearchAndFilter
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        dateFilter={dateFilter}
+        onDateFilterChange={setDateFilter}
+        onClearSearch={clearSearch}
+        selectedMonths={selectedMonths}
+        onMonthsChange={setSelectedMonths}
+      />
 
       <div className="overflow-x-auto" style={{ maxHeight: '500px' }}>
         <table className="w-full text-xs border-collapse">
           <thead className="sticky top-0">
-            <tr className="bg-gray-800 text-white">
-              <th className="px-3 py-2 text-left font-medium border border-gray-600 w-32">Field</th>
+            <tr className="bg-blue-900 text-white">
+              <th className="px-2 py-1 text-left font-medium border border-gray-300 w-32">Field</th>
               {getVisibleBlocks.map(block => (
                 <CollapsibleBlockHeader
                   key={block.id}
@@ -348,93 +411,108 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
                   onToggle={() => toggleBlockExpansion(block.id)}
                 />
               ))}
-              <th className="px-3 py-2 text-center font-medium border border-gray-600 bg-orange-600 w-32">Remarks</th>
+              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-600">Planned</th>
+              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-600">Actual</th>
+              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-600">Deviation</th>
+              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-yellow-500 w-32">Remarks</th>
             </tr>
-            <tr className="bg-gray-700 text-white">
-              <th className="px-3 py-2 text-left font-medium border border-gray-600">Inverter</th>
+            <tr className="bg-blue-800 text-white">
+              <th className="px-2 py-1 text-left font-medium border border-gray-300">Inverter</th>
               {getVisibleBlocks.map(block => (
                 expandedBlocks[block.id] ? (
                   block.inverters.map(inverter => (
-                    <th key={`${block.id}-${inverter.id}`} className="px-2 py-2 text-center font-medium border border-gray-600 w-16">
+                    <th key={`${block.id}-${inverter.id}`} className="px-2 py-1 text-center font-medium border border-gray-300 w-16">
                       {inverter.id}
                     </th>
                   ))
                 ) : (
-                  <th key={`${block.id}-collapsed`} className="px-2 py-2 text-center font-medium border border-gray-600 w-16">
+                  <th key={`${block.id}-collapsed`} className="px-2 py-1 text-center font-medium border border-gray-300 w-16">
                     {block.inverters.length} INVs
                   </th>
                 )
               ))}
-              <th className="px-3 py-2 border border-gray-600"></th>
+              <th className="px-2 py-1 border border-gray-300"></th>
+              <th className="px-2 py-1 border border-gray-300"></th>
+              <th className="px-2 py-1 border border-gray-300"></th>
+              <th className="px-2 py-1 border border-gray-300"></th>
             </tr>
           </thead>
           <tbody>
             {/* Total Strings */}
-            <tr className="bg-gray-50">
-              <td className="px-3 py-2 font-medium border border-gray-200">Total Strings</td>
+            <tr className="bg-blue-50">
+              <td className="px-2 py-1 font-medium border border-gray-300">Total Strings</td>
               {getVisibleBlocks.map(block => (
                 expandedBlocks[block.id] ? (
                   block.inverters.map(inverter => (
-                    <td key={`total-${block.id}-${inverter.id}`} className="px-2 py-2 text-center border border-gray-200 bg-gray-100">
+                    <td key={`total-${block.id}-${inverter.id}`} className="px-2 py-1 text-center border border-gray-300 bg-blue-100">
                       {inverter.totalStrings}
                     </td>
                   ))
                 ) : (
-                  <td key={`total-${block.id}-collapsed`} className="px-2 py-2 text-center border border-gray-200 bg-gray-100">
+                  <td key={`total-${block.id}-collapsed`} className="px-2 py-1 text-center border border-gray-300 bg-blue-100">
                     {block.inverters.reduce((sum, inv) => sum + inv.totalStrings, 0)}
                   </td>
                 )
               ))}
-              <td className="px-3 py-2 border border-gray-200"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
             </tr>
 
             {/* Total Strings Cleaned */}
             <tr className="bg-purple-50">
-              <td className="px-3 py-2 font-medium border border-gray-200">Total Strings Cleaned</td>
+              <td className="px-2 py-1 font-medium border border-gray-300">Total Strings Cleaned</td>
               {getVisibleBlocks.map(block => (
                 expandedBlocks[block.id] ? (
                   block.inverters.map(inverter => (
-                    <td key={`cleaned-${block.id}-${inverter.id}`} className="px-2 py-2 text-center border border-gray-200 bg-purple-100">
+                    <td key={`cleaned-${block.id}-${inverter.id}`} className="px-2 py-1 text-center border border-gray-300 bg-purple-100">
                       {inverter.grassCuttingDone}
                     </td>
                   ))
                 ) : (
-                  <td key={`cleaned-${block.id}-collapsed`} className="px-2 py-2 text-center border border-gray-200 bg-purple-100">
+                  <td key={`cleaned-${block.id}-collapsed`} className="px-2 py-1 text-center border border-gray-300 bg-purple-100">
                     {block.inverters.reduce((sum, inv) => sum + inv.grassCuttingDone, 0)}
                   </td>
                 )
               ))}
-              <td className="px-3 py-2 border border-gray-200"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
             </tr>
 
             {/* Cycles Completed */}
             <tr className="bg-green-50">
-              <td className="px-3 py-2 font-medium border border-gray-200">Cycles Completed</td>
+              <td className="px-2 py-1 font-medium border border-gray-300">Cycles Completed</td>
               {getVisibleBlocks.map(block => (
                 expandedBlocks[block.id] ? (
                   block.inverters.map(inverter => (
-                    <td key={`cycles-${block.id}-${inverter.id}`} className="px-2 py-2 text-center border border-gray-200 bg-green-100">
+                    <td key={`cycles-${block.id}-${inverter.id}`} className="px-2 py-1 text-center border border-gray-300 bg-green-100">
                       {(inverter.grassCuttingDone / inverter.totalStrings).toFixed(2)}
                     </td>
                   ))
                 ) : (
-                  <td key={`cycles-${block.id}-collapsed`} className="px-2 py-2 text-center border border-gray-200 bg-green-100">
+                  <td key={`cycles-${block.id}-collapsed`} className="px-2 py-1 text-center border border-gray-300 bg-green-100">
                     {(block.inverters.reduce((sum, inv) => sum + inv.grassCuttingDone, 0) / 
                       block.inverters.reduce((sum, inv) => sum + inv.totalStrings, 0)).toFixed(2)}
                   </td>
                 )
               ))}
-              <td className="px-3 py-2 border border-gray-200"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
+              <td className="px-2 py-1 border border-gray-300"></td>
             </tr>
 
             {/* Historic Entries */}
             {filteredEntries.map((entry, index) => (
-              <tr key={entry.date} className={globalEditMode ? "bg-blue-50" : "bg-white hover:bg-gray-50"}>
-                <td className="px-3 py-2 font-medium border border-gray-200">
+              <tr key={entry.date} className={globalEditMode ? "bg-yellow-50" : "bg-gray-50"}>
+                <td className="px-2 py-1 font-medium border border-gray-300">
                   <div className="flex items-center justify-between">
                     <div>
                       {globalEditMode && (
-                        <span className="text-xs bg-blue-200 text-blue-800 px-1 rounded mr-1 font-medium">EDIT</span>
+                        <span className="text-xs bg-orange-200 px-1 rounded mr-1">EDIT</span>
                       )}
                       {entry.date}
                     </div>
@@ -446,18 +524,27 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
                       const cellKey = `${entry.date}-${block.id}-${inverter.id}`;
                       const value = entry.inverterData[`${block.id}-${inverter.id}`] || 0;
                       return (
-                        <td key={cellKey} className={`px-2 py-2 border border-gray-200 ${globalEditMode ? 'bg-blue-50' : 'bg-white'}`}>
+                        <td key={cellKey} className={`px-2 py-1 border border-gray-300 ${globalEditMode ? 'bg-yellow-100' : 'bg-gray-100'}`}>
                           {renderEditableCell(cellKey, value)}
                         </td>
                       );
                     })
                   ) : (
-                    <td key={`${entry.date}-${block.id}-collapsed`} className={`px-2 py-2 border border-gray-200 ${globalEditMode ? 'bg-blue-50' : 'bg-white'} text-center text-xs`}>
+                    <td key={`${entry.date}-${block.id}-collapsed`} className={`px-2 py-1 border border-gray-300 ${globalEditMode ? 'bg-yellow-100' : 'bg-gray-100'} text-center text-xs`}>
                       {block.inverters.reduce((sum, inv) => sum + (entry.inverterData[`${block.id}-${inv.id}`] || 0), 0)}
                     </td>
                   )
                 ))}
-                <td className={`px-3 py-2 border border-gray-200 ${globalEditMode ? 'bg-orange-50' : 'bg-white'}`}>
+                <td className={`px-2 py-1 border border-gray-300 ${globalEditMode ? 'bg-green-100' : 'bg-gray-100'}`}>
+                  {renderEditableCell(`${entry.date}-planned`, entry.plannedStrings)}
+                </td>
+                <td className={`px-2 py-1 border border-gray-300 ${globalEditMode ? 'bg-green-100' : 'bg-gray-100'}`}>
+                  {renderEditableCell(`${entry.date}-actual`, entry.dailyActual)}
+                </td>
+                <td className={`px-2 py-1 border border-gray-300 ${globalEditMode ? 'bg-green-100' : 'bg-gray-100'}`}>
+                  {renderEditableCell(`${entry.date}-deviation`, entry.deviation)}
+                </td>
+                <td className={`px-2 py-1 border border-gray-300 ${globalEditMode ? 'bg-yellow-100' : 'bg-gray-100'}`}>
                   {renderEditableCell(`${entry.date}-remarks`, entry.remarks, "", true)}
                 </td>
               </tr>
@@ -465,8 +552,8 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
             
             {filteredEntries.length === 0 && (
               <tr>
-                <td colSpan={getVisibleBlocks.reduce((acc, block) => acc + (expandedBlocks[block.id] ? block.inverters.length : 1), 0) + 2} className="px-3 py-8 text-center text-gray-500">
-                  No records found for the selected month
+                <td colSpan={getVisibleBlocks.reduce((acc, block) => acc + (expandedBlocks[block.id] ? block.inverters.length : 1), 0) + 5} className="px-2 py-4 text-center text-gray-500">
+                  {searchTerm || dateFilter !== 'all' || selectedMonths.length > 0 ? 'No matching records found' : 'No historic entries found'}
                 </td>
               </tr>
             )}

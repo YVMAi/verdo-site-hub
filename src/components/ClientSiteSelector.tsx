@@ -23,7 +23,9 @@ export const ClientSiteSelector: React.FC<ClientSiteSelectorProps> = ({
   onCleaningTypeChange,
   showCleaningType = false
 }) => {
-  const availableSites = selectedClient ? mockSites.filter(site => site.clientId === selectedClient.id) : [];
+  const availableSites = selectedClient 
+    ? mockSites.filter(site => site.clientId === selectedClient.id)
+    : [];
 
   const handleSiteChange = (siteId: string) => {
     const site = availableSites.find(s => s.id === siteId) || null;
@@ -70,6 +72,21 @@ export const ClientSiteSelector: React.FC<ClientSiteSelectorProps> = ({
           </div>
         )}
       </div>
+
+      {selectedClient && selectedSite && (
+        <div className="p-2 bg-blue-50 rounded border border-blue-200">
+          <div className="flex items-center justify-between text-xs">
+            <div>
+              <span className="font-medium text-blue-900">Selected:</span> 
+              <span className="text-blue-800"> {selectedClient.name} → {selectedSite.name}</span>
+            </div>
+            <div className="text-blue-600">
+              Edit: {selectedClient.allowedEditDays}d • 
+              Cols: {selectedSite.columns.length}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
