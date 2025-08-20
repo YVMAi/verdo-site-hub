@@ -86,6 +86,27 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
     return Array.from(months);
   }, [data]);
 
+  // Calculate summary data
+  const summaryData = useMemo(() => {
+    if (!data) return null;
+    
+    const totalStrings = data.blocks.reduce((total, block) => 
+      total + block.inverters.reduce((blockTotal, inverter) => blockTotal + inverter.totalStrings, 0), 0
+    );
+    
+    const totalStringsCleaned = data.blocks.reduce((total, block) => 
+      total + block.inverters.reduce((blockTotal, inverter) => blockTotal + inverter.grassCuttingDone, 0), 0
+    );
+    
+    const cyclesCompleted = totalStrings > 0 ? totalStringsCleaned / totalStrings : 0;
+    
+    return {
+      totalStrings,
+      totalStringsCleaned,
+      cyclesCompleted
+    };
+  }, [data]);
+
   return (
     <div className="bg-white rounded border">
       <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
@@ -126,7 +147,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
         <table className="w-full text-xs border-collapse">
           <thead className="sticky top-0">
             <tr className="bg-verdo-navy text-white">
-              <th className="px-2 py-1 text-left font-medium border border-gray-300 w-24">Date</th>
+              <th className="px-2 py-1 text-left font-medium border border-gray-300 w-24">Field</th>
               {data?.blocks.map(block => (
                 <CollapsibleBlockHeader
                   key={block.id}
@@ -137,13 +158,14 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
                   onToggle={() => toggleBlock(block.id)}
                 />
               ))}
-              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-600 w-20">Total</th>
-              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-yellow-500 w-16">Rain</th>
+              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-600 w-20">Planned</th>
+              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-600 w-20">Actual</th>
+              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-600 w-20">Deviation</th>
               <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-yellow-500 w-32">Remarks</th>
             </tr>
             {Object.keys(expandedBlocks).some(key => expandedBlocks[key]) && (
               <tr className="bg-verdo-navy-light text-white">
-                <th className="px-2 py-1 border border-gray-300"></th>
+                <th className="px-2 py-1 border border-gray-300">Inverter</th>
                 {data?.blocks.map(block => (
                   expandedBlocks[block.id] ? (
                     block.inverters.map(inverter => (
@@ -156,10 +178,89 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
                 <th className="px-2 py-1 border border-gray-300"></th>
                 <th className="px-2 py-1 border border-gray-300"></th>
                 <th className="px-2 py-1 border border-gray-300"></th>
+                <th className="px-2 py-1 border border-gray-300"></th>
               </tr>
             )}
           </thead>
           <tbody>
+            {/* Summary rows */}
+            {summaryData && (
+              <>
+                <tr className="bg-gray-100">
+                  <td className="px-2 py-1 border border-gray-300 font-medium">Total Strings</td>
+                  {data?.blocks.map(block => {
+                    if (expandedBlocks[block.id]) {
+                      return block.inverters.map(inverter => (
+                        <td key={`${block.id}-${inverter.id}`} className="px-2 py-1 text-center border border-gray-300">
+                          {inverter.totalStrings}
+                        </td>
+                      ));
+                    } else {
+                      const blockTotal = block.inverters.reduce((sum, inv) => sum + inv.totalStrings, 0);
+                      return (
+                        <td key={block.id} className="px-2 py-1 text-center border border-gray-300">
+                          {blockTotal}
+                        </td>
+                      );
+                    }
+                  })}
+                  <td className="px-2 py-1 text-center border border-gray-300"></td>
+                  <td className="px-2 py-1 text-center border border-gray-300"></td>
+                  <td className="px-2 py-1 text-center border border-gray-300"></td>
+                  <td className="px-2 py-1 border border-gray-300"></td>
+                </tr>
+                <tr className="bg-gray-100">
+                  <td className="px-2 py-1 border border-gray-300 font-medium">Total Strings Cleaned</td>
+                  {data?.blocks.map(block => {
+                    if (expandedBlocks[block.id]) {
+                      return block.inverters.map(inverter => (
+                        <td key={`${block.id}-${inverter.id}`} className="px-2 py-1 text-center border border-gray-300">
+                          {inverter.grassCuttingDone}
+                        </td>
+                      ));
+                    } else {
+                      const blockTotal = block.inverters.reduce((sum, inv) => sum + inv.grassCuttingDone, 0);
+                      return (
+                        <td key={block.id} className="px-2 py-1 text-center border border-gray-300">
+                          {blockTotal}
+                        </td>
+                      );
+                    }
+                  })}
+                  <td className="px-2 py-1 text-center border border-gray-300"></td>
+                  <td className="px-2 py-1 text-center border border-gray-300"></td>
+                  <td className="px-2 py-1 text-center border border-gray-300"></td>
+                  <td className="px-2 py-1 border border-gray-300"></td>
+                </tr>
+                <tr className="bg-gray-100">
+                  <td className="px-2 py-1 border border-gray-300 font-medium">Cycles Completed</td>
+                  {data?.blocks.map(block => {
+                    if (expandedBlocks[block.id]) {
+                      return block.inverters.map(inverter => (
+                        <td key={`${block.id}-${inverter.id}`} className="px-2 py-1 text-center border border-gray-300">
+                          {inverter.totalStrings > 0 ? (inverter.grassCuttingDone / inverter.totalStrings).toFixed(2) : '0.00'}
+                        </td>
+                      ));
+                    } else {
+                      const blockTotalStrings = block.inverters.reduce((sum, inv) => sum + inv.totalStrings, 0);
+                      const blockTotalCleaned = block.inverters.reduce((sum, inv) => sum + inv.grassCuttingDone, 0);
+                      const blockCycles = blockTotalStrings > 0 ? blockTotalCleaned / blockTotalStrings : 0;
+                      return (
+                        <td key={block.id} className="px-2 py-1 text-center border border-gray-300">
+                          {blockCycles.toFixed(2)}
+                        </td>
+                      );
+                    }
+                  })}
+                  <td className="px-2 py-1 text-center border border-gray-300"></td>
+                  <td className="px-2 py-1 text-center border border-gray-300"></td>
+                  <td className="px-2 py-1 text-center border border-gray-300"></td>
+                  <td className="px-2 py-1 border border-gray-300"></td>
+                </tr>
+              </>
+            )}
+
+            {/* Historic entries */}
             {historicEntries.map((entry, index) => (
               <tr key={`${entry.date}-${index}`} className="bg-white">
                 <td className="px-2 py-1 border border-gray-300">{entry.date}</td>
@@ -185,8 +286,9 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
                     );
                   }
                 })}
-                <td className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-50">{entry.dailyActual}</td>
-                <td className="px-2 py-1 text-center border border-gray-300 bg-yellow-50">{entry.rainfallMM}</td>
+                <td className="px-2 py-1 text-center border border-gray-300 bg-green-50">{entry.plannedStrings}</td>
+                <td className="px-2 py-1 text-center border border-gray-300 bg-green-50">{entry.dailyActual}</td>
+                <td className="px-2 py-1 text-center border border-gray-300 bg-green-50">{entry.deviation}</td>
                 <td className="px-2 py-1 border border-gray-300">{entry.remarks}</td>
               </tr>
             ))}
