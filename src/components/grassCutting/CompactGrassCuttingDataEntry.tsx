@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { format } from "date-fns";
 import { CalendarIcon, Save, FileText, Table } from "lucide-react";
@@ -166,7 +165,7 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
                       {block.name}
                     </th>
                   ))}
-                  <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-yellow-500 w-32">Remarks</th>
+                  <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-[hsl(var(--verdo-navy))] w-32">Remarks</th>
                 </tr>
                 <tr className="bg-[hsl(var(--verdo-navy-light))] text-white">
                   <th className="px-2 py-1 text-left font-medium border border-gray-300">Inverter</th>
