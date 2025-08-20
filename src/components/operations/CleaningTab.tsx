@@ -5,7 +5,6 @@ import { CompactCleaningHistoric } from "@/components/cleaning/CompactCleaningHi
 import { useClientContext } from "@/contexts/ClientContext";
 import { mockCleaningData } from "@/data/mockCleaningData";
 import { CleaningSiteData } from "@/types/cleaning";
-import { Toggle } from "@/components/ui/toggle";
 import { Droplets } from "lucide-react";
 
 export const CleaningTab: React.FC = () => {
@@ -24,10 +23,6 @@ export const CleaningTab: React.FC = () => {
     console.log('Cleaning data updated:', data);
   };
 
-  const handleToggleChange = (pressed: boolean) => {
-    setCleaningType(pressed ? 'dry' : 'wet');
-  };
-
   return (
     <div className="h-full flex flex-col space-y-4">
       {/* Header */}
@@ -36,23 +31,32 @@ export const CleaningTab: React.FC = () => {
           <h2 className="text-lg font-bold text-gray-900">Cleaning Management</h2>
           <p className="text-sm text-gray-600">Monitor solar panel cleaning activities</p>
         </div>
-        <div className="flex items-center gap-2">
-          <label className="text-xs font-medium flex items-center gap-1">
-            <Droplets className="h-3 w-3" />
+        <div className="flex items-center gap-3">
+          <label className="text-sm font-medium flex items-center gap-1">
+            <Droplets className="h-4 w-4" />
             Cleaning Type
           </label>
-          <div className="flex items-center gap-2 text-xs">
-            <span className={cleaningType === 'wet' ? 'font-medium' : 'text-gray-500'}>
+          <div className="flex items-center bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setCleaningType('wet')}
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                cleaningType === 'wet'
+                  ? 'bg-verdo-navy text-white shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
               Wet Cleaning
-            </span>
-            <Toggle 
-              pressed={cleaningType === 'dry'} 
-              onPressedChange={handleToggleChange}
-              size="sm"
-            />
-            <span className={cleaningType === 'dry' ? 'font-medium' : 'text-gray-500'}>
+            </button>
+            <button
+              onClick={() => setCleaningType('dry')}
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                cleaningType === 'dry'
+                  ? 'bg-verdo-navy text-white shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
               Dry Cleaning
-            </span>
+            </button>
           </div>
         </div>
       </div>
