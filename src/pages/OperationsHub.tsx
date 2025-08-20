@@ -139,28 +139,30 @@ export default function OperationsHub() {
             <p className="text-sm text-gray-600">Centralized daily operations management</p>
           </div>
           
-          {/* Compact Progress Tracker */}
-          <div className="bg-gray-50 rounded-lg border px-3 py-2 min-w-[240px]">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-medium text-gray-700">Today's Progress</span>
-              <span className="text-xs text-gray-500">{completedOperations}/{totalOperations}</span>
+          <div className="flex items-center gap-4">
+            {/* Compact Site Selector */}
+            <div className="min-w-[300px]">
+              <ClientSiteSelector 
+                selectedClient={selectedClient}
+                selectedSite={selectedSite}
+                onSiteChange={setSelectedSite}
+              />
             </div>
-            <Progress value={progressPercentage} className="h-1.5" />
-            <div className="flex items-center gap-1 mt-1">
-              <CheckCircle2 className="w-3 h-3 text-green-500" />
-              <span className="text-xs text-gray-600">{Math.round(progressPercentage)}% Complete</span>
+
+            {/* Compact Progress Tracker */}
+            <div className="bg-gray-50 rounded-lg border px-3 py-2 min-w-[240px]">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-medium text-gray-700">Today's Progress</span>
+                <span className="text-xs text-gray-500">{completedOperations}/{totalOperations}</span>
+              </div>
+              <Progress value={progressPercentage} className="h-1.5" />
+              <div className="flex items-center gap-1 mt-1">
+                <CheckCircle2 className="w-3 h-3 text-green-500" />
+                <span className="text-xs text-gray-600">{Math.round(progressPercentage)}% Complete</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Site Selection Above Tabs */}
-      <div className="bg-gray-50 border-b px-4 py-3">
-        <ClientSiteSelector 
-          selectedClient={selectedClient}
-          selectedSite={selectedSite}
-          onSiteChange={setSelectedSite}
-        />
       </div>
 
       {/* Scrollable Operations Tabs */}

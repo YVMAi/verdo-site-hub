@@ -33,10 +33,10 @@ export const ClientSiteSelector: React.FC<ClientSiteSelectorProps> = ({
   };
 
   return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+    <div className="space-y-2">
+      <div className={`grid gap-2 ${showCleaningType ? 'grid-cols-2' : 'grid-cols-1'}`}>
         <div className="space-y-1">
-          <label className="text-xs font-medium flex items-center gap-1">
+          <label className="text-xs font-medium flex items-center gap-1 text-gray-700">
             <MapPin className="h-3 w-3" />
             Site
           </label>
@@ -56,7 +56,7 @@ export const ClientSiteSelector: React.FC<ClientSiteSelectorProps> = ({
 
         {showCleaningType && (
           <div className="space-y-1">
-            <label className="text-xs font-medium flex items-center gap-1">
+            <label className="text-xs font-medium flex items-center gap-1 text-gray-700">
               <Droplets className="h-3 w-3" />
               Cleaning Type
             </label>
@@ -74,16 +74,9 @@ export const ClientSiteSelector: React.FC<ClientSiteSelectorProps> = ({
       </div>
 
       {selectedClient && selectedSite && (
-        <div className="p-2 bg-blue-50 rounded border border-blue-200">
-          <div className="flex items-center justify-between text-xs">
-            <div>
-              <span className="font-medium text-blue-900">Selected:</span> 
-              <span className="text-blue-800"> {selectedClient.name} → {selectedSite.name}</span>
-            </div>
-            <div className="text-blue-600">
-              Edit: {selectedClient.allowedEditDays}d • 
-              Cols: {selectedSite.columns.length}
-            </div>
+        <div className="px-2 py-1 bg-blue-50 rounded border border-blue-200">
+          <div className="text-xs text-blue-800">
+            <span className="font-medium">{selectedClient.name}</span> → {selectedSite.name}
           </div>
         </div>
       )}
