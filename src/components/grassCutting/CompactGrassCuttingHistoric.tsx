@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo } from 'react';
 import { format, parseISO, parse } from "date-fns";
 import { Calendar, Filter, ChevronDown, ChevronRight, Search, RefreshCw } from "lucide-react";
@@ -39,7 +40,7 @@ const parseDateString = (dateString: string): Date => {
 
 export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricProps> = ({ data }) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [selectedMonth, setSelectedMonth] = useState<string>("");
+  const [selectedMonth, setSelectedMonth] = useState<string>("all");
   const [expandedBlocks, setExpandedBlocks] = useState<{[key: string]: boolean}>({});
 
   const toggleBlock = (blockId: string) => {
@@ -60,7 +61,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
       );
     }
 
-    if (selectedMonth) {
+    if (selectedMonth && selectedMonth !== "all") {
       filteredEntries = filteredEntries.filter(entry => {
         const entryDate = parseDateString(entry.date);
         const entryMonth = format(entryDate, "MMM-yyyy");
@@ -110,7 +111,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
             <SelectValue placeholder="Filter by month" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Months</SelectItem>
+            <SelectItem value="all">All Months</SelectItem>
             {availableMonths.map(month => (
               <SelectItem key={month} value={month}>{month}</SelectItem>
             ))}
@@ -195,3 +196,4 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
     </div>
   );
 };
+
