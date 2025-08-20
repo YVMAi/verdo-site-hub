@@ -141,7 +141,7 @@ export const CleaningForm: React.FC<CleaningFormProps> = ({ data, onDataChange }
             <div className="px-4 py-3 border-r border-white/20">Modules Cleaned</div>
             <div className="px-4 py-3 border-r border-white/20">Remarks</div>
             <div className="px-4 py-3 border-r border-white/20">Total Modules</div>
-            <div className="px-4 py-3 border-r border-white/20">% Completed</div>
+            <div className="px-4 py-3 border-r border-white/20">Completed %</div>
             <div className="px-4 py-3">Actions</div>
           </div>
         </div>
@@ -202,11 +202,11 @@ export const CleaningForm: React.FC<CleaningFormProps> = ({ data, onDataChange }
                 />
               </div>
               
-              <div className="px-4 py-2 border-r text-center text-sm">
+              <div className="px-4 py-2 border-r text-center text-sm bg-gray-100">
                 {row.totalModules || '-'}
               </div>
               
-              <div className="px-4 py-2 border-r text-center text-sm">
+              <div className="px-4 py-2 border-r text-center text-sm bg-gray-100">
                 {row.percentCompleted || '-'}
               </div>
               
