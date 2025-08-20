@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { format, parseISO } from "date-fns";
 import { Calendar, Filter, ChevronDown, ChevronRight, Search, RefreshCw } from "lucide-react";
@@ -25,9 +26,9 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
   };
 
   const historicEntries: GrassCuttingHistoricEntry[] = useMemo(() => {
-    if (!data || !data.historic) return [];
+    if (!data || !data.historicEntries) return [];
 
-    let filteredEntries = [...data.historic];
+    let filteredEntries = [...data.historicEntries];
 
     if (searchTerm) {
       filteredEntries = filteredEntries.filter(entry =>
@@ -47,9 +48,9 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
   }, [data, searchTerm, selectedMonth]);
 
   const availableMonths = useMemo(() => {
-    if (!data || !data.historic) return [];
+    if (!data || !data.historicEntries) return [];
     const months = new Set<string>();
-    data.historic.forEach(entry => {
+    data.historicEntries.forEach(entry => {
       const entryDate = parseISO(entry.date);
       months.add(format(entryDate, "MMM-yyyy"));
     });
@@ -81,7 +82,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
             <SelectValue placeholder="Filter by month" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Months</SelectItem>
+            <SelectItem value="all">All Months</SelectItem>
             {availableMonths.map(month => (
               <SelectItem key={month} value={month}>{month}</SelectItem>
             ))}
@@ -130,14 +131,14 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
             )}
           </thead>
           <tbody>
-            {historicEntries.map(entry => (
-              <tr key={entry.id} className="bg-white">
+            {historicEntries.map((entry, index) => (
+              <tr key={`${entry.date}-${index}`} className="bg-white">
                 <td className="px-2 py-1 border border-gray-300">{entry.date}</td>
                 {data?.blocks.map(block => {
                   if (expandedBlocks[block.id]) {
                     return block.inverters.map(inverter => {
-                      const inverterData = entry.inverterData.find(item => item.inverterId === inverter.id && item.blockId === block.id);
-                      const value = inverterData ? inverterData.stringsCleaned : '-';
+                      const key = `${block.id}-${inverter.id}`;
+                      const value = entry.inverterData[key] || '-';
                       return (
                         <td key={`${block.id}-${inverter.id}`} className="px-2 py-1 text-center border border-gray-300">
                           {value}
@@ -145,12 +146,9 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
                       );
                     });
                   } else {
-                    const blockTotal = entry.inverterData.reduce((sum, item) => {
-                      if (item.blockId === block.id) {
-                        return sum + parseInt(item.stringsCleaned || '0');
-                      }
-                      return sum;
-                    }, 0);
+                    const blockTotal = Object.keys(entry.inverterData)
+                      .filter(key => key.startsWith(`${block.id}-`))
+                      .reduce((sum, key) => sum + (Number(entry.inverterData[key]) || 0), 0);
                     return (
                       <td key={block.id} className="px-2 py-1 text-center border border-gray-300">
                         {blockTotal}
@@ -158,8 +156,8 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
                     );
                   }
                 })}
-                <td className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-50">{entry.totalActual}</td>
-                <td className="px-2 py-1 text-center border border-gray-300 bg-yellow-50">{entry.rainfall}</td>
+                <td className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-50">{entry.dailyActual}</td>
+                <td className="px-2 py-1 text-center border border-gray-300 bg-yellow-50">{entry.rainfallMM}</td>
                 <td className="px-2 py-1 border border-gray-300">{entry.remarks}</td>
               </tr>
             ))}

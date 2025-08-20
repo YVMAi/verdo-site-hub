@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { format, parseISO } from "date-fns";
 import { Calendar, Filter, ChevronDown, ChevronRight, Search, RefreshCw } from "lucide-react";
@@ -24,9 +25,9 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
   };
 
   const filteredHistoricData = useMemo(() => {
-    if (!data || !data.historicData) return [];
+    if (!data || !data.historicEntries) return [];
 
-    let filteredData = data.historicData;
+    let filteredData = data.historicEntries;
 
     if (searchTerm) {
       filteredData = filteredData.filter(entry =>
@@ -45,9 +46,9 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
   }, [data, searchTerm, selectedMonth]);
 
   const availableMonths = useMemo(() => {
-    if (!data || !data.historicData) return [];
+    if (!data || !data.historicEntries) return [];
     const months = new Set<string>();
-    data.historicData.forEach(entry => {
+    data.historicEntries.forEach(entry => {
       months.add(format(parseISO(entry.date), "MMM"));
     });
     return Array.from(months);
@@ -58,7 +59,7 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
       <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
         <span>Historic Cleaning Data</span>
         <Badge variant="outline">
-          {data?.historicData?.length || 0} entries
+          {data?.historicEntries?.length || 0} entries
         </Badge>
       </div>
 
@@ -76,6 +77,7 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
             <SelectValue placeholder="Filter by month" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">All Months</SelectItem>
             {availableMonths.map(month => (
               <SelectItem key={month} value={month} className="text-xs">
                 {month}
@@ -123,7 +125,7 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
                 </th>
               ))}
               <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-green-600 w-20">Total</th>
-              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-yellow-500 w-20">Water</th>
+              <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-yellow-500 w-20">Rainfall</th>
               <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-yellow-500 w-32">Remarks</th>
             </tr>
             {Object.keys(expandedBlocks).some(key => expandedBlocks[key]) && (
@@ -151,8 +153,8 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
                 {data?.blocks.map(block => {
                   if (expandedBlocks[block.id]) {
                     return block.inverters.map(inverter => {
-                      const inverterData = entry.inverterData.find(invData => invData.blockId === block.id && invData.inverterId === inverter.id);
-                      const value = inverterData ? inverterData.value : '-';
+                      const key = `${block.id}-${inverter.id}`;
+                      const value = entry.inverterData[key] || '-';
                       return (
                         <td key={`${block.id}-${inverter.id}`} className="px-2 py-1 text-center border border-gray-300">
                           {value}
@@ -160,11 +162,18 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
                       );
                     });
                   } else {
-                    return null;
+                    const blockTotal = Object.keys(entry.inverterData)
+                      .filter(key => key.startsWith(`${block.id}-`))
+                      .reduce((sum, key) => sum + (parseInt(entry.inverterData[key]?.toString() || '0') || 0), 0);
+                    return (
+                      <td key={block.id} className="px-2 py-1 text-center border border-gray-300">
+                        {blockTotal}
+                      </td>
+                    );
                   }
                 })}
-                <td className="px-2 py-1 text-center border border-gray-300">{entry.total}</td>
-                <td className="px-2 py-1 text-center border border-gray-300">{entry.waterUsed}</td>
+                <td className="px-2 py-1 text-center border border-gray-300">{entry.totalCleaned}</td>
+                <td className="px-2 py-1 text-center border border-gray-300">{entry.rainfallMM}</td>
                 <td className="px-2 py-1 border border-gray-300">{entry.remarks}</td>
               </tr>
             ))}

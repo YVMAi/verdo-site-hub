@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { format } from "date-fns";
 import { CalendarIcon, Save, FileText, Table } from "lucide-react";
@@ -137,11 +138,11 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
             </tr>
 
             <tr className="bg-green-50">
-              <td className="px-2 py-1 font-medium border border-gray-300">Last Cleaned</td>
+              <td className="px-2 py-1 font-medium border border-gray-300">Modules Cleaned</td>
               {data?.blocks.map(block => (
                 block.inverters.map(inverter => (
                   <td key={`percent-${block.id}-${inverter.id}`} className={cn("px-2 py-1 text-center border border-gray-300 bg-green-100", getColumnWidth(`${block.id}-${inverter.id}`))}>
-                    {inverter.lastCleaned}
+                    {inverter.modulesCleaned}
                   </td>
                 ))
               ))}

@@ -57,7 +57,6 @@ export const CleaningTab: React.FC = () => {
         />
         <CompactCleaningHistoric 
           data={currentData} 
-          onDataChange={handleDataChange}
         />
       </div>
     </div>
