@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { format } from "date-fns";
 import { CalendarIcon, Save, FileText, Table } from "lucide-react";
@@ -139,16 +140,8 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
         </div>
       ) : (
         <>
-          {/* Compact Legend */}
+          {/* Single Legend */}
           <div className="px-3 py-2 bg-gray-50 border-b text-xs flex gap-4">
-            <span className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-blue-100 border border-blue-300"></div>
-              Static
-            </span>
-            <span className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-green-100 border border-green-300"></div>
-              Calculated
-            </span>
             <span className="flex items-center gap-1">
               <div className="w-3 h-3 bg-yellow-100 border border-yellow-300"></div>
               Input
@@ -180,11 +173,11 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
                 </tr>
               </thead>
               <tbody>
-                <tr className="bg-blue-50">
+                <tr className="bg-gray-100">
                   <td className="px-2 py-1 font-medium border border-gray-300">Total Strings</td>
                   {data.blocks.map(block => (
                     block.inverters.map(inverter => (
-                      <td key={`total-${block.id}-${inverter.id}`} className={cn("px-2 py-1 text-center border border-gray-300 bg-blue-100", getColumnWidth(`${block.id}-${inverter.id}`))}>
+                      <td key={`total-${block.id}-${inverter.id}`} className={cn("px-2 py-1 text-center border border-gray-300 bg-gray-200", getColumnWidth(`${block.id}-${inverter.id}`))}>
                         {inverter.totalStrings}
                       </td>
                     ))
@@ -192,11 +185,11 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
                   <td className="px-2 py-1 border border-gray-300"></td>
                 </tr>
 
-                <tr className="bg-green-50">
+                <tr className="bg-gray-100">
                   <td className="px-2 py-1 font-medium border border-gray-300">% Completed</td>
                   {data.blocks.map(block => (
                     block.inverters.map(inverter => (
-                      <td key={`percent-${block.id}-${inverter.id}`} className={cn("px-2 py-1 text-center border border-gray-300 bg-green-100", getColumnWidth(`${block.id}-${inverter.id}`))}>
+                      <td key={`percent-${block.id}-${inverter.id}`} className={cn("px-2 py-1 text-center border border-gray-300 bg-gray-200", getColumnWidth(`${block.id}-${inverter.id}`))}>
                         {inverter.percentCompleted}%
                       </td>
                     ))
@@ -204,7 +197,7 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
                   <td className="px-2 py-1 border border-gray-300"></td>
                 </tr>
 
-                <tr className="bg-yellow-50">
+                <tr className="bg-blue-50">
                   <td className="px-2 py-1 font-medium border border-gray-300">
                     <Popover>
                       <PopoverTrigger asChild>
@@ -234,7 +227,7 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
                     block.inverters.map(inverter => {
                       const key = `${block.id}-${inverter.id}`;
                       return (
-                        <td key={`input-${key}`} className={cn("px-2 py-1 text-center border border-gray-300 bg-yellow-100", getColumnWidth(key))}>
+                        <td key={`input-${key}`} className={cn("px-2 py-1 text-center border border-gray-300 bg-blue-100", getColumnWidth(key))}>
                           <input 
                             type="number" 
                             className="w-full h-6 text-center text-xs border-0 bg-transparent focus:bg-white"
@@ -245,7 +238,7 @@ export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntry
                       );
                     })
                   ))}
-                  <td className="px-2 py-1 border border-gray-300 bg-yellow-100">
+                  <td className="px-2 py-1 border border-gray-300 bg-blue-100">
                     <textarea 
                       className="w-full h-6 text-xs border-0 bg-transparent focus:bg-white resize-none"
                       style={{ minHeight: '24px', whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
