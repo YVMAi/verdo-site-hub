@@ -5,7 +5,7 @@ import { CompactCleaningHistoric } from "@/components/cleaning/CompactCleaningHi
 import { useClientContext } from "@/contexts/ClientContext";
 import { mockCleaningData } from "@/data/mockCleaningData";
 import { CleaningSiteData } from "@/types/cleaning";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Toggle } from "@/components/ui/toggle";
 import { Droplets } from "lucide-react";
 
 export const CleaningTab: React.FC = () => {
@@ -24,6 +24,10 @@ export const CleaningTab: React.FC = () => {
     console.log('Cleaning data updated:', data);
   };
 
+  const handleToggleChange = (pressed: boolean) => {
+    setCleaningType(pressed ? 'dry' : 'wet');
+  };
+
   return (
     <div className="h-full flex flex-col space-y-4">
       {/* Header */}
@@ -37,15 +41,19 @@ export const CleaningTab: React.FC = () => {
             <Droplets className="h-3 w-3" />
             Cleaning Type
           </label>
-          <Select value={cleaningType} onValueChange={(value: 'wet' | 'dry') => setCleaningType(value)}>
-            <SelectTrigger className="h-8 w-32 text-xs">
-              <SelectValue placeholder="Select type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="wet" className="text-xs">Wet Cleaning</SelectItem>
-              <SelectItem value="dry" className="text-xs">Dry Cleaning</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2 text-xs">
+            <span className={cleaningType === 'wet' ? 'font-medium' : 'text-gray-500'}>
+              Wet Cleaning
+            </span>
+            <Toggle 
+              pressed={cleaningType === 'dry'} 
+              onPressedChange={handleToggleChange}
+              size="sm"
+            />
+            <span className={cleaningType === 'dry' ? 'font-medium' : 'text-gray-500'}>
+              Dry Cleaning
+            </span>
+          </div>
         </div>
       </div>
 
