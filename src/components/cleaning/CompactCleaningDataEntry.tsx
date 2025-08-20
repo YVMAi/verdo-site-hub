@@ -116,11 +116,10 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
                   {block.name}
                 </th>
               ))}
-              <th className="px-2 py-1 text-center font-medium border border-gray-300">Total</th>
               <th className="px-2 py-1 text-center font-medium border border-gray-300">Rainfall (MM)</th>
               <th className="px-2 py-1 text-center font-medium border border-gray-300 w-32">Remarks</th>
             </tr>
-            <tr className="bg-verdo-navy-light text-white">
+            <tr className="bg-verdo-navy text-white">
               <th className="px-2 py-1 text-left font-medium border border-gray-300">Inverter</th>
               {data?.blocks.map(block => (
                 block.inverters.map(inverter => (
@@ -129,7 +128,6 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
                   </th>
                 ))
               ))}
-              <th className="px-2 py-1 border border-gray-300"></th>
               <th className="px-2 py-1 border border-gray-300"></th>
               <th className="px-2 py-1 border border-gray-300"></th>
             </tr>
@@ -146,7 +144,6 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
               ))}
               <td className="px-2 py-1 border border-gray-300"></td>
               <td className="px-2 py-1 border border-gray-300"></td>
-              <td className="px-2 py-1 border border-gray-300"></td>
             </tr>
 
             <tr className="bg-green-50">
@@ -158,7 +155,6 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
                   </td>
                 ))
               ))}
-              <td className="px-2 py-1 border border-gray-300"></td>
               <td className="px-2 py-1 border border-gray-300"></td>
               <td className="px-2 py-1 border border-gray-300"></td>
             </tr>
@@ -180,9 +176,6 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
                   );
                 })
               ))}
-              <td className="px-2 py-1 text-center border border-gray-300 bg-green-100">
-                {Object.values(inputValues).reduce((sum, val) => sum + (parseInt(val) || 0), 0)}
-              </td>
               <td className="px-2 py-1 text-center border border-gray-300 bg-yellow-100">
                 <input 
                   className="w-full h-6 text-center text-xs border-0 bg-transparent focus:bg-white"
