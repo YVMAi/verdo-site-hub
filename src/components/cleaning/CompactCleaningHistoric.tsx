@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { format, parseISO } from "date-fns";
+import { format, parseISO, isValid } from "date-fns";
 import { Calendar, Filter, ChevronDown, ChevronRight, Search, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,21 @@ import { CleaningSiteData, CleaningHistoricEntry } from "@/types/cleaning";
 interface CompactCleaningHistoricProps {
   data: CleaningSiteData | null;
 }
+
+// Helper function to safely parse and format dates
+const safeDateFormat = (dateString: string, formatPattern: string): string => {
+  try {
+    const parsedDate = parseISO(dateString);
+    if (isValid(parsedDate)) {
+      return format(parsedDate, formatPattern);
+    }
+    // If parseISO fails, return the original string
+    return dateString;
+  } catch (error) {
+    console.warn(`Error formatting date: ${dateString}`, error);
+    return dateString;
+  }
+};
 
 export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = ({ data }) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -32,14 +47,15 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
     if (searchTerm) {
       filteredData = filteredData.filter(entry =>
         entry.remarks.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        format(parseISO(entry.date), "dd-MMM-yy").toLowerCase().includes(searchTerm.toLowerCase())
+        safeDateFormat(entry.date, "dd-MMM-yy").toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     if (selectedMonth) {
-      filteredData = filteredData.filter(entry =>
-        format(parseISO(entry.date), "MMM").toLowerCase() === selectedMonth.toLowerCase()
-      );
+      filteredData = filteredData.filter(entry => {
+        const monthFromDate = safeDateFormat(entry.date, "MMM");
+        return monthFromDate.toLowerCase() === selectedMonth.toLowerCase();
+      });
     }
 
     return filteredData;
@@ -49,7 +65,10 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
     if (!data || !data.historicEntries) return [];
     const months = new Set<string>();
     data.historicEntries.forEach(entry => {
-      months.add(format(parseISO(entry.date), "MMM"));
+      const month = safeDateFormat(entry.date, "MMM");
+      if (month && month !== entry.date) { // Only add if formatting was successful
+        months.add(month);
+      }
     });
     return Array.from(months);
   }, [data]);
@@ -149,7 +168,7 @@ export const CompactCleaningHistoric: React.FC<CompactCleaningHistoricProps> = (
           <tbody>
             {filteredHistoricData.map(entry => (
               <tr key={entry.date} className="bg-white">
-                <td className="px-2 py-1 border border-gray-300">{format(parseISO(entry.date), "dd-MMM-yy")}</td>
+                <td className="px-2 py-1 border border-gray-300">{safeDateFormat(entry.date, "dd-MMM-yy")}</td>
                 {data?.blocks.map(block => {
                   if (expandedBlocks[block.id]) {
                     return block.inverters.map(inverter => {
