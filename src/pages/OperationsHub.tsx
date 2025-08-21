@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -149,7 +148,8 @@ export default function OperationsHub() {
     }
   };
 
-  return <div className="min-h-screen w-full flex flex-col">
+  return (
+    <div className="min-h-screen w-full flex flex-col">
       {/* Top Navigation Bar */}
       <div className="bg-[hsl(var(--verdo-navy))] text-white px-6 py-4 flex items-center justify-between">
         <div>
@@ -160,44 +160,53 @@ export default function OperationsHub() {
         <div className="flex items-center gap-4">
           {/* Site Selector */}
           <div className="flex items-center gap-2 min-w-[300px]">
-            
             <Select onValueChange={handleSiteChange} disabled={!selectedClient} value={selectedSite?.id || ""}>
               <SelectTrigger className="bg-white/10 border-white/20 text-white h-8 text-sm">
                 <SelectValue placeholder={selectedClient ? "Select a site..." : "Select client from sidebar first"} />
               </SelectTrigger>
               <SelectContent>
-                {availableSites.map(site => <SelectItem key={site.id} value={site.id} className="text-sm">
+                {availableSites.map(site => (
+                  <SelectItem key={site.id} value={site.id} className="text-sm">
                     {site.name}
-                  </SelectItem>)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
-
-          {/* Progress Tracker */}
-          
         </div>
       </div>
 
-      {/* Scrollable Operations Tabs */}
-      <div className="flex-1 bg-white">
+      {/* Fixed Scrollable Operations Tabs */}
+      <div className="flex-1 bg-white overflow-hidden">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-          <div className="border-b bg-gray-50/50 px-4 py-2">
-            <ScrollArea className="w-full">
-              <TabsList className="inline-flex h-auto p-0 gap-1 bg-transparent w-max">
-                {operations.map(operation => {
-                const IconComponent = operation.icon;
-                return <TabsTrigger key={operation.id} value={operation.id} disabled={!operation.enabled} className={`flex items-center gap-2 h-8 px-3 data-[state=active]:bg-[hsl(var(--verdo-navy))] data-[state=active]:text-white data-[state=active]:shadow-sm border data-[state=active]:border-[hsl(var(--verdo-navy))] text-gray-600 text-xs whitespace-nowrap min-w-[120px] ${!operation.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                      <IconComponent className="w-4 h-4" />
-                      <span className="font-medium">{operation.name}</span>
-                      {getStatusIcon(operation.status, operation.enabled)}
-                    </TabsTrigger>;
-              })}
-              </TabsList>
-              <ScrollBar orientation="horizontal" />
+          {/* Horizontally Scrollable Tab Strip - Fixed Height */}
+          <div className="border-b bg-gray-50/50 px-4 py-2 flex-shrink-0 overscroll-x-contain">
+            <ScrollArea className="w-full" type="scroll">
+              <div className="flex min-w-max">
+                <TabsList className="inline-flex h-auto p-0 gap-1 bg-transparent w-max">
+                  {operations.map(operation => {
+                    const IconComponent = operation.icon;
+                    return (
+                      <TabsTrigger 
+                        key={operation.id} 
+                        value={operation.id} 
+                        disabled={!operation.enabled} 
+                        className={`flex items-center gap-2 h-8 px-3 data-[state=active]:bg-[hsl(var(--verdo-navy))] data-[state=active]:text-white data-[state=active]:shadow-sm border data-[state=active]:border-[hsl(var(--verdo-navy))] text-gray-600 text-xs whitespace-nowrap min-w-[140px] flex-shrink-0 ${!operation.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        <IconComponent className="w-4 h-4 flex-shrink-0" />
+                        <span className="font-medium">{operation.name}</span>
+                        {getStatusIcon(operation.status, operation.enabled)}
+                      </TabsTrigger>
+                    );
+                  })}
+                </TabsList>
+              </div>
+              <ScrollBar orientation="horizontal" className="h-2" />
             </ScrollArea>
           </div>
 
-          <div className="flex-1 overflow-hidden">
+          {/* Fixed Main Content Area - Scrollable Independently */}
+          <div className="flex-1 overflow-auto overscroll-y-auto">
             <TabsContent value="grass-cutting" className="h-full m-0 p-3">
               <GrassCuttingTab />
             </TabsContent>
@@ -252,5 +261,6 @@ export default function OperationsHub() {
           </div>
         </Tabs>
       </div>
-    </div>;
+    </div>
+  );
 }
