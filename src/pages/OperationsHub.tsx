@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -180,17 +181,18 @@ export default function OperationsHub() {
       <div className="flex-1 bg-white overflow-hidden">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
           {/* Horizontally Scrollable Tab Strip - Fixed Height */}
-          <div className="border-b bg-gray-50/50 px-4 py-2 flex-shrink-0">
+          <div className="border-b bg-gray-100 px-4 py-2 flex-shrink-0">
             <ScrollArea className="w-full whitespace-nowrap" type="always">
-              <TabsList className="inline-flex h-auto p-0 gap-1 bg-transparent w-max">
-                {operations.map(operation => {
+              <TabsList className="inline-flex h-auto p-0 gap-0 bg-transparent w-max border border-gray-300 rounded-md overflow-hidden">
+                {operations.map((operation, index) => {
                   const IconComponent = operation.icon;
+                  const isLast = index === operations.length - 1;
                   return (
                     <TabsTrigger 
                       key={operation.id} 
                       value={operation.id} 
                       disabled={!operation.enabled} 
-                      className={`flex items-center gap-2 h-8 px-3 data-[state=active]:bg-[hsl(var(--verdo-navy))] data-[state=active]:text-white data-[state=active]:shadow-sm border data-[state=active]:border-[hsl(var(--verdo-navy))] text-gray-600 text-xs whitespace-nowrap min-w-[140px] flex-shrink-0 ${!operation.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      className={`flex items-center justify-center gap-2 h-10 px-4 bg-white border-r ${isLast ? 'border-r-0' : 'border-r-gray-300'} data-[state=active]:bg-gray-50 data-[state=active]:text-[hsl(var(--verdo-navy))] data-[state=active]:font-medium text-gray-700 text-sm whitespace-nowrap min-w-[120px] flex-shrink-0 hover:bg-gray-50 transition-colors ${!operation.enabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                     >
                       <IconComponent className="w-4 h-4 flex-shrink-0" />
                       <span className="font-medium">{operation.name}</span>
