@@ -4,92 +4,68 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  Scissors, 
-  Droplets, 
-  Search, 
-  Leaf, 
-  CheckCircle2, 
-  Clock,
-  BarChart3,
-  Circle,
-  Lock,
-  Wrench,
-  Package,
-  FileText,
-  MapPin
-} from "lucide-react";
+import { Scissors, Droplets, Search, Leaf, CheckCircle2, Clock, BarChart3, Circle, Lock, Wrench, Package, FileText, MapPin } from "lucide-react";
 import { GrassCuttingTab } from "@/components/operations/GrassCuttingTab";
 import { CleaningTab } from "@/components/operations/CleaningTab";
 import { ComingSoonTab } from "@/components/operations/ComingSoonTab";
 import { AllOperationsSummary } from "@/components/operations/AllOperationsSummary";
 import { useClientContext } from "@/contexts/ClientContext";
 import { mockSites } from "@/data/mockGenerationData";
-
 const getOperationsForSite = (siteId: string | null, siteName: string | null) => {
-  const baseOperations = [
-    {
-      id: 'grass-cutting',
-      name: 'Grass Cutting',
-      icon: Scissors,
-      status: 'completed',
-      description: 'Track and manage grass cutting operations',
-      enabled: true
-    },
-    {
-      id: 'cleaning',
-      name: 'Cleaning',
-      icon: Droplets,
-      status: 'in-progress',
-      description: 'Monitor solar panel cleaning activities',
-      enabled: true
-    },
-    {
-      id: 'inspection',
-      name: 'Inspection',
-      icon: Search,
-      status: 'pending',
-      description: 'Field inspection and maintenance logs',
-      enabled: false
-    },
-    {
-      id: 'vegetation',
-      name: 'Vegetation Control',
-      icon: Leaf,
-      status: 'pending',
-      description: 'Vegetation management and control',
-      enabled: false
-    }
-  ];
+  const baseOperations = [{
+    id: 'grass-cutting',
+    name: 'Grass Cutting',
+    icon: Scissors,
+    status: 'completed',
+    description: 'Track and manage grass cutting operations',
+    enabled: true
+  }, {
+    id: 'cleaning',
+    name: 'Cleaning',
+    icon: Droplets,
+    status: 'in-progress',
+    description: 'Monitor solar panel cleaning activities',
+    enabled: true
+  }, {
+    id: 'inspection',
+    name: 'Inspection',
+    icon: Search,
+    status: 'pending',
+    description: 'Field inspection and maintenance logs',
+    enabled: false
+  }, {
+    id: 'vegetation',
+    name: 'Vegetation Control',
+    icon: Leaf,
+    status: 'pending',
+    description: 'Vegetation management and control',
+    enabled: false
+  }];
 
   // Check if this is "Desert Solar Farm B" (site id '2') - show all tabs
   if (siteName === 'Desert Solar Farm B' || siteId === '2') {
-    baseOperations.push(
-      {
-        id: 'ppm-tracking',
-        name: 'PPM Tracking',
-        icon: Wrench,
-        status: 'pending',
-        description: 'Preventive maintenance tracking',
-        enabled: false
-      },
-      {
-        id: 'spare-tracking',
-        name: 'Spare Tracking',
-        icon: Package,
-        status: 'pending',
-        description: 'Spare parts inventory management',
-        enabled: false
-      },
-      {
-        id: 'pod',
-        name: 'POD',
-        icon: FileText,
-        status: 'pending',
-        description: 'Proof of delivery documentation',
-        enabled: false
-      }
-    );
+    baseOperations.push({
+      id: 'ppm-tracking',
+      name: 'PPM Tracking',
+      icon: Wrench,
+      status: 'pending',
+      description: 'Preventive maintenance tracking',
+      enabled: false
+    }, {
+      id: 'spare-tracking',
+      name: 'Spare Tracking',
+      icon: Package,
+      status: 'pending',
+      description: 'Spare parts inventory management',
+      enabled: false
+    }, {
+      id: 'pod',
+      name: 'POD',
+      icon: FileText,
+      status: 'pending',
+      description: 'Proof of delivery documentation',
+      enabled: false
+    });
   }
 
   // Always add summary tab at the end
@@ -101,28 +77,24 @@ const getOperationsForSite = (siteId: string | null, siteName: string | null) =>
     description: 'Review and export all operations',
     enabled: false
   });
-
   return baseOperations;
 };
-
 export default function OperationsHub() {
   const [activeTab, setActiveTab] = useState('grass-cutting');
-  const { selectedClient, selectedSite, setSelectedSite } = useClientContext();
-  
+  const {
+    selectedClient,
+    selectedSite,
+    setSelectedSite
+  } = useClientContext();
   const operations = getOperationsForSite(selectedSite?.id || null, selectedSite?.name || null);
   const completedOperations = operations.filter(op => op.status === 'completed').length;
   const totalOperations = operations.length - 1; // Exclude summary tab
-  const progressPercentage = (completedOperations / totalOperations) * 100;
-
-  const availableSites = selectedClient 
-    ? mockSites.filter(site => site.clientId === selectedClient.id)
-    : [];
-
+  const progressPercentage = completedOperations / totalOperations * 100;
+  const availableSites = selectedClient ? mockSites.filter(site => site.clientId === selectedClient.id) : [];
   const handleSiteChange = (siteId: string) => {
     const site = availableSites.find(s => s.id === siteId) || null;
     setSelectedSite(site);
   };
-
   const getStatusIcon = (status: string, enabled: boolean) => {
     if (!enabled) {
       return <Lock className="w-3 h-3 text-gray-400" />;
@@ -138,9 +110,7 @@ export default function OperationsHub() {
         return null;
     }
   };
-
-  return (
-    <div className="h-full flex flex-col">
+  return <div className="h-full flex flex-col">
       {/* Top Navigation Bar */}
       <div className="bg-[hsl(var(--verdo-navy))] text-white px-6 py-4 flex items-center justify-between">
         <div>
@@ -151,33 +121,21 @@ export default function OperationsHub() {
         <div className="flex items-center gap-4">
           {/* Site Selector */}
           <div className="flex items-center gap-2 min-w-[300px]">
-            <MapPin className="w-4 h-4 text-white/70" />
+            
             <Select onValueChange={handleSiteChange} disabled={!selectedClient} value={selectedSite?.id || ""}>
               <SelectTrigger className="bg-white/10 border-white/20 text-white h-8 text-sm">
                 <SelectValue placeholder={selectedClient ? "Select a site..." : "Select client from sidebar first"} />
               </SelectTrigger>
               <SelectContent>
-                {availableSites.map(site => (
-                  <SelectItem key={site.id} value={site.id} className="text-sm">
+                {availableSites.map(site => <SelectItem key={site.id} value={site.id} className="text-sm">
                     {site.name}
-                  </SelectItem>
-                ))}
+                  </SelectItem>)}
               </SelectContent>
             </Select>
           </div>
 
           {/* Progress Tracker */}
-          <div className="bg-white/10 rounded-lg border border-white/20 px-3 py-2 min-w-[240px]">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-medium text-white">Today's Progress</span>
-              <span className="text-xs text-white/70">{completedOperations}/{totalOperations}</span>
-            </div>
-            <Progress value={progressPercentage} className="h-1.5" />
-            <div className="flex items-center gap-1 mt-1">
-              <CheckCircle2 className="w-3 h-3 text-green-400" />
-              <span className="text-xs text-white/80">{Math.round(progressPercentage)}% Complete</span>
-            </div>
-          </div>
+          
         </div>
       </div>
 
@@ -187,21 +145,14 @@ export default function OperationsHub() {
           <div className="border-b bg-gray-50/50 px-4 py-2">
             <ScrollArea className="w-full whitespace-nowrap">
               <TabsList className="inline-flex h-auto p-0 gap-1 bg-transparent w-max">
-                {operations.map((operation) => {
-                  const IconComponent = operation.icon;
-                  return (
-                    <TabsTrigger
-                      key={operation.id}
-                      value={operation.id}
-                      disabled={!operation.enabled}
-                      className={`flex items-center gap-2 h-8 px-3 data-[state=active]:bg-[hsl(var(--verdo-navy))] data-[state=active]:text-white data-[state=active]:shadow-sm border data-[state=active]:border-[hsl(var(--verdo-navy))] text-gray-600 text-xs whitespace-nowrap ${!operation.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
+                {operations.map(operation => {
+                const IconComponent = operation.icon;
+                return <TabsTrigger key={operation.id} value={operation.id} disabled={!operation.enabled} className={`flex items-center gap-2 h-8 px-3 data-[state=active]:bg-[hsl(var(--verdo-navy))] data-[state=active]:text-white data-[state=active]:shadow-sm border data-[state=active]:border-[hsl(var(--verdo-navy))] text-gray-600 text-xs whitespace-nowrap ${!operation.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
                       <IconComponent className="w-4 h-4" />
                       <span className="font-medium">{operation.name}</span>
                       {getStatusIcon(operation.status, operation.enabled)}
-                    </TabsTrigger>
-                  );
-                })}
+                    </TabsTrigger>;
+              })}
               </TabsList>
               <ScrollBar orientation="horizontal" />
             </ScrollArea>
@@ -217,43 +168,23 @@ export default function OperationsHub() {
             </TabsContent>
 
             <TabsContent value="inspection" className="h-full m-0 p-3">
-              <ComingSoonTab 
-                title="Field Inspection" 
-                description="Comprehensive field inspection and maintenance logging system"
-                icon={Search}
-              />
+              <ComingSoonTab title="Field Inspection" description="Comprehensive field inspection and maintenance logging system" icon={Search} />
             </TabsContent>
 
             <TabsContent value="vegetation" className="h-full m-0 p-3">
-              <ComingSoonTab 
-                title="Vegetation Control" 
-                description="Advanced vegetation management and control operations"
-                icon={Leaf}
-              />
+              <ComingSoonTab title="Vegetation Control" description="Advanced vegetation management and control operations" icon={Leaf} />
             </TabsContent>
 
             <TabsContent value="ppm-tracking" className="h-full m-0 p-3">
-              <ComingSoonTab 
-                title="PPM Tracking" 
-                description="Preventive maintenance planning and tracking system"
-                icon={Wrench}
-              />
+              <ComingSoonTab title="PPM Tracking" description="Preventive maintenance planning and tracking system" icon={Wrench} />
             </TabsContent>
 
             <TabsContent value="spare-tracking" className="h-full m-0 p-3">
-              <ComingSoonTab 
-                title="Spare Tracking" 
-                description="Spare parts inventory and usage tracking"
-                icon={Package}
-              />
+              <ComingSoonTab title="Spare Tracking" description="Spare parts inventory and usage tracking" icon={Package} />
             </TabsContent>
 
             <TabsContent value="pod" className="h-full m-0 p-3">
-              <ComingSoonTab 
-                title="POD" 
-                description="Proof of delivery documentation and management"
-                icon={FileText}
-              />
+              <ComingSoonTab title="POD" description="Proof of delivery documentation and management" icon={FileText} />
             </TabsContent>
 
             <TabsContent value="summary" className="h-full m-0 p-3">
@@ -262,6 +193,5 @@ export default function OperationsHub() {
           </div>
         </Tabs>
       </div>
-    </div>
-  );
+    </div>;
 }
