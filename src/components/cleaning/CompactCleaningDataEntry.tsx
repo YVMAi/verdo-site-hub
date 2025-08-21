@@ -155,11 +155,11 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
                 </tr>
               </thead>
               <tbody>
-                <tr className="bg-blue-50">
+                <tr className="bg-gray-200">
                   <td className="px-2 py-1 font-medium border border-gray-300">Total Modules</td>
                   {data.blocks.map(block => (
                     block.inverters.map(inverter => (
-                      <td key={`total-${block.id}-${inverter.id}`} className={cn("px-2 py-1 text-center border border-gray-300 bg-blue-100", getColumnWidth(`${block.id}-${inverter.id}`))}>
+                      <td key={`total-${block.id}-${inverter.id}`} className={cn("px-2 py-1 text-center border border-gray-300", getColumnWidth(`${block.id}-${inverter.id}`))}>
                         {inverter.totalModules}
                       </td>
                     ))
@@ -167,19 +167,19 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
                   <td className="px-2 py-1 border border-gray-300"></td>
                 </tr>
 
-                <tr className="bg-green-50">
-                  <td className="px-2 py-1 font-medium border border-gray-300">Modules Cleaned</td>
+                <tr className="bg-gray-200">
+                  <td className="px-2 py-1 font-medium border border-gray-300">Cleaned %</td>
                   {data.blocks.map(block => (
                     block.inverters.map(inverter => (
-                      <td key={`percent-${block.id}-${inverter.id}`} className={cn("px-2 py-1 text-center border border-gray-300 bg-green-100", getColumnWidth(`${block.id}-${inverter.id}`))}>
-                        {inverter.modulesCleaned}
+                      <td key={`percent-${block.id}-${inverter.id}`} className={cn("px-2 py-1 text-center border border-gray-300", getColumnWidth(`${block.id}-${inverter.id}`))}>
+                        {Math.round((inverter.modulesCleaned / inverter.totalModules) * 100)}%
                       </td>
                     ))
                   ))}
                   <td className="px-2 py-1 border border-gray-300"></td>
                 </tr>
 
-                <tr className="bg-blue-50">
+                <tr className="bg-gray-200">
                   <td className="px-2 py-1 font-medium border border-gray-300">
                     <Popover>
                       <PopoverTrigger asChild>
@@ -209,7 +209,7 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
                     block.inverters.map(inverter => {
                       const key = `${block.id}-${inverter.id}`;
                       return (
-                        <td key={`input-${key}`} className={cn("px-2 py-1 text-center border border-gray-300 bg-blue-100", getColumnWidth(key))}>
+                        <td key={`input-${key}`} className={cn("px-2 py-1 text-center border border-gray-300", getColumnWidth(key))}>
                           <input 
                             type="number" 
                             className="w-full h-6 text-center text-xs border-0 bg-transparent focus:bg-white"
@@ -220,7 +220,7 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
                       );
                     })
                   ))}
-                  <td className="px-2 py-1 border border-gray-300 bg-blue-100">
+                  <td className="px-2 py-1 border border-gray-300">
                     <textarea 
                       className="w-full h-6 text-xs border-0 bg-transparent focus:bg-white resize-none"
                       style={{ minHeight: '24px', whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
