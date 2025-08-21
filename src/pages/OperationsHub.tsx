@@ -11,6 +11,7 @@ import { ComingSoonTab } from "@/components/operations/ComingSoonTab";
 import { AllOperationsSummary } from "@/components/operations/AllOperationsSummary";
 import { useClientContext } from "@/contexts/ClientContext";
 import { mockSites } from "@/data/mockGenerationData";
+
 const getOperationsForSite = (siteId: string | null, siteName: string | null) => {
   const baseOperations = [{
     id: 'grass-cutting',
@@ -79,6 +80,7 @@ const getOperationsForSite = (siteId: string | null, siteName: string | null) =>
   });
   return baseOperations;
 };
+
 export default function OperationsHub() {
   const [activeTab, setActiveTab] = useState('grass-cutting');
   const {
@@ -110,7 +112,8 @@ export default function OperationsHub() {
         return null;
     }
   };
-  return <div className="h-full flex flex-col">
+
+  return <div className="min-h-screen w-full flex flex-col">
       {/* Top Navigation Bar */}
       <div className="bg-[hsl(var(--verdo-navy))] text-white px-6 py-4 flex items-center justify-between">
         <div>
