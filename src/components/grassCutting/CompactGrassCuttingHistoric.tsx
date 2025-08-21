@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { format, parseISO, parse } from "date-fns";
 import { Calendar, Filter, ChevronDown, ChevronRight, Search, Save, Download, Edit } from "lucide-react";
@@ -8,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { GrassCuttingSiteData, GrassCuttingHistoricEntry } from "@/types/grassCutting";
 import { CollapsibleBlockHeader } from "./CollapsibleBlockHeader";
@@ -179,15 +181,43 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
             </div>
           )}
           <div className="flex flex-col items-center">
-            <Button 
-              onClick={() => setIsEditMode(!isEditMode)} 
-              variant="outline" 
-              size="sm" 
-              className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0"
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-            <span className="text-xs mt-1">Edit</span>
+            {isEditMode ? (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0"
+                  >
+                    <Save className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Save Changes</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to save all changes to the historic grass cutting data? This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleSaveChanges}>
+                      Save Changes
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            ) : (
+              <Button 
+                onClick={() => setIsEditMode(true)} 
+                variant="outline" 
+                size="sm" 
+                className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0"
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            )}
+            <span className="text-xs mt-1">{isEditMode ? 'Save' : 'Edit'}</span>
           </div>
           <div className="flex flex-col items-center">
             <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
