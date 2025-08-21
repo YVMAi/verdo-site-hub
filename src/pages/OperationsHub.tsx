@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -183,17 +182,29 @@ export default function OperationsHub() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
           <div className="border-b bg-gray-50/50 px-4 py-2">
             <ScrollArea className="w-full">
-              <TabsList className="inline-flex h-auto p-0 gap-1 bg-transparent w-max">
-                {operations.map(operation => {
-                const IconComponent = operation.icon;
-                return <TabsTrigger key={operation.id} value={operation.id} disabled={!operation.enabled} className={`flex items-center gap-2 h-8 px-3 data-[state=active]:bg-[hsl(var(--verdo-navy))] data-[state=active]:text-white data-[state=active]:shadow-sm border data-[state=active]:border-[hsl(var(--verdo-navy))] text-gray-600 text-xs whitespace-nowrap min-w-[120px] ${!operation.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                      <IconComponent className="w-4 h-4" />
-                      <span className="font-medium">{operation.name}</span>
-                      {getStatusIcon(operation.status, operation.enabled)}
-                    </TabsTrigger>;
-              })}
-              </TabsList>
-              <ScrollBar orientation="horizontal" />
+              <div className="flex w-max">
+                <TabsList className="inline-flex h-auto p-0 gap-1 bg-transparent">
+                  {operations.map((operation, index) => {
+                    const IconComponent = operation.icon;
+                    return <TabsTrigger 
+                      key={operation.id} 
+                      value={operation.id} 
+                      disabled={!operation.enabled} 
+                      className={`flex items-center gap-2 h-8 px-3 data-[state=active]:bg-[hsl(var(--verdo-navy))] data-[state=active]:text-white data-[state=active]:shadow-sm border data-[state=active]:border-[hsl(var(--verdo-navy))] text-gray-600 text-xs whitespace-nowrap min-w-[160px] ${!operation.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      style={{ 
+                        width: `${100/5}%`,
+                        minWidth: '160px',
+                        flexShrink: 0
+                      }}
+                    >
+                        <IconComponent className="w-4 h-4" />
+                        <span className="font-medium">{operation.name}</span>
+                        {getStatusIcon(operation.status, operation.enabled)}
+                      </TabsTrigger>;
+                  })}
+                </TabsList>
+              </div>
+              <ScrollBar orientation="horizontal" className="h-2" />
             </ScrollArea>
           </div>
 
