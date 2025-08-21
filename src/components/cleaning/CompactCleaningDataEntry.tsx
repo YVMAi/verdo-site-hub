@@ -179,7 +179,7 @@ export const CompactCleaningDataEntry: React.FC<CompactCleaningDataEntryProps> =
                   <td className="px-2 py-1 border border-gray-300"></td>
                 </tr>
 
-                <tr className="bg-gray-200">
+                <tr className="bg-blue-100">
                   <td className="px-2 py-1 font-medium border border-gray-300">
                     <Popover>
                       <PopoverTrigger asChild>
