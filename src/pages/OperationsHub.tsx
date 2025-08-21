@@ -1,180 +1,256 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { 
-  Wrench, 
-  Scissors, 
-  Sparkles, 
-  Search, 
-  Cable,
-  Shield,
-  Bot,
-  Radar,
-  Zap,
-  AlertTriangle
-} from "lucide-react";
-import { AllOperationsSummary } from "@/components/operations/AllOperationsSummary";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Scissors, Droplets, Search, Leaf, CheckCircle2, Clock, BarChart3, Circle, Lock, Wrench, Package, FileText, MapPin, Shield, Bot, Satellite, Zap, AlertTriangle } from "lucide-react";
 import { GrassCuttingTab } from "@/components/operations/GrassCuttingTab";
 import { CleaningTab } from "@/components/operations/CleaningTab";
 import { ComingSoonTab } from "@/components/operations/ComingSoonTab";
+import { AllOperationsSummary } from "@/components/operations/AllOperationsSummary";
+import { useClientContext } from "@/contexts/ClientContext";
+import { mockSites } from "@/data/mockGenerationData";
 
-const operations = [
-  { 
-    id: "all", 
-    name: "All Operations Summary", 
-    icon: Wrench, 
-    enabled: true, 
-    status: "active" as const 
-  },
-  { 
-    id: "grass-cutting", 
-    name: "Grass Cutting", 
-    icon: Scissors, 
-    enabled: true, 
-    status: "active" as const 
-  },
-  { 
-    id: "cleaning", 
-    name: "Cleaning", 
-    icon: Sparkles, 
-    enabled: true, 
-    status: "active" as const 
-  },
-  { 
-    id: "field-inspection", 
-    name: "Field Inspection", 
-    icon: Search, 
-    enabled: false, 
-    status: "inactive" as const 
-  },
-  { 
-    id: "vegetation", 
-    name: "Vegetation", 
-    icon: Cable, 
-    enabled: false, 
-    status: "inactive" as const 
-  },
-  { 
-    id: "theft-incident", 
-    name: "Theft Incident Summary", 
-    icon: Shield, 
-    enabled: false, 
-    status: "inactive" as const 
-  },
-  { 
-    id: "robot-operation", 
-    name: "Robot Operation", 
-    icon: Bot, 
-    enabled: false, 
-    status: "inactive" as const 
-  },
-  { 
-    id: "tracker-operation", 
-    name: "Tracker Operation", 
-    icon: Radar, 
-    enabled: false, 
-    status: "inactive" as const 
-  },
-  { 
-    id: "string-monitoring", 
-    name: "String Monitoring", 
-    icon: Zap, 
-    enabled: false, 
-    status: "inactive" as const 
-  },
-  { 
-    id: "major-breakdown", 
-    name: "Major Breakdown", 
-    icon: AlertTriangle, 
-    enabled: false, 
-    status: "inactive" as const 
+const getOperationsForSite = (siteId: string | null, siteName: string | null) => {
+  const baseOperations = [{
+    id: 'grass-cutting',
+    name: 'Grass Cutting',
+    icon: Scissors,
+    status: 'completed',
+    description: 'Track and manage grass cutting operations',
+    enabled: true
+  }, {
+    id: 'cleaning',
+    name: 'Cleaning',
+    icon: Droplets,
+    status: 'in-progress',
+    description: 'Monitor solar panel cleaning activities',
+    enabled: true
+  }, {
+    id: 'inspection',
+    name: 'Inspection',
+    icon: Search,
+    status: 'pending',
+    description: 'Field inspection and maintenance logs',
+    enabled: false
+  }, {
+    id: 'vegetation',
+    name: 'Vegetation Control',
+    icon: Leaf,
+    status: 'pending',
+    description: 'Vegetation management and control',
+    enabled: false
+  }, {
+    id: 'theft-incident',
+    name: 'Theft Incident Summary',
+    icon: Shield,
+    status: 'pending',
+    description: 'Security incident tracking and reporting',
+    enabled: false
+  }, {
+    id: 'robot-operation',
+    name: 'Robot Operation',
+    icon: Bot,
+    status: 'pending',
+    description: 'Automated robot operations monitoring',
+    enabled: false
+  }, {
+    id: 'tracker-operation',
+    name: 'Tracker Operation',
+    icon: Satellite,
+    status: 'pending',
+    description: 'Solar tracker system operations',
+    enabled: false
+  }, {
+    id: 'string-monitoring',
+    name: 'String Monitoring',
+    icon: Zap,
+    status: 'pending',
+    description: 'String performance and monitoring',
+    enabled: false
+  }, {
+    id: 'major-breakdown',
+    name: 'Major Breakdown',
+    icon: AlertTriangle,
+    status: 'pending',
+    description: 'Major equipment failure tracking',
+    enabled: false
+  }];
+
+  // Check if this is "Desert Solar Farm B" (site id '2') - show all tabs
+  if (siteName === 'Desert Solar Farm B' || siteId === '2') {
+    baseOperations.push({
+      id: 'ppm-tracking',
+      name: 'PPM Tracking',
+      icon: Wrench,
+      status: 'pending',
+      description: 'Preventive maintenance tracking',
+      enabled: false
+    }, {
+      id: 'spare-tracking',
+      name: 'Spare Tracking',
+      icon: Package,
+      status: 'pending',
+      description: 'Spare parts inventory management',
+      enabled: false
+    }, {
+      id: 'pod',
+      name: 'POD',
+      icon: FileText,
+      status: 'pending',
+      description: 'Proof of delivery documentation',
+      enabled: false
+    });
   }
-];
 
-const getStatusIcon = (status: "active" | "inactive", enabled: boolean) => {
-  if (!enabled) return null;
-  return (
-    <div className={`w-2 h-2 rounded-full ${
-      status === "active" ? "bg-green-500" : "bg-gray-400"
-    }`} />
-  );
+  // Always add summary tab at the end
+  baseOperations.push({
+    id: 'summary',
+    name: 'Summary',
+    icon: BarChart3,
+    status: 'available',
+    description: 'Review and export all operations',
+    enabled: false
+  });
+  return baseOperations;
 };
 
-const OperationsHub = () => {
-  const [activeTab, setActiveTab] = useState("all");
+export default function OperationsHub() {
+  const [activeTab, setActiveTab] = useState('grass-cutting');
+  const {
+    selectedClient,
+    selectedSite,
+    setSelectedSite
+  } = useClientContext();
+  const operations = getOperationsForSite(selectedSite?.id || null, selectedSite?.name || null);
+  const completedOperations = operations.filter(op => op.status === 'completed').length;
+  const totalOperations = operations.length - 1; // Exclude summary tab
+  const progressPercentage = completedOperations / totalOperations * 100;
+  const availableSites = selectedClient ? mockSites.filter(site => site.clientId === selectedClient.id) : [];
+  const handleSiteChange = (siteId: string) => {
+    const site = availableSites.find(s => s.id === siteId) || null;
+    setSelectedSite(site);
+  };
+  const getStatusIcon = (status: string, enabled: boolean) => {
+    if (!enabled) {
+      return <Lock className="w-3 h-3 text-gray-400" />;
+    }
+    switch (status) {
+      case 'completed':
+        return <CheckCircle2 className="w-3 h-3 text-green-500" />;
+      case 'in-progress':
+        return <Clock className="w-3 h-3 text-yellow-500" />;
+      case 'pending':
+        return <Circle className="w-3 h-3 text-gray-400" />;
+      default:
+        return null;
+    }
+  };
 
-  return (
-    <div className="flex h-full bg-gray-50">
+  return <div className="min-h-screen w-full flex flex-col">
+      {/* Top Navigation Bar */}
+      <div className="bg-[hsl(var(--verdo-navy))] text-white px-6 py-4 flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold">Operations Hub</h1>
+          <p className="text-sm text-white/80">Centralized daily operations management</p>
+        </div>
+        
+        <div className="flex items-center gap-4">
+          {/* Site Selector */}
+          <div className="flex items-center gap-2 min-w-[300px]">
+            
+            <Select onValueChange={handleSiteChange} disabled={!selectedClient} value={selectedSite?.id || ""}>
+              <SelectTrigger className="bg-white/10 border-white/20 text-white h-8 text-sm">
+                <SelectValue placeholder={selectedClient ? "Select a site..." : "Select client from sidebar first"} />
+              </SelectTrigger>
+              <SelectContent>
+                {availableSites.map(site => <SelectItem key={site.id} value={site.id} className="text-sm">
+                    {site.name}
+                  </SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Progress Tracker */}
+          
+        </div>
+      </div>
+
+      {/* Scrollable Operations Tabs */}
       <div className="flex-1 bg-white">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
           <div className="border-b bg-gray-50/50 px-4 py-2">
             <ScrollArea className="w-full">
               <TabsList className="inline-flex h-auto p-0 gap-1 bg-transparent w-max">
-                {operations.map((operation) => {
-                  const IconComponent = operation.icon;
-                  return (
-                    <TabsTrigger 
-                      key={operation.id} 
-                      value={operation.id} 
-                      disabled={!operation.enabled} 
-                      className={`flex items-center gap-2 h-8 px-3 data-[state=active]:bg-[hsl(var(--verdo-navy))] data-[state=active]:text-white data-[state=active]:shadow-sm border data-[state=active]:border-[hsl(var(--verdo-navy))] text-gray-600 text-xs whitespace-nowrap min-w-[160px] flex-shrink-0 ${!operation.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
+                {operations.map(operation => {
+                const IconComponent = operation.icon;
+                return <TabsTrigger key={operation.id} value={operation.id} disabled={!operation.enabled} className={`flex items-center gap-2 h-8 px-3 data-[state=active]:bg-[hsl(var(--verdo-navy))] data-[state=active]:text-white data-[state=active]:shadow-sm border data-[state=active]:border-[hsl(var(--verdo-navy))] text-gray-600 text-xs whitespace-nowrap min-w-[120px] ${!operation.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
                       <IconComponent className="w-4 h-4" />
                       <span className="font-medium">{operation.name}</span>
                       {getStatusIcon(operation.status, operation.enabled)}
-                    </TabsTrigger>
-                  );
-                })}
+                    </TabsTrigger>;
+              })}
               </TabsList>
-              <ScrollBar orientation="horizontal" className="h-2" />
+              <ScrollBar orientation="horizontal" />
             </ScrollArea>
           </div>
 
-          <div className="flex-1 overflow-auto">
-            <TabsContent value="all" className="h-full m-0">
-              <AllOperationsSummary />
-            </TabsContent>
-            
-            <TabsContent value="grass-cutting" className="h-full m-0">
+          <div className="flex-1 overflow-hidden">
+            <TabsContent value="grass-cutting" className="h-full m-0 p-3">
               <GrassCuttingTab />
             </TabsContent>
-            
-            <TabsContent value="cleaning" className="h-full m-0">
+
+            <TabsContent value="cleaning" className="h-full m-0 p-3">
               <CleaningTab />
             </TabsContent>
-            
-            <TabsContent value="field-inspection" className="h-full m-0">
-              <ComingSoonTab title="Field Inspection" />
+
+            <TabsContent value="inspection" className="h-full m-0 p-3">
+              <ComingSoonTab title="Field Inspection" description="Comprehensive field inspection and maintenance logging system" icon={Search} />
             </TabsContent>
-            
-            <TabsContent value="vegetation" className="h-full m-0">
-              <ComingSoonTab title="Vegetation Management" />
+
+            <TabsContent value="vegetation" className="h-full m-0 p-3">
+              <ComingSoonTab title="Vegetation Control" description="Advanced vegetation management and control operations" icon={Leaf} />
             </TabsContent>
-            
-            <TabsContent value="theft-incident" className="h-full m-0">
-              <ComingSoonTab title="Theft Incident Summary" />
+
+            <TabsContent value="theft-incident" className="h-full m-0 p-3">
+              <ComingSoonTab title="Theft Incident Summary" description="Security incident tracking and comprehensive reporting system" icon={Shield} />
             </TabsContent>
-            
-            <TabsContent value="robot-operation" className="h-full m-0">
-              <ComingSoonTab title="Robot Operation" />
+
+            <TabsContent value="robot-operation" className="h-full m-0 p-3">
+              <ComingSoonTab title="Robot Operation" description="Automated robot operations monitoring and control center" icon={Bot} />
             </TabsContent>
-            
-            <TabsContent value="tracker-operation" className="h-full m-0">
-              <ComingSoonTab title="Tracker Operation" />
+
+            <TabsContent value="tracker-operation" className="h-full m-0 p-3">
+              <ComingSoonTab title="Tracker Operation" description="Solar tracker system operations and performance monitoring" icon={Satellite} />
             </TabsContent>
-            
-            <TabsContent value="string-monitoring" className="h-full m-0">
-              <ComingSoonTab title="String Monitoring" />
+
+            <TabsContent value="string-monitoring" className="h-full m-0 p-3">
+              <ComingSoonTab title="String Monitoring" description="Real-time string performance monitoring and analysis" icon={Zap} />
             </TabsContent>
-            
-            <TabsContent value="major-breakdown" className="h-full m-0">
-              <ComingSoonTab title="Major Breakdown" />
+
+            <TabsContent value="major-breakdown" className="h-full m-0 p-3">
+              <ComingSoonTab title="Major Breakdown" description="Major equipment failure tracking and incident management" icon={AlertTriangle} />
+            </TabsContent>
+
+            <TabsContent value="ppm-tracking" className="h-full m-0 p-3">
+              <ComingSoonTab title="PPM Tracking" description="Preventive maintenance planning and tracking system" icon={Wrench} />
+            </TabsContent>
+
+            <TabsContent value="spare-tracking" className="h-full m-0 p-3">
+              <ComingSoonTab title="Spare Tracking" description="Spare parts inventory and usage tracking" icon={Package} />
+            </TabsContent>
+
+            <TabsContent value="pod" className="h-full m-0 p-3">
+              <ComingSoonTab title="POD" description="Proof of delivery documentation and management" icon={FileText} />
+            </TabsContent>
+
+            <TabsContent value="summary" className="h-full m-0 p-3">
+              <AllOperationsSummary />
             </TabsContent>
           </div>
         </Tabs>
       </div>
-    </div>
-  );
-};
-
-export default OperationsHub;
+    </div>;
+}
