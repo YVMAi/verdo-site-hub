@@ -180,33 +180,31 @@ export default function OperationsHub() {
       <div className="flex-1 bg-white overflow-hidden">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
           {/* Horizontally Scrollable Tab Strip - Fixed Height */}
-          <div className="border-b bg-gray-50/50 px-4 py-2 flex-shrink-0 overscroll-x-contain">
-            <ScrollArea className="w-full" type="scroll">
-              <div className="flex min-w-max">
-                <TabsList className="inline-flex h-auto p-0 gap-1 bg-transparent w-max">
-                  {operations.map(operation => {
-                    const IconComponent = operation.icon;
-                    return (
-                      <TabsTrigger 
-                        key={operation.id} 
-                        value={operation.id} 
-                        disabled={!operation.enabled} 
-                        className={`flex items-center gap-2 h-8 px-3 data-[state=active]:bg-[hsl(var(--verdo-navy))] data-[state=active]:text-white data-[state=active]:shadow-sm border data-[state=active]:border-[hsl(var(--verdo-navy))] text-gray-600 text-xs whitespace-nowrap min-w-[140px] flex-shrink-0 ${!operation.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      >
-                        <IconComponent className="w-4 h-4 flex-shrink-0" />
-                        <span className="font-medium">{operation.name}</span>
-                        {getStatusIcon(operation.status, operation.enabled)}
-                      </TabsTrigger>
-                    );
-                  })}
-                </TabsList>
-              </div>
+          <div className="border-b bg-gray-50/50 px-4 py-2 flex-shrink-0">
+            <ScrollArea className="w-full whitespace-nowrap" type="always">
+              <TabsList className="inline-flex h-auto p-0 gap-1 bg-transparent w-max">
+                {operations.map(operation => {
+                  const IconComponent = operation.icon;
+                  return (
+                    <TabsTrigger 
+                      key={operation.id} 
+                      value={operation.id} 
+                      disabled={!operation.enabled} 
+                      className={`flex items-center gap-2 h-8 px-3 data-[state=active]:bg-[hsl(var(--verdo-navy))] data-[state=active]:text-white data-[state=active]:shadow-sm border data-[state=active]:border-[hsl(var(--verdo-navy))] text-gray-600 text-xs whitespace-nowrap min-w-[140px] flex-shrink-0 ${!operation.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      <IconComponent className="w-4 h-4 flex-shrink-0" />
+                      <span className="font-medium">{operation.name}</span>
+                      {getStatusIcon(operation.status, operation.enabled)}
+                    </TabsTrigger>
+                  );
+                })}
+              </TabsList>
               <ScrollBar orientation="horizontal" className="h-2" />
             </ScrollArea>
           </div>
 
           {/* Fixed Main Content Area - Scrollable Independently */}
-          <div className="flex-1 overflow-auto overscroll-y-auto">
+          <div className="flex-1 overflow-auto">
             <TabsContent value="grass-cutting" className="h-full m-0 p-3">
               <GrassCuttingTab />
             </TabsContent>
