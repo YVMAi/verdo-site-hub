@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Scissors, Droplets, Search, Leaf, CheckCircle2, Clock, BarChart3, Circle, Lock, Wrench, Package, FileText, MapPin } from "lucide-react";
+import { Scissors, Droplets, Search, Leaf, CheckCircle2, Clock, BarChart3, Circle, Lock, Wrench, Package, FileText, MapPin, Shield, Bot, Satellite, Zap, AlertTriangle } from "lucide-react";
 import { GrassCuttingTab } from "@/components/operations/GrassCuttingTab";
 import { CleaningTab } from "@/components/operations/CleaningTab";
 import { ComingSoonTab } from "@/components/operations/ComingSoonTab";
@@ -40,6 +41,41 @@ const getOperationsForSite = (siteId: string | null, siteName: string | null) =>
     icon: Leaf,
     status: 'pending',
     description: 'Vegetation management and control',
+    enabled: false
+  }, {
+    id: 'theft-incident',
+    name: 'Theft Incident Summary',
+    icon: Shield,
+    status: 'pending',
+    description: 'Security incident tracking and reporting',
+    enabled: false
+  }, {
+    id: 'robot-operation',
+    name: 'Robot Operation',
+    icon: Bot,
+    status: 'pending',
+    description: 'Automated robot operations monitoring',
+    enabled: false
+  }, {
+    id: 'tracker-operation',
+    name: 'Tracker Operation',
+    icon: Satellite,
+    status: 'pending',
+    description: 'Solar tracker system operations',
+    enabled: false
+  }, {
+    id: 'string-monitoring',
+    name: 'String Monitoring',
+    icon: Zap,
+    status: 'pending',
+    description: 'String performance and monitoring',
+    enabled: false
+  }, {
+    id: 'major-breakdown',
+    name: 'Major Breakdown',
+    icon: AlertTriangle,
+    status: 'pending',
+    description: 'Major equipment failure tracking',
     enabled: false
   }];
 
@@ -146,11 +182,11 @@ export default function OperationsHub() {
       <div className="flex-1 bg-white">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
           <div className="border-b bg-gray-50/50 px-4 py-2">
-            <ScrollArea className="w-full whitespace-nowrap">
+            <ScrollArea className="w-full">
               <TabsList className="inline-flex h-auto p-0 gap-1 bg-transparent w-max">
                 {operations.map(operation => {
                 const IconComponent = operation.icon;
-                return <TabsTrigger key={operation.id} value={operation.id} disabled={!operation.enabled} className={`flex items-center gap-2 h-8 px-3 data-[state=active]:bg-[hsl(var(--verdo-navy))] data-[state=active]:text-white data-[state=active]:shadow-sm border data-[state=active]:border-[hsl(var(--verdo-navy))] text-gray-600 text-xs whitespace-nowrap ${!operation.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                return <TabsTrigger key={operation.id} value={operation.id} disabled={!operation.enabled} className={`flex items-center gap-2 h-8 px-3 data-[state=active]:bg-[hsl(var(--verdo-navy))] data-[state=active]:text-white data-[state=active]:shadow-sm border data-[state=active]:border-[hsl(var(--verdo-navy))] text-gray-600 text-xs whitespace-nowrap min-w-[120px] ${!operation.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
                       <IconComponent className="w-4 h-4" />
                       <span className="font-medium">{operation.name}</span>
                       {getStatusIcon(operation.status, operation.enabled)}
@@ -176,6 +212,26 @@ export default function OperationsHub() {
 
             <TabsContent value="vegetation" className="h-full m-0 p-3">
               <ComingSoonTab title="Vegetation Control" description="Advanced vegetation management and control operations" icon={Leaf} />
+            </TabsContent>
+
+            <TabsContent value="theft-incident" className="h-full m-0 p-3">
+              <ComingSoonTab title="Theft Incident Summary" description="Security incident tracking and comprehensive reporting system" icon={Shield} />
+            </TabsContent>
+
+            <TabsContent value="robot-operation" className="h-full m-0 p-3">
+              <ComingSoonTab title="Robot Operation" description="Automated robot operations monitoring and control center" icon={Bot} />
+            </TabsContent>
+
+            <TabsContent value="tracker-operation" className="h-full m-0 p-3">
+              <ComingSoonTab title="Tracker Operation" description="Solar tracker system operations and performance monitoring" icon={Satellite} />
+            </TabsContent>
+
+            <TabsContent value="string-monitoring" className="h-full m-0 p-3">
+              <ComingSoonTab title="String Monitoring" description="Real-time string performance monitoring and analysis" icon={Zap} />
+            </TabsContent>
+
+            <TabsContent value="major-breakdown" className="h-full m-0 p-3">
+              <ComingSoonTab title="Major Breakdown" description="Major equipment failure tracking and incident management" icon={AlertTriangle} />
             </TabsContent>
 
             <TabsContent value="ppm-tracking" className="h-full m-0 p-3">
