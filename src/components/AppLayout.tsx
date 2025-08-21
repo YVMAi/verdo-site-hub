@@ -29,13 +29,11 @@ export function AppLayout({ children }: AppLayoutProps) {
           )}
 
           {/* Desktop Trigger - Outside of sidebar */}
-          {!isOperationsPage && (
-            <div className="hidden md:block fixed top-4 left-4 z-50">
-              <SidebarTrigger className="bg-white shadow-lg border border-gray-200 hover:bg-gray-50 rounded-lg p-2">
-                <Menu className="w-5 h-5 text-gray-600" />
-              </SidebarTrigger>
-            </div>
-          )}
+          <div className="hidden md:block fixed top-4 left-4 z-50">
+            <SidebarTrigger className="bg-white shadow-lg border border-gray-200 hover:bg-gray-50 rounded-lg p-2">
+              <Menu className="w-5 h-5 text-gray-600" />
+            </SidebarTrigger>
+          </div>
 
           {/* Main Content */}
           <main className={isOperationsPage ? "flex-1" : "flex-1 p-6 md:p-8 md:pl-16"}>
