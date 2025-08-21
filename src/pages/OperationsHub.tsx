@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Scissors, Droplets, Search, Leaf, CheckCircle2, Clock, BarChart3, Circle, Lock, Wrench, Package, FileText, MapPin, Shield, Bot, Satellite, Zap, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Scissors, Droplets, Search, Leaf, CheckCircle2, Clock, BarChart3, Circle, Lock, Wrench, Package, FileText, MapPin, Shield, Bot, Satellite, Zap, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
 import { GrassCuttingTab } from "@/components/operations/GrassCuttingTab";
 import { CleaningTab } from "@/components/operations/CleaningTab";
 import { ComingSoonTab } from "@/components/operations/ComingSoonTab";
@@ -118,20 +118,42 @@ const getOperationsForSite = (siteId: string | null, siteName: string | null) =>
 
 export default function OperationsHub() {
   const [activeTab, setActiveTab] = useState('grass-cutting');
+  const [currentTabIndex, setCurrentTabIndex] = useState(0);
+  const tabsPerPage = 5;
+  
   const {
     selectedClient,
     selectedSite,
     setSelectedSite
   } = useClientContext();
+  
   const operations = getOperationsForSite(selectedSite?.id || null, selectedSite?.name || null);
   const completedOperations = operations.filter(op => op.status === 'completed').length;
   const totalOperations = operations.length - 1; // Exclude summary tab
   const progressPercentage = completedOperations / totalOperations * 100;
   const availableSites = selectedClient ? mockSites.filter(site => site.clientId === selectedClient.id) : [];
+  
+  const totalPages = Math.ceil(operations.length / tabsPerPage);
+  const visibleOperations = operations.slice(currentTabIndex, currentTabIndex + tabsPerPage);
+  
   const handleSiteChange = (siteId: string) => {
     const site = availableSites.find(s => s.id === siteId) || null;
     setSelectedSite(site);
+    setCurrentTabIndex(0); // Reset to first page when site changes
   };
+
+  const handlePrevious = () => {
+    if (currentTabIndex > 0) {
+      setCurrentTabIndex(Math.max(0, currentTabIndex - tabsPerPage));
+    }
+  };
+
+  const handleNext = () => {
+    if (currentTabIndex + tabsPerPage < operations.length) {
+      setCurrentTabIndex(Math.min(operations.length - tabsPerPage, currentTabIndex + tabsPerPage));
+    }
+  };
+
   const getStatusIcon = (status: string, enabled: boolean) => {
     if (!enabled) {
       return <Lock className="w-3 h-3 text-gray-400" />;
@@ -176,31 +198,56 @@ export default function OperationsHub() {
         </div>
       </div>
 
-      {/* Fixed Scrollable Operations Tabs */}
+      {/* Tab Navigation with Arrows */}
       <div className="flex-1 bg-white overflow-hidden">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-          {/* Horizontally Scrollable Tab Strip - Fixed Height */}
           <div className="border-b bg-gray-50/50 px-4 py-2 flex-shrink-0">
-            <ScrollArea className="w-full whitespace-nowrap" type="always">
-              <TabsList className="inline-flex h-auto p-0 gap-1 bg-transparent w-max">
-                {operations.map(operation => {
-                  const IconComponent = operation.icon;
-                  return (
-                    <TabsTrigger 
-                      key={operation.id} 
-                      value={operation.id} 
-                      disabled={!operation.enabled} 
-                      className={`flex items-center gap-2 h-8 px-3 data-[state=active]:bg-[hsl(var(--verdo-navy))] data-[state=active]:text-white data-[state=active]:shadow-sm border data-[state=active]:border-[hsl(var(--verdo-navy))] text-gray-600 text-xs whitespace-nowrap min-w-[140px] flex-shrink-0 ${!operation.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
-                      <IconComponent className="w-4 h-4 flex-shrink-0" />
-                      <span className="font-medium">{operation.name}</span>
-                      {getStatusIcon(operation.status, operation.enabled)}
-                    </TabsTrigger>
-                  );
-                })}
-              </TabsList>
-              <ScrollBar orientation="horizontal" className="h-2" />
-            </ScrollArea>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 flex-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handlePrevious}
+                  disabled={currentTabIndex === 0}
+                  className="h-8 w-8 p-0 hover:bg-gray-200"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+
+                <TabsList className="flex h-auto p-0 gap-1 bg-transparent flex-1">
+                  {visibleOperations.map(operation => {
+                    const IconComponent = operation.icon;
+                    return (
+                      <TabsTrigger 
+                        key={operation.id} 
+                        value={operation.id} 
+                        disabled={!operation.enabled} 
+                        className={`flex items-center gap-2 h-8 px-3 data-[state=active]:bg-[hsl(var(--verdo-navy))] data-[state=active]:text-white data-[state=active]:shadow-sm border data-[state=active]:border-[hsl(var(--verdo-navy))] text-gray-600 text-xs whitespace-nowrap flex-1 ${!operation.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        <IconComponent className="w-4 h-4 flex-shrink-0" />
+                        <span className="font-medium truncate">{operation.name}</span>
+                        {getStatusIcon(operation.status, operation.enabled)}
+                      </TabsTrigger>
+                    );
+                  })}
+                </TabsList>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleNext}
+                  disabled={currentTabIndex + tabsPerPage >= operations.length}
+                  className="h-8 w-8 p-0 hover:bg-gray-200"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+
+              {/* Page indicator */}
+              <div className="text-xs text-gray-500 ml-4">
+                {Math.floor(currentTabIndex / tabsPerPage) + 1} / {totalPages}
+              </div>
+            </div>
           </div>
 
           {/* Fixed Main Content Area - Scrollable Independently */}
