@@ -1,257 +1,297 @@
-
-import React, { useState } from 'react';
-import { format } from "date-fns";
-import { CalendarIcon, Save, FileText, Table } from "lucide-react";
-import { GrassCuttingSiteData } from "@/types/grassCutting";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { BulkUploadModal } from "./BulkUploadModal";
-import { GrassCuttingForm } from "./GrassCuttingForm";
-import { cn } from "@/lib/utils";
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Save, Edit, Upload } from 'lucide-react';
+import { GrassCuttingSiteData, GrassCuttingEntry } from '@/types/grassCutting';
+import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { BulkUploadModal } from './BulkUploadModal';
+import { ConfirmationDialog } from '@/components/common/ConfirmationDialog';
 
 interface CompactGrassCuttingDataEntryProps {
   data: GrassCuttingSiteData | null;
-  onDataChange?: (data: GrassCuttingSiteData) => void;
 }
 
-export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntryProps> = ({ data, onDataChange }) => {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [inputValues, setInputValues] = useState<{[key: string]: string}>({});
-  const [rainfall, setRainfall] = useState<string>("");
-  const [remarks, setRemarks] = useState<string>("");
-  const [viewMode, setViewMode] = useState<"form" | "table">("form");
+export const CompactGrassCuttingDataEntry: React.FC<CompactGrassCuttingDataEntryProps> = ({ data }) => {
+  const [entries, setEntries] = useState<GrassCuttingEntry[]>([]);
+  const [editedData, setEditedData] = useState<Record<string, any>>({});
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  const [sortColumn, setSortColumn] = useState<string>('date');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [filterValue, setFilterValue] = useState('');
+  const { toast } = useToast();
+  const [showBulkUploadModal, setShowBulkUploadModal] = useState(false);
+  const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
 
-  if (!data) {
-    return (
-      <div className="bg-white rounded border p-4 text-center text-gray-500 text-sm">
-        Select client and site to view data
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (data && data.entries) {
+      setEntries([...data.entries]);
+    } else {
+      setEntries([]);
+    }
+  }, [data]);
 
-  const handleInputChange = (key: string, value: string) => {
-    setInputValues(prev => ({ ...prev, [key]: value }));
+  const handleCellEdit = (id: string, columnId: string, value: any) => {
+    const key = `${id}-${columnId}`;
+    setEditedData(prev => ({ ...prev, [key]: value }));
   };
 
-  const handleSave = () => {
-    const dataToSave = {
-      date: format(selectedDate, "dd-MMM-yy"),
-      inverterData: inputValues,
-      rainfall,
-      remarks,
-      totalPlanned: Object.values(inputValues).reduce((sum, val) => sum + (parseInt(val) || 0), 0),
-      totalActual: Object.values(inputValues).reduce((sum, val) => sum + (parseInt(val) || 0), 0),
-    };
-    
-    console.log('Saving grass cutting data:', dataToSave);
-    if (onDataChange) {
-      // This would update the parent with the new data
+  const handleSort = (columnId: string) => {
+    if (sortColumn === columnId) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(columnId);
+      setSortDirection('asc');
     }
   };
 
-  const handleBulkUpload = (uploadedData: any[]) => {
-    console.log('Bulk upload data:', uploadedData);
-    uploadedData.forEach(row => {
-      if (row['Block-Inverter'] && row['Daily Grass Cutting']) {
-        setInputValues(prev => ({
-          ...prev,
-          [row['Block-Inverter']]: row['Daily Grass Cutting']
-        }));
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilterValue(e.target.value);
+  };
+
+  const filteredEntries = useMemo(() => {
+    return entries.filter(entry => {
+      if (!filterValue) return true;
+      const values = Object.values(entry).join(' ').toLowerCase();
+      return values.includes(filterValue.toLowerCase());
+    }).sort((a, b) => {
+      let aValue: any = a[sortColumn];
+      let bValue: any = b[sortColumn];
+
+      if (aValue === undefined || aValue === null) aValue = '';
+      if (bValue === undefined || bValue === null) bValue = '';
+
+      if (typeof aValue === 'string') aValue = aValue.toLowerCase();
+      if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+
+      if (sortDirection === 'asc') {
+        if (aValue < bValue) return -1;
+        if (aValue > bValue) return 1;
+        return 0;
+      } else {
+        if (aValue > bValue) return -1;
+        if (aValue < bValue) return 1;
+        return 0;
       }
-      if (row['Rainfall MM']) {
-        setRainfall(row['Rainfall MM']);
-      }
-      if (row['Remarks']) {
-        setRemarks(row['Remarks']);
-      }
-      if (row['Date']) {
-        try {
-          const date = new Date(row['Date']);
-          if (!isNaN(date.getTime())) {
-            setSelectedDate(date);
-          }
-        } catch (e) {
-          console.warn('Invalid date format:', row['Date']);
-        }
-      }
+    });
+  }, [entries, filterValue, sortColumn, sortDirection]);
+
+  const handleBulkUploadComplete = (newEntries: GrassCuttingEntry[]) => {
+    setEntries(newEntries);
+    setShowBulkUploadModal(false);
+    toast({
+      title: "Bulk Upload Complete",
+      description: `${newEntries.length} entries have been added.`,
     });
   };
 
-  const getColumnWidth = (key: string, defaultWidth: string = "w-16") => {
-    const value = inputValues[key] || "";
-    if (value.length > 8) return "w-24";
-    if (value.length > 4) return "w-20";
-    return defaultWidth;
+  const handleSaveClick = () => {
+    setShowSaveConfirmation(true);
   };
 
+  const handleConfirmSave = () => {
+    console.log('Saving grass cutting data:', editedData);
+    toast({
+      title: "Changes Saved",
+      description: "Grass cutting data has been updated successfully.",
+    });
+    setEditedData({});
+    setIsEditMode(false);
+    setShowSaveConfirmation(false);
+  };
+
+  const handleCancelSave = () => {
+    setShowSaveConfirmation(false);
+  };
+
+  const hasUnsavedChanges = Object.keys(editedData).length > 0;
+
   return (
-    <div className="bg-white rounded border">
-      <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <span>Enter Grass Cutting Data</span>
-          <ToggleGroup 
-            type="single" 
-            value={viewMode} 
-            onValueChange={(value) => value && setViewMode(value as "form" | "table")}
-            className="bg-white/10 rounded p-1"
-          >
-            <ToggleGroupItem 
-              value="form" 
-              size="sm"
-              className="text-white data-[state=on]:bg-white data-[state=on]:text-verdo-navy"
-            >
-              <FileText className="h-3 w-3 mr-1" />
-              Form
-            </ToggleGroupItem>
-            <ToggleGroupItem 
-              value="table" 
-              size="sm"
-              className="text-white data-[state=on]:bg-white data-[state=on]:text-verdo-navy"
-            >
-              <Table className="h-3 w-3 mr-1" />
-              Table
-            </ToggleGroupItem>
-          </ToggleGroup>
+    <>
+      <div className="bg-white rounded border">
+        <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
+          <span>Daily Grass Cutting Data Entry</span>
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col items-center">
+              <Button 
+                onClick={isEditMode ? handleSaveClick : () => setIsEditMode(true)} 
+                variant="outline" 
+                size="sm" 
+                className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0"
+              >
+                {isEditMode ? <Save className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
+              </Button>
+              <span className="text-xs mt-1">{isEditMode ? 'Save' : 'Edit'}</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <BulkUploadModal>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0"
+                >
+                  <Upload className="h-4 w-4" />
+                </Button>
+              </BulkUploadModal>
+              <span className="text-xs mt-1">Upload</span>
+            </div>
+          </div>
         </div>
-        <div className="flex gap-4">
-          <div className="flex flex-col items-center">
-            <BulkUploadModal onUpload={handleBulkUpload} />
-            <span className="text-xs mt-1">Upload</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <Button 
-              onClick={handleSave}
-              variant="outline"
-              size="sm" 
-              className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0"
-            >
-              <Save className="h-4 w-4" />
-            </Button>
-            <span className="text-xs mt-1">Save</span>
-          </div>
+
+        {/* Search and Filter Controls */}
+        <div className="px-3 py-2 bg-gray-50 border-b flex flex-wrap gap-2 items-center text-xs">
+          <Input
+            type="search"
+            placeholder="Search entries..."
+            value={filterValue}
+            onChange={handleFilterChange}
+            className="h-7 text-xs flex-1 min-w-[120px]"
+          />
+          <Badge variant="secondary">
+            {filteredEntries.length} Records
+          </Badge>
+          {isEditMode && (
+            <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300">
+              Edit Mode
+            </Badge>
+          )}
+          {hasUnsavedChanges && (
+            <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-300">
+              {Object.keys(editedData).length} Unsaved Changes
+            </Badge>
+          )}
+        </div>
+        
+        <div className="overflow-x-auto" style={{ maxHeight: '400px' }}>
+          <table className="w-full text-xs border-collapse">
+            <thead className="sticky top-0">
+              <tr className="bg-verdo-navy text-white">
+                <th 
+                  className="px-2 py-1 text-left font-medium border border-gray-300 min-w-[100px] cursor-pointer hover:bg-verdo-navy/80"
+                  onClick={() => handleSort('date')}
+                >
+                  <div className="flex items-center justify-between">
+                    Date
+                    {sortColumn === 'date' && (
+                      <span className="text-xs">
+                        {sortDirection === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </div>
+                </th>
+                <th 
+                  className="px-2 py-1 text-left font-medium border border-gray-300 min-w-[100px] cursor-pointer hover:bg-verdo-navy/80"
+                  onClick={() => handleSort('operator')}
+                >
+                  <div className="flex items-center justify-between">
+                    Operator
+                    {sortColumn === 'operator' && (
+                      <span className="text-xs">
+                        {sortDirection === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </div>
+                </th>
+                <th 
+                  className="px-2 py-1 text-left font-medium border border-gray-300 min-w-[100px] cursor-pointer hover:bg-verdo-navy/80"
+                  onClick={() => handleSort('duration')}
+                >
+                  <div className="flex items-center justify-between">
+                    Duration (hours)
+                    {sortColumn === 'duration' && (
+                      <span className="text-xs">
+                        {sortDirection === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </div>
+                </th>
+                <th 
+                  className="px-2 py-1 text-left font-medium border border-gray-300 min-w-[100px] cursor-pointer hover:bg-verdo-navy/80"
+                  onClick={() => handleSort('notes')}
+                >
+                  <div className="flex items-center justify-between">
+                    Notes
+                    {sortColumn === 'notes' && (
+                      <span className="text-xs">
+                        {sortDirection === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            
+            <tbody>
+              {filteredEntries.map((entry, index) => {
+                return (
+                  <tr key={entry.id} className={cn(
+                    "hover:bg-muted/20",
+                    index % 2 === 0 ? "bg-background" : "bg-muted/10"
+                  )}>
+                    <td className="px-2 py-1 border border-gray-300">
+                      <div className="text-xs py-1 px-2 bg-muted/50 rounded">
+                        {format(new Date(entry.date), 'yyyy-MM-dd')}
+                      </div>
+                    </td>
+                    <td className="px-2 py-1 border border-gray-300">
+                      <Input
+                        type="text"
+                        value={editedData[`${entry.id}-operator`] !== undefined ? editedData[`${entry.id}-operator`] : entry.operator}
+                        onChange={(e) => handleCellEdit(entry.id, 'operator', e.target.value)}
+                        className={cn(
+                          "h-6 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
+                          isEditMode && "bg-blue-100",
+                          editedData[`${entry.id}-operator`] !== undefined && "bg-yellow-50 border border-yellow-300"
+                        )}
+                        readOnly={!isEditMode}
+                      />
+                    </td>
+                    <td className="px-2 py-1 border border-gray-300">
+                      <Input
+                        type="number"
+                        value={editedData[`${entry.id}-duration`] !== undefined ? editedData[`${entry.id}-duration`] : entry.duration}
+                        onChange={(e) => handleCellEdit(entry.id, 'duration', e.target.value)}
+                        className={cn(
+                          "h-6 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
+                          isEditMode && "bg-blue-100",
+                          editedData[`${entry.id}-duration`] !== undefined && "bg-yellow-50 border border-yellow-300"
+                        )}
+                        readOnly={!isEditMode}
+                        step="0.5"
+                      />
+                    </td>
+                    <td className="px-2 py-1 border border-gray-300">
+                      <Input
+                        type="text"
+                        value={editedData[`${entry.id}-notes`] !== undefined ? editedData[`${entry.id}-notes`] : entry.notes}
+                        onChange={(e) => handleCellEdit(entry.id, 'notes', e.target.value)}
+                        className={cn(
+                          "h-6 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
+                          isEditMode && "bg-blue-100",
+                          editedData[`${entry.id}-notes`] !== undefined && "bg-yellow-50 border border-yellow-300"
+                        )}
+                        readOnly={!isEditMode}
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
-      
-      {viewMode === "form" ? (
-        <div className="p-4">
-          <GrassCuttingForm data={data} onDataChange={onDataChange} />
-        </div>
-      ) : (
-        <>
-          {/* Single Legend */}
-          <div className="px-3 py-2 bg-gray-50 border-b text-xs flex gap-4">
-            <span className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-blue-100 border border-blue-300"></div>
-              Enter grass cutting data
-            </span>
-          </div>
 
-          <div className="overflow-x-auto" style={{ maxHeight: '400px' }}>
-            <table className="w-full text-xs border-collapse">
-              <thead className="sticky top-0">
-                <tr className="bg-[hsl(var(--verdo-navy))] text-white">
-                  <th className="px-2 py-1 text-left font-medium border border-gray-300 w-32">Field</th>
-                  {data.blocks.map(block => (
-                    <th key={block.id} className="px-2 py-1 text-center font-medium border border-gray-300" colSpan={block.inverters.length}>
-                      {block.name}
-                    </th>
-                  ))}
-                  <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-[hsl(var(--verdo-navy))] w-32">Remarks</th>
-                </tr>
-                <tr className="bg-[hsl(var(--verdo-navy-light))] text-white">
-                  <th className="px-2 py-1 text-left font-medium border border-gray-300">Inverter</th>
-                  {data.blocks.map(block => (
-                    block.inverters.map(inverter => (
-                      <th key={`${block.id}-${inverter.id}`} className={cn("px-2 py-1 text-center font-medium border border-gray-300", getColumnWidth(`${block.id}-${inverter.id}`))}>
-                        {inverter.id}
-                      </th>
-                    ))
-                  ))}
-                  <th className="px-2 py-1 border border-gray-300"></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="bg-gray-100">
-                  <td className="px-2 py-1 font-medium border border-gray-300">Total Strings</td>
-                  {data.blocks.map(block => (
-                    block.inverters.map(inverter => (
-                      <td key={`total-${block.id}-${inverter.id}`} className={cn("px-2 py-1 text-center border border-gray-300 bg-gray-200", getColumnWidth(`${block.id}-${inverter.id}`))}>
-                        {inverter.totalStrings}
-                      </td>
-                    ))
-                  ))}
-                  <td className="px-2 py-1 border border-gray-300"></td>
-                </tr>
-
-                <tr className="bg-gray-100">
-                  <td className="px-2 py-1 font-medium border border-gray-300">% Completed</td>
-                  {data.blocks.map(block => (
-                    block.inverters.map(inverter => (
-                      <td key={`percent-${block.id}-${inverter.id}`} className={cn("px-2 py-1 text-center border border-gray-300 bg-gray-200", getColumnWidth(`${block.id}-${inverter.id}`))}>
-                        {inverter.percentCompleted}%
-                      </td>
-                    ))
-                  ))}
-                  <td className="px-2 py-1 border border-gray-300"></td>
-                </tr>
-
-                <tr className="bg-blue-50">
-                  <td className="px-2 py-1 font-medium border border-gray-300">
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "h-6 px-2 justify-start text-left font-normal text-xs",
-                            "bg-white border border-gray-300 text-gray-900 hover:bg-gray-50"
-                          )}
-                        >
-                          <CalendarIcon className="mr-1 h-3 w-3" />
-                          {format(selectedDate, "dd-MMM-yy")}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={selectedDate}
-                          onSelect={(date) => date && setSelectedDate(date)}
-                          initialFocus
-                          className={cn("p-3 pointer-events-auto")}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </td>
-                  {data.blocks.map(block => (
-                    block.inverters.map(inverter => {
-                      const key = `${block.id}-${inverter.id}`;
-                      return (
-                        <td key={`input-${key}`} className={cn("px-2 py-1 text-center border border-gray-300 bg-blue-100", getColumnWidth(key))}>
-                          <input 
-                            type="number" 
-                            className="w-full h-6 text-center text-xs border-0 bg-transparent focus:bg-white"
-                            value={inputValues[key] || ""}
-                            onChange={(e) => handleInputChange(key, e.target.value)}
-                          />
-                        </td>
-                      );
-                    })
-                  ))}
-                  <td className="px-2 py-1 border border-gray-300 bg-blue-100">
-                    <textarea 
-                      className="w-full h-6 text-xs border-0 bg-transparent focus:bg-white resize-none"
-                      style={{ minHeight: '24px', whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
-                      value={remarks}
-                      onChange={(e) => setRemarks(e.target.value)}
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </>
-      )}
-    </div>
+      <ConfirmationDialog
+        isOpen={showSaveConfirmation}
+        onConfirm={handleConfirmSave}
+        onCancel={handleCancelSave}
+        title="Save Changes"
+        description={`Are you sure you want to save ${Object.keys(editedData).length} change(s) to the grass cutting data?`}
+        confirmText="Save Changes"
+        cancelText="Cancel"
+      />
+    </>
   );
 };
