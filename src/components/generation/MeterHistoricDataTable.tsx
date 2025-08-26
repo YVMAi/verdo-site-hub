@@ -175,29 +175,16 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
       <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
         <span>Historic Data - Meter Data</span>
         <div className="flex items-center gap-4">
-          {hasUnsavedChanges && (
-            <div className="flex flex-col items-center">
-              <Button 
-                onClick={handleSaveChanges} 
-                variant="outline"
-                size="sm" 
-                className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0"
-              >
-                <Save className="h-4 w-4" />
-              </Button>
-              <span className="text-xs mt-1">Save</span>
-            </div>
-          )}
           <div className="flex flex-col items-center">
             <Button 
-              onClick={() => setIsEditMode(!isEditMode)} 
+              onClick={isEditMode ? handleSaveChanges : () => setIsEditMode(true)} 
               variant="outline" 
               size="sm" 
               className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0"
             >
-              <Edit className="h-4 w-4" />
+              {isEditMode ? <Save className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
             </Button>
-            <span className="text-xs mt-1">{isEditMode ? 'View' : 'Edit'}</span>
+            <span className="text-xs mt-1">{isEditMode ? 'Save' : 'Edit'}</span>
           </div>
           <div className="flex flex-col items-center">
             <ExportDialog
@@ -330,25 +317,18 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
                     </div>
                   </td>
                   <td className="px-2 py-1 border border-gray-300">
-                    {isLocked ? (
-                      <div className="text-xs py-1 px-2 bg-muted/50 text-muted-foreground rounded">
-                        {currentValue}
-                        <span className="ml-1 text-xs">🔒</span>
-                      </div>
-                    ) : (
-                      <Input
-                        type="number"
-                        value={currentValue || ''}
-                        onChange={(e) => handleCellEdit(row.id, e.target.value)}
-                        className={cn(
-                          "h-6 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
-                          isEditMode && "bg-blue-100",
-                          hasChanges && "bg-yellow-50 border border-yellow-300"
-                        )}
-                        readOnly={!isEditMode}
-                        step="0.01"
-                      />
-                    )}
+                    <Input
+                      type="number"
+                      value={currentValue || ''}
+                      onChange={(e) => handleCellEdit(row.id, e.target.value)}
+                      className={cn(
+                        "h-6 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
+                        isEditMode && "bg-blue-100",
+                        hasChanges && "bg-yellow-50 border border-yellow-300"
+                      )}
+                      readOnly={!isEditMode}
+                      step="0.01"
+                    />
                   </td>
                 </tr>
               );
@@ -360,8 +340,7 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
       <div className="p-3 bg-muted/20 text-xs text-muted-foreground border-t flex justify-between">
         <span>
           Showing {processedData.length} records • 
-          Editable within {allowedEditDays} days • 
-          🔒 = Locked (older than {allowedEditDays} days)
+          Editable within {allowedEditDays} days
         </span>
         {hasUnsavedChanges && (
           <span className="text-yellow-600 font-medium">

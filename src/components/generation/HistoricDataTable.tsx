@@ -143,29 +143,16 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
       <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
         <span>Historic Data - {activeTab.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
         <div className="flex items-center gap-4">
-          {hasUnsavedChanges && (
-            <div className="flex flex-col items-center">
-              <Button 
-                onClick={handleSaveChanges} 
-                variant="outline"
-                size="sm" 
-                className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0"
-              >
-                <Save className="h-4 w-4" />
-              </Button>
-              <span className="text-xs mt-1">Save</span>
-            </div>
-          )}
           <div className="flex flex-col items-center">
             <Button 
-              onClick={() => setIsEditMode(!isEditMode)} 
+              onClick={isEditMode ? handleSaveChanges : () => setIsEditMode(true)} 
               variant="outline" 
               size="sm" 
               className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0"
             >
-              <Edit className="h-4 w-4" />
+              {isEditMode ? <Save className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
             </Button>
-            <span className="text-xs mt-1">{isEditMode ? 'View' : 'Edit'}</span>
+            <span className="text-xs mt-1">{isEditMode ? 'Save' : 'Edit'}</span>
           </div>
           <div className="flex flex-col items-center">
             <ExportDialog
@@ -254,11 +241,6 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
                         {column.id === 'date' ? (
                           <div className="text-xs py-1 px-2 bg-muted/50 rounded">
                             {format(new Date(row.date), 'yyyy-MM-dd')}
-                          </div>
-                        ) : isLocked ? (
-                          <div className="text-xs py-1 px-2 bg-muted/50 text-muted-foreground rounded">
-                            {currentValue || '-'}
-                            <span className="ml-1 text-xs">🔒</span>
                           </div>
                         ) : (
                           <Input
