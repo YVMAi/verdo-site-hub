@@ -99,19 +99,19 @@ const GenerationData = () => {
         
         <div className="flex items-center gap-4">
           {/* Site Selector */}
-          <div className="flex items-center gap-2 min-w-[200px]">
+          <div className="flex items-center gap-2 min-w-[300px]">
             <Select onValueChange={handleSiteChange} disabled={!selectedClient} value={selectedSite?.id || ""}>
-              <SelectTrigger className="bg-white/10 border-white/20 text-white h-8 text-sm">
+              <SelectTrigger className="bg-white/10 border-white/20 text-white h-10 text-base">
                 <SelectValue placeholder={selectedClient ? "Select a site..." : "Select client from sidebar first"} />
               </SelectTrigger>
-              <SelectContent className="bg-white border border-gray-200 shadow-lg">
+              <SelectContent className="bg-[hsl(var(--verdo-navy))] border border-white/20 shadow-lg">
                 {availableSites.map(site => (
-                  <SelectItem key={site.id} value={site.id} className="py-3 px-3 hover:bg-gray-50 cursor-pointer">
+                  <SelectItem key={site.id} value={site.id} className="py-4 px-4 hover:bg-white/10 cursor-pointer text-white">
                     <div className="flex flex-col gap-1">
-                      <span className="font-medium text-gray-900">{site.name}</span>
+                      <span className="font-medium text-white text-base">{site.name}</span>
                       <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                        <span className="text-xs text-gray-600 font-medium">
+                        <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                        <span className="text-sm text-white/80 font-medium">
                           Updated: {format(getLastUpdatedDate(site.id), "MMM dd, HH:mm")}
                         </span>
                       </div>
