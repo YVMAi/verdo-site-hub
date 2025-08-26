@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { MeterHistoricDataTable } from './MeterHistoricDataTable';
+import { ExportDialog } from '@/components/common/ExportDialog';
 
 interface HistoricDataTableProps {
   site: Site | null;
@@ -127,11 +128,11 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
     setIsEditMode(false);
   };
 
-  const handleExport = () => {
-    console.log(`Exporting ${historicData.length} records for ${activeTab}`);
+  const handleExportWithDateRange = (startDate: Date, endDate: Date) => {
+    console.log(`Exporting ${activeTab} data from ${format(startDate, 'yyyy-MM-dd')} to ${format(endDate, 'yyyy-MM-dd')}`);
     toast({
       title: "Export Started",
-      description: `Downloading ${historicData.length} records as CSV`,
+      description: `Downloading ${activeTab} data for selected date range as CSV`,
     });
   };
 
@@ -167,14 +168,19 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
             <span className="text-xs mt-1">{isEditMode ? 'View' : 'Edit'}</span>
           </div>
           <div className="flex flex-col items-center">
-            <Button 
-              onClick={handleExport}
-              variant="outline" 
-              size="sm" 
-              className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0"
+            <ExportDialog
+              title="Export Historic Data"
+              description={`Select the date range for which you want to export historic ${activeTab.replace('-', ' ')} data:`}
+              onExport={handleExportWithDateRange}
             >
-              <Download className="h-4 w-4" />
-            </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0"
+              >
+                <Download className="h-4 w-4" />
+              </Button>
+            </ExportDialog>
             <span className="text-xs mt-1">Export</span>
           </div>
         </div>
