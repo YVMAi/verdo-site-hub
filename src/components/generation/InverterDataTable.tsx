@@ -9,6 +9,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { TableHeader } from './TableHeader';
 import { MobileCard } from './MobileCard';
 import { EmptyState } from './EmptyState';
+import { Search } from 'lucide-react';
 
 interface InverterDataTableProps {
   site: Site | null;
@@ -25,6 +26,7 @@ interface InverterRow {
 export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, selectedDate }) => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const [searchTerm, setSearchTerm] = useState('');
 
   const inverterRows = useMemo(() => {
     if (!site || !site.inverterConfig) return [];
@@ -42,6 +44,16 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
     });
     return rows;
   }, [site]);
+
+  // Filter inverter rows based on search term
+  const filteredInverterRows = useMemo(() => {
+    if (!searchTerm.trim()) return inverterRows;
+    
+    return inverterRows.filter(row => 
+      row.block.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.inverter.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [inverterRows, searchTerm]);
 
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -127,8 +139,8 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
     return <EmptyState message="Select a site to begin inverter data entry" />;
   }
 
-  // Group inverter data by block for mobile cards
-  const groupedData = inverterRows.reduce((acc, row) => {
+  // Group filtered inverter data by block for mobile cards
+  const groupedData = filteredInverterRows.reduce((acc, row) => {
     if (!acc[row.block]) {
       acc[row.block] = [];
     }
@@ -145,6 +157,20 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
           onSave={handleSave}
         />
         
+        {/* Search Bar */}
+        <div className="p-4 border-b">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search blocks or inverters..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+        
         <div className="p-4 space-y-4" onPaste={handlePasteFromExcel} tabIndex={0}>
           {Object.entries(groupedData).map(([blockName, rows]) => (
             <MobileCard
@@ -160,6 +186,11 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
               }))}
             />
           ))}
+          {filteredInverterRows.length === 0 && searchTerm && (
+            <div className="text-center py-8 text-muted-foreground">
+              No blocks or inverters found matching "{searchTerm}"
+            </div>
+          )}
         </div>
       </div>
     );
@@ -172,6 +203,20 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
         selectedDate={selectedDate}
         onSave={handleSave}
       />
+      
+      {/* Search Bar */}
+      <div className="p-4 border-b">
+        <div className="relative max-w-sm">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search blocks or inverters..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+      </div>
       
       <div className="overflow-x-auto">
         <div className="min-w-full" onPaste={handlePasteFromExcel} tabIndex={0}>
@@ -190,7 +235,7 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
               </tr>
             </thead>
             <tbody>
-              {inverterRows.map((row) => (
+              {filteredInverterRows.map((row) => (
                 <tr key={row.id} className="hover:bg-muted/20">
                   <td className="px-3 py-2 border border-gray-300">
                     <div className="text-xs py-1 px-2 bg-muted/50 rounded">
@@ -222,6 +267,13 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
                   </td>
                 </tr>
               ))}
+              {filteredInverterRows.length === 0 && searchTerm && (
+                <tr>
+                  <td colSpan={3} className="px-3 py-8 text-center text-muted-foreground">
+                    No blocks or inverters found matching "{searchTerm}"
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

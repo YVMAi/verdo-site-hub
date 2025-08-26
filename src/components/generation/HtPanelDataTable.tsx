@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -9,6 +9,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { TableHeader } from './TableHeader';
 import { MobileCard } from './MobileCard';
 import { EmptyState } from './EmptyState';
+import { Search } from 'lucide-react';
 
 interface HtPanelDataTableProps {
   site: Site | null;
@@ -18,6 +19,7 @@ interface HtPanelDataTableProps {
 export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, selectedDate }) => {
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -26,6 +28,15 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
   }
 
   const blocks = site.htPanelConfig?.blockNames || ['Block 1'];
+
+  // Filter blocks based on search term
+  const filteredBlocks = useMemo(() => {
+    if (!searchTerm.trim()) return blocks;
+    
+    return blocks.filter(blockName => 
+      blockName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [blocks, searchTerm]);
 
   const handleInputChange = (blockName: string, field: string, value: any) => {
     const key = `${blockName}_${field}`;
@@ -117,8 +128,22 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
           onSave={handleSave}
         />
         
+        {/* Search Bar */}
+        <div className="p-4 border-b">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search blocks..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+        
         <div className="p-4 space-y-4" onPaste={handlePasteFromExcel} tabIndex={0}>
-          {blocks.map((blockName) => (
+          {filteredBlocks.map((blockName) => (
             <MobileCard
               key={blockName}
               title={blockName}
@@ -142,6 +167,11 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
               ]}
             />
           ))}
+          {filteredBlocks.length === 0 && searchTerm && (
+            <div className="text-center py-8 text-muted-foreground">
+              No blocks found matching "{searchTerm}"
+            </div>
+          )}
         </div>
       </div>
     );
@@ -154,6 +184,20 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
         selectedDate={selectedDate}
         onSave={handleSave}
       />
+      
+      {/* Search Bar */}
+      <div className="p-4 border-b">
+        <div className="relative max-w-sm">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search blocks..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+      </div>
       
       <div className="overflow-x-auto">
         <div className="min-w-full" onPaste={handlePasteFromExcel} tabIndex={0}>
@@ -172,7 +216,7 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
               </tr>
             </thead>
             <tbody>
-              {blocks.map((blockName) => (
+              {filteredBlocks.map((blockName) => (
                 <tr key={blockName} className="hover:bg-muted/20">
                   <td className="px-3 py-2 border border-gray-300">
                     <Input
@@ -219,6 +263,13 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
                   </td>
                 </tr>
               ))}
+              {filteredBlocks.length === 0 && searchTerm && (
+                <tr>
+                  <td colSpan={3} className="px-3 py-8 text-center text-muted-foreground">
+                    No blocks found matching "{searchTerm}"
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
