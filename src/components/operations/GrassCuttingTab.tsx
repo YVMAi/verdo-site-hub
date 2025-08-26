@@ -18,6 +18,10 @@ export const GrassCuttingTab: React.FC = () => {
     return mockGrassCuttingData[key] || null;
   }, [selectedClient, selectedSite]);
 
+  console.log('GrassCuttingTab - selectedClient:', selectedClient);
+  console.log('GrassCuttingTab - selectedSite:', selectedSite);
+  console.log('GrassCuttingTab - currentData:', currentData);
+
   if (!selectedClient || !selectedSite) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -48,13 +52,21 @@ export const GrassCuttingTab: React.FC = () => {
         {/* New Data Entry Section */}
         <div>
           <h3 className="text-lg font-semibold mb-3">New Data Entry</h3>
-          <CompactGrassCuttingDataEntry data={currentData} />
+          <CompactGrassCuttingDataEntry 
+            data={currentData} 
+            selectedClient={selectedClient}
+            selectedSite={selectedSite}
+          />
         </div>
         
         {/* Historic Data Section */}
         <div>
           <h3 className="text-lg font-semibold mb-3">Historic Data</h3>
-          <CompactGrassCuttingHistoric data={currentData} />
+          <CompactGrassCuttingHistoric 
+            data={currentData}
+            selectedClient={selectedClient}
+            selectedSite={selectedSite}
+          />
         </div>
       </div>
     </div>
