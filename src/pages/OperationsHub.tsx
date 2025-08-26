@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +11,19 @@ import { ComingSoonTab } from "@/components/operations/ComingSoonTab";
 import { AllOperationsSummary } from "@/components/operations/AllOperationsSummary";
 import { useClientContext } from "@/contexts/ClientContext";
 import { mockSites } from "@/data/mockGenerationData";
+import { format } from 'date-fns';
+
+// Mock function to get last updated date for operations data
+const getOperationsLastUpdatedDate = (siteId: string): Date => {
+  // Mock data - in real app this would come from API
+  const mockLastUpdated: Record<string, Date> = {
+    '1': new Date('2024-08-26T09:15:00'),
+    '2': new Date('2024-08-25T17:30:00'),
+    '3': new Date('2024-08-24T14:45:00')
+  };
+  
+  return mockLastUpdated[siteId] || new Date();
+};
 
 const getOperationsForSite = (siteId: string | null, siteName: string | null) => {
   const baseOperations = [{
@@ -178,6 +190,11 @@ export default function OperationsHub() {
         <div>
           <h1 className="text-xl font-bold">Daily Operations Data</h1>
           <p className="text-sm text-white/80">Centralized daily operations management</p>
+          {selectedSite && (
+            <p className="text-xs text-white/60 mt-1">
+              Last updated: {format(getOperationsLastUpdatedDate(selectedSite.id), "MMM dd, yyyy 'at' HH:mm")}
+            </p>
+          )}
         </div>
         
         <div className="flex items-center gap-4">
@@ -190,7 +207,12 @@ export default function OperationsHub() {
               <SelectContent>
                 {availableSites.map(site => (
                   <SelectItem key={site.id} value={site.id} className="text-sm">
-                    {site.name}
+                    <div className="flex flex-col">
+                      <span>{site.name}</span>
+                      <span className="text-xs text-gray-500">
+                        Updated: {format(getOperationsLastUpdatedDate(site.id), "MMM dd, HH:mm")}
+                      </span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
