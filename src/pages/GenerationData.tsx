@@ -42,7 +42,7 @@ const GenerationData = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col">
+    <div className="min-h-screen w-full flex flex-col bg-white">
       {/* Top Navigation Bar */}
       <div className="bg-[hsl(var(--verdo-navy))] text-white px-6 py-4 flex items-center justify-between">
         <div>
@@ -105,7 +105,7 @@ const GenerationData = () => {
       {/* Tab Navigation */}
       <div className="flex-1 bg-white overflow-hidden">
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabType)} className="h-full flex flex-col">
-          <div className="border-b bg-gray-50/50 px-4 py-2 flex-shrink-0">
+          <div className="border-b bg-gray-50/50 px-6 py-3 flex-shrink-0">
             <TabsList className="flex h-auto p-0 gap-1 bg-transparent">
               {tabConfigs.map(tab => {
                 const IconComponent = iconMap[tab.icon as keyof typeof iconMap];
@@ -113,7 +113,7 @@ const GenerationData = () => {
                   <TabsTrigger 
                     key={tab.id} 
                     value={tab.id} 
-                    className="flex items-center gap-2 h-8 px-3 data-[state=active]:bg-[hsl(var(--verdo-navy))] data-[state=active]:text-white data-[state=active]:shadow-sm border data-[state=active]:border-[hsl(var(--verdo-navy))] text-gray-600 text-xs whitespace-nowrap"
+                    className="flex items-center gap-2 h-10 px-4 data-[state=active]:bg-[hsl(var(--verdo-navy))] data-[state=active]:text-white data-[state=active]:shadow-sm border data-[state=active]:border-[hsl(var(--verdo-navy))] text-gray-600 text-sm whitespace-nowrap"
                   >
                     <IconComponent className="h-4 w-4" />
                     {tab.label}
@@ -126,9 +126,9 @@ const GenerationData = () => {
           {/* Fixed Main Content Area - Scrollable Independently */}
           <div className="flex-1 overflow-auto">
             {tabConfigs.map(tab => (
-              <TabsContent key={tab.id} value={tab.id} className="h-full m-0 p-3">
+              <TabsContent key={tab.id} value={tab.id} className="h-full m-0 p-6">
                 {/* Data Entry Table */}
-                <div className="mb-6">
+                <div className="mb-8">
                   <h2 className="text-xl font-semibold mb-4">New Data Entry</h2>
                   <DataEntryTable 
                     site={selectedSite} 
@@ -151,7 +151,7 @@ const GenerationData = () => {
 
             {/* Info Panel */}
             {(!selectedClient || !selectedSite) && (
-              <div className="bg-muted/30 border border-dashed rounded-lg p-8 text-center m-3">
+              <div className="bg-muted/30 border border-dashed rounded-lg p-8 text-center m-6">
                 <div className="space-y-4">
                   <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
                     <Building className="h-8 w-8 text-muted-foreground" />

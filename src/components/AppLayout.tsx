@@ -11,6 +11,7 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation();
   const isOperationsPage = location.pathname === '/operations';
+  const isGenerationPage = location.pathname === '/generation';
 
   return (
     <SidebarProvider>
@@ -19,7 +20,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         
         <div className="flex-1 flex flex-col">
           {/* Mobile Header */}
-          {!isOperationsPage && (
+          {!isOperationsPage && !isGenerationPage && (
             <header className="h-16 bg-white border-b border-border flex items-center px-6 md:hidden">
               <SidebarTrigger>
                 <Menu className="w-6 h-6 text-gray-600" />
@@ -36,7 +37,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           </div>
 
           {/* Main Content */}
-          <main className={isOperationsPage ? "flex-1" : "flex-1 p-6 md:p-8 md:pl-16"}>
+          <main className={isOperationsPage || isGenerationPage ? "flex-1" : "flex-1 p-6 md:p-8 md:pl-16"}>
             {children}
           </main>
         </div>
