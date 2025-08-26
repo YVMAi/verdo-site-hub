@@ -123,7 +123,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
             <Button 
               onClick={handleExport}
               disabled={!startDate || !endDate}
-              className="bg-black text-white hover:bg-black/90"
+              className="bg-verdo-navy text-white hover:bg-verdo-navy/90"
             >
               Export CSV
             </Button>
