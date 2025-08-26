@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,14 +22,14 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
   const meterColumns = useMemo(() => {
     if (!site?.meterConfig || activeTab !== 'meter-data') return [];
     
-    const columns = [{ id: 'date', name: 'Date', type: 'date' as const, required: true }];
+    const columns: any[] = [];
     
     site.meterConfig.meters.forEach(meter => {
       site.meterConfig!.types.forEach(type => {
         columns.push({
           id: `${meter.toLowerCase().replace(' ', '-')}-${type.toLowerCase()}`,
           name: `${meter} - ${type}`,
-          type: 'number' as const,
+          type: 'number',
           required: true
         });
       });
@@ -39,8 +38,10 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
     return columns;
   }, [site, activeTab]);
 
-  // Use appropriate columns based on tab type
-  const currentColumns = activeTab === 'meter-data' ? meterColumns : (site?.columns || []);
+  // Use appropriate columns based on tab type (excluding date column)
+  const currentColumns = activeTab === 'meter-data' 
+    ? meterColumns 
+    : (site?.columns?.filter(col => col.id !== 'date') || []);
 
   if (!site) {
     return (
@@ -125,7 +126,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
     // Map pasted values to columns (simplified)
     const newFormData: Record<string, any> = {};
     currentColumns.forEach((column, index) => {
-      if (values[index] && column.id !== 'date') {
+      if (values[index]) {
         newFormData[column.id] = values[index];
       }
     });
@@ -189,28 +190,22 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
               <tr className="hover:bg-muted/20">
                 {currentColumns.map((column) => (
                   <td key={column.id} className="px-3 py-2 border border-gray-300">
-                    {column.id === 'date' ? (
-                      <div className="text-sm py-1 px-2 bg-muted/50 rounded">
-                        {format(selectedDate, 'yyyy-MM-dd')}
-                      </div>
-                    ) : (
-                      <div className="space-y-1">
-                        <Input
-                          type={getInputType(column)}
-                          value={formData[column.id] || ''}
-                          onChange={(e) => handleInputChange(column.id, e.target.value)}
-                          className={cn(
-                            "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
-                            errors[column.id] && "border-destructive focus:border-destructive"
-                          )}
-                          placeholder={getPlaceholder(column)}
-                          step={column.type === 'number' ? '0.01' : undefined}
-                        />
-                        {errors[column.id] && (
-                          <p className="text-xs text-destructive">{errors[column.id]}</p>
+                    <div className="space-y-1">
+                      <Input
+                        type={getInputType(column)}
+                        value={formData[column.id] || ''}
+                        onChange={(e) => handleInputChange(column.id, e.target.value)}
+                        className={cn(
+                          "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
+                          errors[column.id] && "border-destructive focus:border-destructive"
                         )}
-                      </div>
-                    )}
+                        placeholder={getPlaceholder(column)}
+                        step={column.type === 'number' ? '0.01' : undefined}
+                      />
+                      {errors[column.id] && (
+                        <p className="text-xs text-destructive">{errors[column.id]}</p>
+                      )}
+                    </div>
                   </td>
                 ))}
               </tr>

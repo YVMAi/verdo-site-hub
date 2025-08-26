@@ -40,14 +40,14 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
   const meterColumns = useMemo(() => {
     if (!site?.meterConfig || activeTab !== 'meter-data') return [];
     
-    const columns = [{ id: 'date', name: 'Date', type: 'date' as const, required: true }];
+    const columns = [{ id: 'date', name: 'Date', type: 'date', required: true }] as any[];
     
     site.meterConfig.meters.forEach(meter => {
       site.meterConfig!.types.forEach(type => {
         columns.push({
           id: `${meter.toLowerCase().replace(' ', '-')}-${type.toLowerCase()}`,
           name: `${meter} - ${type}`,
-          type: 'number' as const,
+          type: 'number',
           required: true
         });
       });
