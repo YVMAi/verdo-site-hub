@@ -151,7 +151,7 @@ export const BulkUploadModal: React.FC<BulkUploadModalProps> = ({
         <Button 
           variant="outline" 
           size="sm" 
-          className="h-8 text-xs bg-white/10 border-white/20 text-[hsl(var(--verdo-navy))] hover:bg-white/20 hover:text-[hsl(var(--verdo-navy))]"
+          className="h-8 text-xs bg-white text-[hsl(var(--verdo-navy))] border-white hover:bg-white/90 hover:text-[hsl(var(--verdo-navy))]"
           disabled={!selectedSite}
         >
           <Upload className="h-3 w-3 mr-1" />
@@ -172,7 +172,7 @@ export const BulkUploadModal: React.FC<BulkUploadModalProps> = ({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Tabs Combined</SelectItem>
+                  <SelectItem value="all">All Tabs</SelectItem>
                   {tabConfigs.map(tab => (
                     <SelectItem key={tab.id} value={tab.id}>
                       {tab.label}
