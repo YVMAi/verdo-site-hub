@@ -1,10 +1,11 @@
+
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Save } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { Site, TabType } from '@/types/generation';
+import { Site, TabType, SiteColumn } from '@/types/generation';
 import { useToast } from '@/hooks/use-toast';
 
 interface DataEntryTableProps {
