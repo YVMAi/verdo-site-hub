@@ -191,9 +191,12 @@ export default function OperationsHub() {
           <h1 className="text-xl font-bold">Daily Operations Data</h1>
           <p className="text-sm text-white/80">Centralized daily operations management</p>
           {selectedSite && (
-            <p className="text-xs text-white/60 mt-1">
-              Last updated: {format(getOperationsLastUpdatedDate(selectedSite.id), "MMM dd, yyyy 'at' HH:mm")}
-            </p>
+            <div className="flex items-center gap-2 mt-2">
+              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+              <p className="text-sm text-blue-200 font-medium">
+                Last updated: {format(getOperationsLastUpdatedDate(selectedSite.id), "MMM dd, yyyy 'at' HH:mm")}
+              </p>
+            </div>
           )}
         </div>
         
@@ -204,14 +207,17 @@ export default function OperationsHub() {
               <SelectTrigger className="bg-white/10 border-white/20 text-white h-8 text-sm">
                 <SelectValue placeholder={selectedClient ? "Select a site..." : "Select client from sidebar first"} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white border border-gray-200 shadow-lg">
                 {availableSites.map(site => (
-                  <SelectItem key={site.id} value={site.id} className="text-sm">
-                    <div className="flex flex-col">
-                      <span>{site.name}</span>
-                      <span className="text-xs text-gray-500">
-                        Updated: {format(getOperationsLastUpdatedDate(site.id), "MMM dd, HH:mm")}
-                      </span>
+                  <SelectItem key={site.id} value={site.id} className="py-3 px-3 hover:bg-gray-50 cursor-pointer">
+                    <div className="flex flex-col gap-1">
+                      <span className="font-medium text-gray-900">{site.name}</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                        <span className="text-xs text-gray-600 font-medium">
+                          Updated: {format(getOperationsLastUpdatedDate(site.id), "MMM dd, HH:mm")}
+                        </span>
+                      </div>
                     </div>
                   </SelectItem>
                 ))}
