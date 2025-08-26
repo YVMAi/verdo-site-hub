@@ -39,19 +39,19 @@ export const ClientProvider: React.FC<ClientProviderProps> = ({ children }) => {
     }
   }, [selectedClient]);
 
-  // Reset site when client changes
+  // Auto-select first site when client changes
   useEffect(() => {
     if (selectedClient) {
       const availableSites = mockSites.filter(site => site.clientId === selectedClient.id);
-      if (availableSites.length > 0) {
+      if (availableSites.length > 0 && !selectedSite) {
         setSelectedSite(availableSites[0]);
-      } else {
+      } else if (availableSites.length === 0) {
         setSelectedSite(null);
       }
     } else {
       setSelectedSite(null);
     }
-  }, [selectedClient]);
+  }, [selectedClient, selectedSite]);
 
   const handleSetSelectedSite = (site: Site | null) => {
     setSelectedSite(site);

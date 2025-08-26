@@ -2,9 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Save } from 'lucide-react';
+import { Save } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Site, TabType } from '@/types/generation';
@@ -13,10 +11,10 @@ import { useToast } from '@/hooks/use-toast';
 interface DataEntryTableProps {
   site: Site | null;
   activeTab: TabType;
+  selectedDate: Date;
 }
 
-export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab }) => {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab, selectedDate }) => {
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
@@ -110,22 +108,9 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab 
         <div className="flex items-center justify-between">
           <h3 className="font-semibold">Data Entry - {activeTab.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</h3>
           <div className="flex items-center gap-4">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="h-8">
-                  <CalendarIcon className="h-4 w-4 mr-2" />
-                  {format(selectedDate, 'PPP')}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={(date) => date && setSelectedDate(date)}
-                  className="pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
+            <div className="text-sm text-muted-foreground">
+              Date: {format(selectedDate, 'PPP')}
+            </div>
             <Button onClick={handleSave} size="sm">
               <Save className="h-4 w-4 mr-2" />
               Save
