@@ -6,13 +6,21 @@ import { HistoricDataTable } from '@/components/generation/HistoricDataTable';
 import { ClientSiteSelector } from '@/components/ClientSiteSelector';
 import { tabConfigs } from '@/data/mockGenerationData';
 import { Site, TabType } from '@/types/generation';
-import { Building } from 'lucide-react';
+import { Building, Factory, Gauge, CloudSun, Zap, Cpu } from 'lucide-react';
 import { useClient } from '@/contexts/ClientContext';
+
+const iconMap = {
+  'factory': Factory,
+  'gauge': Gauge,
+  'cloud-sun': CloudSun,
+  'zap': Zap,
+  'cpu': Cpu,
+};
 
 const GenerationData = () => {
   const { selectedClient } = useClient();
   const [selectedSite, setSite] = useState<Site | null>(null);
-  const [activeTab, setActiveTab] = useState<TabType>('meter-reading');
+  const [activeTab, setActiveTab] = useState<TabType>('plant-data');
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -33,12 +41,20 @@ const GenerationData = () => {
 
       {/* Tabs and Data Tables */}
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabType)}>
-        <TabsList className="grid w-full grid-cols-3">
-          {tabConfigs.map(tab => (
-            <TabsTrigger key={tab.id} value={tab.id} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              {tab.label}
-            </TabsTrigger>
-          ))}
+        <TabsList className="grid w-full grid-cols-5 bg-gray-100">
+          {tabConfigs.map(tab => {
+            const IconComponent = iconMap[tab.icon as keyof typeof iconMap];
+            return (
+              <TabsTrigger 
+                key={tab.id} 
+                value={tab.id} 
+                className="flex items-center gap-2 data-[state=active]:bg-verdo-navy data-[state=active]:text-white hover:bg-gray-200"
+              >
+                <IconComponent className="h-4 w-4" />
+                {tab.label}
+              </TabsTrigger>
+            );
+          })}
         </TabsList>
 
         {tabConfigs.map(tab => (

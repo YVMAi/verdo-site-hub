@@ -1,4 +1,3 @@
-
 import { Client, Site, GenerationData, TabConfig } from '@/types/generation';
 
 export const mockClients: Client[] = [
@@ -47,16 +46,18 @@ export const mockSites: Site[] = [
 ];
 
 export const tabConfigs: TabConfig[] = [
-  { id: 'meter-reading', label: 'Meter Reading', icon: 'gauge' },
-  { id: 'inverter', label: 'Inverter', icon: 'zap' },
-  { id: 'wms', label: 'WMS', icon: 'monitor' },
+  { id: 'plant-data', label: 'Plant Data', icon: 'factory' },
+  { id: 'meter-data', label: 'Meter Data', icon: 'gauge' },
+  { id: 'weather', label: 'Weather', icon: 'cloud-sun' },
+  { id: 'ht-panel', label: 'HT Panel', icon: 'zap' },
+  { id: 'inverter', label: 'Inverter', icon: 'cpu' },
 ];
 
 export const mockHistoricData: GenerationData[] = [
   {
     id: '1',
     siteId: '1',
-    tabType: 'meter-reading',
+    tabType: 'meter-data',
     date: '2024-08-10',
     values: {
       date: '2024-08-10',
@@ -72,7 +73,7 @@ export const mockHistoricData: GenerationData[] = [
   {
     id: '2',
     siteId: '1',
-    tabType: 'meter-reading',
+    tabType: 'meter-data',
     date: '2024-08-09',
     values: {
       date: '2024-08-09',

@@ -29,7 +29,7 @@ export interface GenerationData {
   updatedAt: string;
 }
 
-export type TabType = 'meter-reading' | 'inverter' | 'wms';
+export type TabType = 'plant-data' | 'meter-data' | 'weather' | 'ht-panel' | 'inverter';
 
 export interface TabConfig {
   id: TabType;
