@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar } from '@/components/ui/calendar';
@@ -132,6 +133,7 @@ const GenerationData = () => {
                   <DataEntryTable 
                     site={selectedSite} 
                     activeTab={activeTab}
+                    selectedDate={selectedDate}
                   />
                 </div>
 
