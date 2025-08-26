@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +13,7 @@ import { mockHistoricData } from '@/data/mockGenerationData';
 import { useToast } from '@/hooks/use-toast';
 import { format, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { MeterHistoricDataTable } from './MeterHistoricDataTable';
 
 interface HistoricDataTableProps {
   site: Site | null;
@@ -36,6 +36,11 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
   const [exportStartDate, setExportStartDate] = useState<Date | undefined>();
   const [exportEndDate, setExportEndDate] = useState<Date | undefined>();
   const { toast } = useToast();
+
+  // Use specialized meter historic data table for meter-data tab
+  if (activeTab === 'meter-data') {
+    return <MeterHistoricDataTable site={site} allowedEditDays={allowedEditDays} />;
+  }
 
   const filteredData = useMemo(() => {
     if (!site) return [];
@@ -297,7 +302,6 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
         </div>
       </div>
 
-      {/* Search and Filter Controls */}
       <div className="px-3 py-2 bg-gray-50 border-b flex flex-wrap gap-2 items-center text-xs">
         <Input
           type="search"

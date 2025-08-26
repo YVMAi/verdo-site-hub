@@ -10,6 +10,10 @@ export interface Site {
   name: string;
   clientId: string;
   columns: SiteColumn[];
+  meterConfig?: {
+    meterCount: number;
+    meterNames: string[];
+  };
 }
 
 export interface SiteColumn {

@@ -1,3 +1,4 @@
+
 import { Client, Site, GenerationData, TabConfig } from '@/types/generation';
 
 export const mockClients: Client[] = [
@@ -20,6 +21,10 @@ export const mockSites: Site[] = [
       { id: 'ghi', name: 'GHI (W/m²)', type: 'number', required: true },
       { id: 'gti', name: 'GTI (W/m²)', type: 'number', required: true },
     ],
+    meterConfig: {
+      meterCount: 2,
+      meterNames: ['Meter 1', 'Meter 2']
+    }
   },
   {
     id: '2',
@@ -34,6 +39,10 @@ export const mockSites: Site[] = [
       { id: 'ghi', name: 'GHI (W/m²)', type: 'number', required: true },
       { id: 'gti', name: 'GTI (W/m²)', type: 'number', required: true },
     ],
+    meterConfig: {
+      meterCount: 3,
+      meterNames: ['Meter 1', 'Meter 2', 'Meter 3']
+    }
   },
   {
     id: '3',
@@ -46,6 +55,10 @@ export const mockSites: Site[] = [
       { id: 'turbine3', name: 'Turbine 3 (MWh)', type: 'number', required: true },
       { id: 'windSpeed', name: 'Avg Wind Speed (m/s)', type: 'number', required: false },
     ],
+    meterConfig: {
+      meterCount: 1,
+      meterNames: ['Main Meter']
+    }
   },
 ];
 
@@ -109,6 +122,7 @@ export const mockHistoricData: GenerationData[] = [
     createdAt: '2024-08-23T08:00:00Z',
     updatedAt: '2024-08-23T08:00:00Z',
   },
+  // Meter data entries
   {
     id: '4',
     siteId: '1',
@@ -116,18 +130,31 @@ export const mockHistoricData: GenerationData[] = [
     date: '2024-08-25',
     values: {
       date: '2024-08-25',
-      plantStartTime: '06:30',
-      plantEndTime: '18:45',
-      peakLoad: 45.2,
-      peakLoadTime: '13:15',
-      ghi: 850,
-      gti: 920,
+      'meter1Export': 939,
+      'meter1Import': 312,
+      'meter2Export': 313,
+      'meter2Import': 321,
     },
     createdAt: '2024-08-25T08:00:00Z',
     updatedAt: '2024-08-25T08:00:00Z',
   },
   {
     id: '5',
+    siteId: '1',
+    tabType: 'meter-data',
+    date: '2024-08-24',
+    values: {
+      date: '2024-08-24',
+      'meter1Export': 925,
+      'meter1Import': 298,
+      'meter2Export': 305,
+      'meter2Import': 315,
+    },
+    createdAt: '2024-08-24T08:00:00Z',
+    updatedAt: '2024-08-24T08:00:00Z',
+  },
+  {
+    id: '6',
     siteId: '1',
     tabType: 'weather',
     date: '2024-08-25',
@@ -144,7 +171,7 @@ export const mockHistoricData: GenerationData[] = [
     updatedAt: '2024-08-25T08:00:00Z',
   },
   {
-    id: '6',
+    id: '7',
     siteId: '1',
     tabType: 'ht-panel',
     date: '2024-08-25',
@@ -161,7 +188,7 @@ export const mockHistoricData: GenerationData[] = [
     updatedAt: '2024-08-25T08:00:00Z',
   },
   {
-    id: '7',
+    id: '8',
     siteId: '1',
     tabType: 'inverter',
     date: '2024-08-25',

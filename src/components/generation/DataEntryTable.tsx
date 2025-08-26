@@ -5,8 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Save } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { Site, TabType } from '@/types/generation';
+import { Site, TabType, SiteColumn } from '@/types/generation';
 import { useToast } from '@/hooks/use-toast';
+import { MeterDataTable } from './MeterDataTable';
 
 interface DataEntryTableProps {
   site: Site | null;
@@ -18,6 +19,11 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
+
+  // Use specialized meter data table for meter-data tab
+  if (activeTab === 'meter-data') {
+    return <MeterDataTable site={site} selectedDate={selectedDate} />;
+  }
 
   if (!site) {
     return (
