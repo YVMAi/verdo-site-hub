@@ -47,7 +47,7 @@ const GenerationData = () => {
       <div className="bg-[hsl(var(--verdo-navy))] text-white px-6 py-4 flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold">Daily Generation Data</h1>
-          <p className="text-sm text-white/80">Enter and manage solar and wind generation data across multiple sites</p>
+          <p className="text-sm text-white/80">Enter and manage generation data across multiple sites</p>
         </div>
         
         <div className="flex items-center gap-4">
