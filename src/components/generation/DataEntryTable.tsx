@@ -21,8 +21,13 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
 
   if (!site) {
     return (
-      <div className="bg-card border rounded-lg p-8 text-center">
-        <p className="text-muted-foreground">Select a site to begin data entry</p>
+      <div className="bg-white border rounded">
+        <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm">
+          <span>Data Entry - {activeTab.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+        </div>
+        <div className="p-8 text-center">
+          <p className="text-muted-foreground">Select a site to begin data entry</p>
+        </div>
       </div>
     );
   }
@@ -123,31 +128,36 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
   };
 
   return (
-    <div className="bg-card border rounded-lg">
-      <div className="p-4 border-b bg-muted/50">
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold">Data Entry - {activeTab.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</h3>
-          <div className="flex items-center gap-4">
-            <div className="text-sm text-muted-foreground">
-              Date: {format(selectedDate, 'PPP')}
-            </div>
-            <Button onClick={handleSave} size="sm">
-              <Save className="h-4 w-4 mr-2" />
-              Save
+    <div className="bg-white rounded border">
+      <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
+        <span>Data Entry - {activeTab.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+        <div className="flex items-center gap-4">
+          <div className="text-sm text-white/80">
+            Date: {format(selectedDate, 'PPP')}
+          </div>
+          <div className="flex flex-col items-center">
+            <Button 
+              onClick={handleSave} 
+              variant="outline"
+              size="sm" 
+              className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0"
+            >
+              <Save className="h-4 w-4" />
             </Button>
+            <span className="text-xs mt-1">Save</span>
           </div>
         </div>
       </div>
       
       <div className="overflow-x-auto">
         <div className="min-w-full" onPaste={handlePasteFromExcel} tabIndex={0}>
-          <table className="w-full text-sm">
-            <thead className="bg-muted/30 sticky top-0">
-              <tr>
+          <table className="w-full text-sm border-collapse">
+            <thead className="sticky top-0">
+              <tr className="bg-verdo-navy text-white">
                 {site.columns.map((column) => (
-                  <th key={column.id} className="px-3 py-2 text-left font-medium border-r border-border/50 min-w-[120px]">
+                  <th key={column.id} className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px]">
                     {column.name}
-                    {column.required && <span className="text-destructive ml-1">*</span>}
+                    {column.required && <span className="text-red-300 ml-1">*</span>}
                   </th>
                 ))}
               </tr>
@@ -155,7 +165,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
             <tbody>
               <tr className="hover:bg-muted/20">
                 {site.columns.map((column) => (
-                  <td key={column.id} className="px-3 py-2 border-r border-border/50">
+                  <td key={column.id} className="px-3 py-2 border border-gray-300">
                     {column.id === 'date' ? (
                       <div className="text-sm py-1 px-2 bg-muted/50 rounded">
                         {format(selectedDate, 'yyyy-MM-dd')}
