@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -115,9 +114,6 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
   if (!site || !site.meterConfig) {
     return (
       <div className="bg-white border rounded">
-        <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm">
-          <span>Historic Data - Meter Data</span>
-        </div>
         <div className="p-8 text-center">
           <p className="text-muted-foreground">Select a site to view meter historic data</p>
         </div>
@@ -128,9 +124,6 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
   if (processedData.length === 0) {
     return (
       <div className="bg-white border rounded">
-        <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm">
-          <span>Historic Data - Meter Data</span>
-        </div>
         <div className="p-8 text-center">
           <p className="text-muted-foreground">No historic meter data available for this site</p>
         </div>

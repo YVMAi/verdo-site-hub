@@ -39,9 +39,6 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
   if (!site) {
     return (
       <div className="bg-white border rounded">
-        <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm">
-          <span>Data Entry - {activeTab.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
-        </div>
         <div className="p-8 text-center">
           <p className="text-muted-foreground">Select a site to begin data entry</p>
         </div>
@@ -215,10 +212,6 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
             </tbody>
           </table>
         </div>
-      </div>
-      
-      <div className="p-3 bg-muted/20 text-xs text-muted-foreground border-t">
-        💡 Tip: You can paste data directly from Excel by copying a row and pressing Ctrl+V in this table. Use HH:MM format for time fields.
       </div>
     </div>
   );

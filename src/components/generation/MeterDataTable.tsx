@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,9 +39,6 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
   if (!site || !site.meterConfig) {
     return (
       <div className="bg-white border rounded">
-        <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm">
-          <span>Data Entry - Meter Data</span>
-        </div>
         <div className="p-8 text-center">
           <p className="text-muted-foreground">Select a site to begin meter data entry</p>
         </div>
@@ -212,10 +208,6 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
             </tbody>
           </table>
         </div>
-      </div>
-      
-      <div className="p-3 bg-muted/20 text-xs text-muted-foreground border-t">
-        💡 Tip: You can paste data directly from Excel by copying rows and pressing Ctrl+V in this table.
       </div>
     </div>
   );
