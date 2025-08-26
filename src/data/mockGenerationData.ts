@@ -1,4 +1,4 @@
-import { Client, Site, GenerationData } from '@/types/generation';
+import { Client, Site, GenerationData, TabConfig } from '@/types/generation';
 
 export const mockClients: Client[] = [
   {
@@ -83,6 +83,14 @@ export const mockSites: Site[] = [
       { id: 'date', name: 'Date', type: 'date', required: true },
     ]
   }
+];
+
+export const tabConfigs: TabConfig[] = [
+  { id: 'plant-data', label: 'Plant Data', icon: 'factory' },
+  { id: 'meter-data', label: 'Meter Data', icon: 'gauge' },
+  { id: 'weather', label: 'Weather', icon: 'cloud-sun' },
+  { id: 'ht-panel', label: 'HT Panel', icon: 'zap' },
+  { id: 'inverter', label: 'Inverter', icon: 'cpu' },
 ];
 
 export const mockHistoricData: GenerationData[] = [
