@@ -8,7 +8,7 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Download, Search, Save, Edit, Calendar } from 'lucide-react';
-import { Site, TabType, GenerationData } from '@/types/generation';
+import { Site, TabType, GenerationData, SiteColumn } from '@/types/generation';
 import { mockHistoricData } from '@/data/mockGenerationData';
 import { useToast } from '@/hooks/use-toast';
 import { format, differenceInDays } from 'date-fns';
@@ -40,7 +40,7 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
   const meterColumns = useMemo(() => {
     if (!site?.meterConfig || activeTab !== 'meter-data') return [];
     
-    const columns = [{ id: 'date', name: 'Date', type: 'date', required: true }] as any[];
+    const columns: SiteColumn[] = [{ id: 'date', name: 'Date', type: 'date', required: true }];
     
     site.meterConfig.meters.forEach(meter => {
       site.meterConfig!.types.forEach(type => {

@@ -22,7 +22,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
   const meterColumns = useMemo(() => {
     if (!site?.meterConfig || activeTab !== 'meter-data') return [];
     
-    const columns: any[] = [];
+    const columns: SiteColumn[] = [];
     
     site.meterConfig.meters.forEach(meter => {
       site.meterConfig!.types.forEach(type => {
