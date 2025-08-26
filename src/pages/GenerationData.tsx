@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar } from '@/components/ui/calendar';
@@ -9,11 +10,12 @@ import { HistoricDataTable } from '@/components/generation/HistoricDataTable';
 import { BulkUploadModal } from '@/components/generation/BulkUploadModal';
 import { tabConfigs } from '@/data/mockGenerationData';
 import { Site, TabType } from '@/types/generation';
-import { Building, Factory, Gauge, CloudSun, Zap, Cpu, CalendarIcon, Upload } from 'lucide-react';
+import { Building, Factory, Gauge, CloudSun, Zap, Cpu, CalendarIcon, Upload, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useClient } from '@/contexts/ClientContext';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { mockSites } from '@/data/mockGenerationData';
+
 const iconMap = {
   'factory': Factory,
   'gauge': Gauge,
@@ -21,6 +23,7 @@ const iconMap = {
   'zap': Zap,
   'cpu': Cpu
 };
+
 const GenerationData = () => {
   const {
     selectedClient,
@@ -29,15 +32,43 @@ const GenerationData = () => {
   } = useClient();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [activeTab, setActiveTab] = useState<TabType>('plant-data');
+
   const availableSites = selectedClient ? mockSites.filter(site => site.clientId === selectedClient.id) : [];
+
   const handleSiteChange = (siteId: string) => {
     const site = availableSites.find(s => s.id === siteId) || null;
     setSelectedSite(site);
   };
+
   const handleBulkUpload = (data: any[]) => {
     console.log('Bulk upload data:', data);
     // TODO: Implement bulk upload logic
   };
+
+  // Mock function to check completion status - in real app this would check actual data
+  const getTabCompletionStatus = (tabId: TabType): 'complete' | 'incomplete' => {
+    // Mock logic - randomly return status for demo
+    // In real implementation, this would check if data exists for the selected date and site
+    const mockCompletionData: Record<TabType, boolean> = {
+      'plant-data': true,
+      'meter-data': false,
+      'weather': true,
+      'ht-panel': false,
+      'inverter': true
+    };
+    
+    return mockCompletionData[tabId] ? 'complete' : 'incomplete';
+  };
+
+  const getStatusIcon = (tabId: TabType) => {
+    const status = getTabCompletionStatus(tabId);
+    if (status === 'complete') {
+      return <CheckCircle2 className="h-3 w-3 text-green-500 ml-1" />;
+    } else {
+      return <AlertCircle className="h-3 w-3 text-orange-500 ml-1" />;
+    }
+  };
+
   return <div className="min-h-screen w-full flex flex-col bg-white">
       {/* Top Navigation Bar */}
       <div className="bg-[hsl(var(--verdo-navy))] text-white px-6 py-4 flex items-center justify-between">
@@ -93,6 +124,7 @@ const GenerationData = () => {
               return <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-2 h-10 px-4 data-[state=active]:bg-[hsl(var(--verdo-navy))] data-[state=active]:text-white data-[state=active]:shadow-sm border data-[state=active]:border-[hsl(var(--verdo-navy))] text-gray-600 text-sm whitespace-nowrap">
                     <IconComponent className="h-4 w-4" />
                     {tab.label}
+                    {selectedSite && getStatusIcon(tab.id)}
                   </TabsTrigger>;
             })}
             </TabsList>
@@ -133,4 +165,5 @@ const GenerationData = () => {
       </div>
     </div>;
 };
+
 export default GenerationData;
