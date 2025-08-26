@@ -22,7 +22,7 @@ export const mockSites: Site[] = [
   {
     id: '101',
     clientId: '1',
-    name: 'Main Production Site',
+    name: 'Desert Solar Farm A',
     columns: [
       { id: 'solarPanelOutput', name: 'Solar Panel Output (kW)', type: 'number', required: true },
       { id: 'windTurbineOutput', name: 'Wind Turbine Output (kW)', type: 'number', required: true },
@@ -32,7 +32,7 @@ export const mockSites: Site[] = [
   {
     id: '102',
     clientId: '1',
-    name: 'Research and Development Site',
+    name: 'Desert Solar Farm B',
     columns: [
       { id: 'newMaterialEfficiency', name: 'New Material Efficiency (%)', type: 'number', required: true },
       { id: 'prototypeOutput', name: 'Prototype Output (kW)', type: 'number', required: true },
