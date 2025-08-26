@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,27 +19,6 @@ interface HistoricDataTableProps {
   allowedEditDays: number;
 }
 
-const MONTHS = [
-  { value: 'all', label: 'All Months' },
-  { value: '01', label: 'Jan' },
-  { value: '02', label: 'Feb' },
-  { value: '03', label: 'Mar' },
-  { value: '04', label: 'Apr' },
-  { value: '05', label: 'May' },
-  { value: '06', label: 'Jun' },
-  { value: '07', label: 'Jul' },
-  { value: '08', label: 'Aug' },
-  { value: '09', label: 'Sep' },
-  { value: '10', label: 'Oct' },
-  { value: '11', label: 'Nov' },
-  { value: '12', label: 'Dec' }
-];
-
-const YEARS = Array.from({ length: 10 }, (_, i) => {
-  const year = new Date().getFullYear() - i;
-  return { value: year.toString(), label: year.toString() };
-});
-
 export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({ 
   site, 
   activeTab, 
@@ -52,22 +30,51 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [filterValue, setFilterValue] = useState('');
   const [selectedMonth, setSelectedMonth] = useState<string>('all');
-  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
   const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
   const { toast } = useToast();
 
-  const historicData = useMemo(() => {
+  const rawHistoricData = useMemo(() => {
     if (!site) return [];
     
     return mockHistoricData.filter(
       item => item.siteId === site.id && item.tabType === activeTab
-    ).filter(item => {
+    );
+  }, [site, activeTab]);
+
+  // Generate dynamic month options based on available data
+  const availableMonths = useMemo(() => {
+    const monthsSet = new Set<string>();
+    
+    rawHistoricData.forEach(item => {
+      const date = new Date(item.date);
+      const monthYear = format(date, 'MMMM yyyy');
+      const monthValue = format(date, 'MM-yyyy');
+      monthsSet.add(`${monthValue}|${monthYear}`);
+    });
+
+    const monthsArray = Array.from(monthsSet).map(item => {
+      const [value, label] = item.split('|');
+      return { value, label };
+    }).sort((a, b) => {
+      // Sort by year and month (most recent first)
+      const [aMonth, aYear] = a.value.split('-');
+      const [bMonth, bYear] = b.value.split('-');
+      if (aYear !== bYear) {
+        return parseInt(bYear) - parseInt(aYear);
+      }
+      return parseInt(bMonth) - parseInt(aMonth);
+    });
+
+    return [{ value: 'all', label: 'All Months' }, ...monthsArray];
+  }, [rawHistoricData]);
+
+  const historicData = useMemo(() => {
+    return rawHistoricData.filter(item => {
       // Month filter
       if (selectedMonth !== 'all') {
         const itemDate = new Date(item.date);
-        const itemMonth = (itemDate.getMonth() + 1).toString().padStart(2, '0');
-        const itemYear = itemDate.getFullYear().toString();
-        if (itemMonth !== selectedMonth || itemYear !== selectedYear) {
+        const itemMonthYear = format(itemDate, 'MM-yyyy');
+        if (itemMonthYear !== selectedMonth) {
           return false;
         }
       }
@@ -94,7 +101,7 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
         return aValue > bValue ? -1 : 1;
       }
     });
-  }, [site, activeTab, filterValue, sortColumn, sortDirection, selectedMonth, selectedYear]);
+  }, [rawHistoricData, filterValue, sortColumn, sortDirection, selectedMonth]);
 
   // Use specialized meter historic table for meter-data tab
   if (activeTab === 'meter-data') {
@@ -111,7 +118,7 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
     );
   }
 
-  if (historicData.length === 0) {
+  if (historicData.length === 0 && selectedMonth === 'all') {
     return (
       <div className="bg-white border rounded">
         <div className="p-8 text-center">
@@ -233,33 +240,17 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
           
           {/* Month Filter */}
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-32 h-7 text-xs">
+            <SelectTrigger className="w-40 h-7 text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-white z-50">
-              {MONTHS.map((month) => (
+              {availableMonths.map((month) => (
                 <SelectItem key={month.value} value={month.value}>
                   {month.label}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-
-          {/* Year Filter - only show when a specific month is selected */}
-          {selectedMonth !== 'all' && (
-            <Select value={selectedYear} onValueChange={setSelectedYear}>
-              <SelectTrigger className="w-20 h-7 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-white z-50">
-                {YEARS.map((year) => (
-                  <SelectItem key={year.value} value={year.value}>
-                    {year.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
           
           <Badge variant="secondary">
             {historicData.length} Records
