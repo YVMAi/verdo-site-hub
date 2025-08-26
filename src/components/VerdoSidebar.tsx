@@ -75,7 +75,7 @@ export function VerdoSidebar() {
                     <NavLink to={item.url} className={({ isActive }) => 
                       `group flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-all duration-200 font-medium relative ${
                         isActive 
-                          ? 'bg-verdo-jade text-white shadow-sm' 
+                          ? 'bg-verdo-jade/10 text-verdo-navy shadow-sm border-l-4 border-verdo-jade' 
                           : ''
                       } ${isCollapsed ? 'justify-center w-12 h-12 p-0' : ''}`
                     }>
@@ -104,7 +104,7 @@ export function VerdoSidebar() {
                     <NavLink to={item.url} className={({ isActive }) => 
                       `group flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-all duration-200 font-medium relative ${
                         isActive 
-                          ? 'bg-verdo-jade text-white shadow-sm' 
+                          ? 'bg-verdo-jade/10 text-verdo-navy shadow-sm border-l-4 border-verdo-jade' 
                           : ''
                       } ${isCollapsed ? 'justify-center w-12 h-12 p-0' : ''}`
                     }>
@@ -128,7 +128,7 @@ export function VerdoSidebar() {
                     <NavLink to={item.url} className={({ isActive }) => 
                       `group flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-all duration-200 font-medium relative ${
                         isActive 
-                          ? 'bg-verdo-jade text-white shadow-sm' 
+                          ? 'bg-verdo-jade/10 text-verdo-navy shadow-sm border-l-4 border-verdo-jade' 
                           : ''
                       } ${isCollapsed ? 'justify-center w-12 h-12 p-0' : ''}`
                     }>
