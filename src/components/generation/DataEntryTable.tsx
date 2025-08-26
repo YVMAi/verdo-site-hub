@@ -47,6 +47,14 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
       if (column.type === 'number' && formData[column.id] && isNaN(Number(formData[column.id]))) {
         newErrors[column.id] = 'Must be a valid number';
       }
+
+      // Time field validation
+      if ((column.id.includes('Time') || column.id.includes('time')) && formData[column.id]) {
+        const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+        if (!timeRegex.test(formData[column.id])) {
+          newErrors[column.id] = 'Must be in HH:MM format (24-hour)';
+        }
+      }
     });
     
     setErrors(newErrors);
@@ -102,6 +110,18 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
     });
   };
 
+  const getInputType = (column: any) => {
+    if (column.type === 'number') return 'number';
+    if (column.id.includes('Time') || column.id.includes('time')) return 'time';
+    return 'text';
+  };
+
+  const getPlaceholder = (column: any) => {
+    if (column.type === 'number') return '0.00';
+    if (column.id.includes('Time') || column.id.includes('time')) return 'HH:MM';
+    return 'Enter value';
+  };
+
   return (
     <div className="bg-card border rounded-lg">
       <div className="p-4 border-b bg-muted/50">
@@ -143,14 +163,15 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
                     ) : (
                       <div className="space-y-1">
                         <Input
-                          type={column.type === 'number' ? 'number' : 'text'}
+                          type={getInputType(column)}
                           value={formData[column.id] || ''}
                           onChange={(e) => handleInputChange(column.id, e.target.value)}
                           className={cn(
                             "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
                             errors[column.id] && "border-destructive focus:border-destructive"
                           )}
-                          placeholder={column.type === 'number' ? '0.00' : 'Enter value'}
+                          placeholder={getPlaceholder(column)}
+                          step={column.type === 'number' ? '0.01' : undefined}
                         />
                         {errors[column.id] && (
                           <p className="text-xs text-destructive">{errors[column.id]}</p>
@@ -166,7 +187,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
       </div>
       
       <div className="p-3 bg-muted/20 text-xs text-muted-foreground border-t">
-        💡 Tip: You can paste data directly from Excel by copying a row and pressing Ctrl+V in this table
+        💡 Tip: You can paste data directly from Excel by copying a row and pressing Ctrl+V in this table. Use HH:MM format for time fields.
       </div>
     </div>
   );
