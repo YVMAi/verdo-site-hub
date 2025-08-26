@@ -155,7 +155,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
             <thead className="sticky top-0">
               <tr className="bg-verdo-navy text-white">
                 {site.columns.map((column) => (
-                  <th key={column.id} className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px]">
+                  <th key={column.id} className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
                     {column.name}
                     {column.required && <span className="text-red-300 ml-1">*</span>}
                   </th>
