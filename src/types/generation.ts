@@ -5,11 +5,17 @@ export interface Client {
   allowedEditDays: number;
 }
 
+export interface MeterConfig {
+  meters: string[];
+  types: string[];
+}
+
 export interface Site {
   id: string;
   name: string;
   clientId: string;
   columns: SiteColumn[];
+  meterConfig?: MeterConfig;
 }
 
 export interface SiteColumn {

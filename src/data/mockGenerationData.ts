@@ -1,52 +1,8 @@
-import { Client, Site, GenerationData, TabConfig } from '@/types/generation';
+import { Client, Site, TabConfig, GenerationData } from '@/types/generation';
 
 export const mockClients: Client[] = [
-  { id: '1', name: 'Solar Energy Corp', allowedEditDays: 30 },
-  { id: '2', name: 'Wind Power Solutions', allowedEditDays: 45 },
-  { id: '3', name: 'Green Energy Partners', allowedEditDays: 15 },
-];
-
-export const mockSites: Site[] = [
-  {
-    id: '1',
-    name: 'Desert Solar Farm A',
-    clientId: '1',
-    columns: [
-      { id: 'date', name: 'Date', type: 'date', required: true },
-      { id: 'plantStartTime', name: 'Plant Start Time', type: 'text', required: true },
-      { id: 'plantEndTime', name: 'Plant End Time', type: 'text', required: true },
-      { id: 'peakLoad', name: 'Peak Load (MW)', type: 'number', required: true },
-      { id: 'peakLoadTime', name: 'Peak Load Time', type: 'text', required: true },
-      { id: 'ghi', name: 'GHI (W/m²)', type: 'number', required: true },
-      { id: 'gti', name: 'GTI (W/m²)', type: 'number', required: true },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Desert Solar Farm B',
-    clientId: '1',
-    columns: [
-      { id: 'date', name: 'Date', type: 'date', required: true },
-      { id: 'plantStartTime', name: 'Plant Start Time', type: 'text', required: true },
-      { id: 'plantEndTime', name: 'Plant End Time', type: 'text', required: true },
-      { id: 'peakLoad', name: 'Peak Load (MW)', type: 'number', required: true },
-      { id: 'peakLoadTime', name: 'Peak Load Time', type: 'text', required: true },
-      { id: 'ghi', name: 'GHI (W/m²)', type: 'number', required: true },
-      { id: 'gti', name: 'GTI (W/m²)', type: 'number', required: true },
-    ],
-  },
-  {
-    id: '3',
-    name: 'Mountain Wind Site',
-    clientId: '2',
-    columns: [
-      { id: 'date', name: 'Date', type: 'date', required: true },
-      { id: 'turbine1', name: 'Turbine 1 (MWh)', type: 'number', required: true },
-      { id: 'turbine2', name: 'Turbine 2 (MWh)', type: 'number', required: true },
-      { id: 'turbine3', name: 'Turbine 3 (MWh)', type: 'number', required: true },
-      { id: 'windSpeed', name: 'Avg Wind Speed (m/s)', type: 'number', required: false },
-    ],
-  },
+  { id: 'client-1', name: 'Verdo Renewables', allowedEditDays: 30 },
+  { id: 'client-2', name: 'EcoPower Solutions', allowedEditDays: 15 },
 ];
 
 export const tabConfigs: TabConfig[] = [
@@ -57,10 +13,68 @@ export const tabConfigs: TabConfig[] = [
   { id: 'inverter', label: 'Inverter', icon: 'cpu' },
 ];
 
-export const mockHistoricData: GenerationData[] = [
+export const mockSites: Site[] = [
   {
-    id: '1',
-    siteId: '1',
+    id: 'site-1',
+    name: 'Solar Farm Alpha',
+    clientId: 'client-1',
+    columns: [
+      { id: 'date', name: 'Date', type: 'date', required: true },
+      { id: 'plantStartTime', name: 'Plant Start Time', type: 'text', required: true },
+      { id: 'plantEndTime', name: 'Plant End Time', type: 'text', required: true },
+      { id: 'peakLoad', name: 'Peak Load (MW)', type: 'number', required: true },
+      { id: 'peakLoadTime', name: 'Peak Load Time', type: 'text', required: true },
+      { id: 'ghi', name: 'GHI (kWh/m²)', type: 'number', required: true },
+      { id: 'gti', name: 'GTI (kWh/m²)', type: 'number', required: true },
+    ],
+    meterConfig: {
+      meters: ['Meter 1', 'Meter 2', 'Meter 3'],
+      types: ['Export', 'Import']
+    }
+  },
+  {
+    id: 'site-2',
+    name: 'Wind Park Beta',
+    clientId: 'client-1',
+    columns: [
+      { id: 'date', name: 'Date', type: 'date', required: true },
+      { id: 'plantStartTime', name: 'Plant Start Time', type: 'text', required: true },
+      { id: 'plantEndTime', name: 'Plant End Time', type: 'text', required: true },
+      { id: 'peakLoad', name: 'Peak Load (MW)', type: 'number', required: true },
+      { id: 'peakLoadTime', name: 'Peak Load Time', type: 'text', required: true },
+      { id: 'ghi', name: 'GHI (kWh/m²)', type: 'number', required: true },
+      { id: 'gti', name: 'GTI (kWh/m²)', type: 'number', required: true },
+    ],
+    meterConfig: {
+      meters: ['Meter 1', 'Meter 2'],
+      types: ['Export', 'Import']
+    }
+  },
+  {
+    id: 'site-3',
+    name: 'Hydro Station Gamma',
+    clientId: 'client-2',
+    columns: [
+      { id: 'date', name: 'Date', type: 'date', required: true },
+      { id: 'plantStartTime', name: 'Plant Start Time', type: 'text', required: true },
+      { id: 'plantEndTime', name: 'Plant End Time', type: 'text', required: true },
+      { id: 'peakLoad', name: 'Peak Load (MW)', type: 'number', required: true },
+      { id: 'peakLoadTime', name: 'Peak Load Time', type: 'text', required: true },
+      { id: 'ghi', name: 'GHI (kWh/m²)', type: 'number', required: true },
+      { id: 'gti', name: 'GTI (kWh/m²)', type: 'number', required: true },
+    ],
+    meterConfig: {
+      meters: ['Meter 1', 'Meter 2', 'Meter 3', 'Meter 4'],
+      types: ['Export', 'Import']
+    }
+  }
+];
+
+export const mockHistoricData: GenerationData[] = [
+  // Plant data entries
+  {
+    id: 'data-1',
+    siteId: 'site-1',
     tabType: 'plant-data',
     date: '2024-08-25',
     values: {
@@ -68,113 +82,78 @@ export const mockHistoricData: GenerationData[] = [
       plantStartTime: '06:30',
       plantEndTime: '18:45',
       peakLoad: 45.2,
-      peakLoadTime: '13:15',
-      ghi: 850,
-      gti: 920,
+      peakLoadTime: '12:30',
+      ghi: 6.8,
+      gti: 7.2
     },
-    createdAt: '2024-08-25T08:00:00Z',
-    updatedAt: '2024-08-25T08:00:00Z',
+    createdAt: '2024-08-25T07:00:00Z',
+    updatedAt: '2024-08-25T07:00:00Z'
   },
   {
-    id: '2',
-    siteId: '1',
+    id: 'data-2',
+    siteId: 'site-1',
     tabType: 'plant-data',
     date: '2024-08-24',
     values: {
       date: '2024-08-24',
-      plantStartTime: '06:35',
-      plantEndTime: '18:40',
-      peakLoad: 43.8,
-      peakLoadTime: '12:45',
-      ghi: 820,
-      gti: 890,
+      plantStartTime: '06:25',
+      plantEndTime: '18:50',
+      peakLoad: 42.8,
+      peakLoadTime: '13:15',
+      ghi: 6.5,
+      gti: 6.9
     },
-    createdAt: '2024-08-24T08:00:00Z',
-    updatedAt: '2024-08-24T08:00:00Z',
+    createdAt: '2024-08-24T07:00:00Z',
+    updatedAt: '2024-08-24T07:00:00Z'
   },
+  // Meter data entries
   {
-    id: '3',
-    siteId: '1',
-    tabType: 'plant-data',
-    date: '2024-08-23',
-    values: {
-      date: '2024-08-23',
-      plantStartTime: '06:40',
-      plantEndTime: '18:35',
-      peakLoad: 41.5,
-      peakLoadTime: '13:00',
-      ghi: 780,
-      gti: 840,
-    },
-    createdAt: '2024-08-23T08:00:00Z',
-    updatedAt: '2024-08-23T08:00:00Z',
-  },
-  {
-    id: '4',
-    siteId: '1',
+    id: 'meter-data-1',
+    siteId: 'site-1',
     tabType: 'meter-data',
     date: '2024-08-25',
     values: {
       date: '2024-08-25',
-      plantStartTime: '06:30',
-      plantEndTime: '18:45',
-      peakLoad: 45.2,
-      peakLoadTime: '13:15',
-      ghi: 850,
-      gti: 920,
+      'meter-1-export': 1250.5,
+      'meter-1-import': 15.2,
+      'meter-2-export': 980.3,
+      'meter-2-import': 8.7,
+      'meter-3-export': 1100.8,
+      'meter-3-import': 12.4
     },
-    createdAt: '2024-08-25T08:00:00Z',
-    updatedAt: '2024-08-25T08:00:00Z',
+    createdAt: '2024-08-25T07:00:00Z',
+    updatedAt: '2024-08-25T07:00:00Z'
   },
   {
-    id: '5',
-    siteId: '1',
-    tabType: 'weather',
+    id: 'meter-data-2',
+    siteId: 'site-1',
+    tabType: 'meter-data',
+    date: '2024-08-24',
+    values: {
+      date: '2024-08-24',
+      'meter-1-export': 1185.3,
+      'meter-1-import': 18.9,
+      'meter-2-export': 925.7,
+      'meter-2-import': 11.2,
+      'meter-3-export': 1045.6,
+      'meter-3-import': 14.8
+    },
+    createdAt: '2024-08-24T07:00:00Z',
+    updatedAt: '2024-08-24T07:00:00Z'
+  },
+  {
+    id: 'meter-data-3',
+    siteId: 'site-2',
+    tabType: 'meter-data',
     date: '2024-08-25',
     values: {
       date: '2024-08-25',
-      plantStartTime: '06:30',
-      plantEndTime: '18:45',
-      peakLoad: 45.2,
-      peakLoadTime: '13:15',
-      ghi: 850,
-      gti: 920,
+      'meter-1-export': 890.2,
+      'meter-1-import': 22.1,
+      'meter-2-export': 745.6,
+      'meter-2-import': 16.8
     },
-    createdAt: '2024-08-25T08:00:00Z',
-    updatedAt: '2024-08-25T08:00:00Z',
-  },
-  {
-    id: '6',
-    siteId: '1',
-    tabType: 'ht-panel',
-    date: '2024-08-25',
-    values: {
-      date: '2024-08-25',
-      plantStartTime: '06:30',
-      plantEndTime: '18:45',
-      peakLoad: 45.2,
-      peakLoadTime: '13:15',
-      ghi: 850,
-      gti: 920,
-    },
-    createdAt: '2024-08-25T08:00:00Z',
-    updatedAt: '2024-08-25T08:00:00Z',
-  },
-  {
-    id: '7',
-    siteId: '1',
-    tabType: 'inverter',
-    date: '2024-08-25',
-    values: {
-      date: '2024-08-25',
-      plantStartTime: '06:30',
-      plantEndTime: '18:45',
-      peakLoad: 45.2,
-      peakLoadTime: '13:15',
-      ghi: 850,
-      gti: 920,
-    },
-    createdAt: '2024-08-25T08:00:00Z',
-    updatedAt: '2024-08-25T08:00:00Z',
-  },
+    createdAt: '2024-08-25T07:00:00Z',
+    updatedAt: '2024-08-25T07:00:00Z'
+  }
 ];

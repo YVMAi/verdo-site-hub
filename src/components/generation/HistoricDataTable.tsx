@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,6 +35,29 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
   const [exportStartDate, setExportStartDate] = useState<Date | undefined>();
   const [exportEndDate, setExportEndDate] = useState<Date | undefined>();
   const { toast } = useToast();
+
+  // Generate meter data columns based on site configuration
+  const meterColumns = useMemo(() => {
+    if (!site?.meterConfig || activeTab !== 'meter-data') return [];
+    
+    const columns = [{ id: 'date', name: 'Date', type: 'date' as const, required: true }];
+    
+    site.meterConfig.meters.forEach(meter => {
+      site.meterConfig!.types.forEach(type => {
+        columns.push({
+          id: `${meter.toLowerCase().replace(' ', '-')}-${type.toLowerCase()}`,
+          name: `${meter} - ${type}`,
+          type: 'number' as const,
+          required: true
+        });
+      });
+    });
+    
+    return columns;
+  }, [site, activeTab]);
+
+  // Use appropriate columns based on tab type
+  const currentColumns = activeTab === 'meter-data' ? meterColumns : (site?.columns || []);
 
   const filteredData = useMemo(() => {
     if (!site) return [];
@@ -312,7 +334,7 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="none">No grouping</SelectItem>
-            {site.columns.map(column => (
+            {currentColumns.map(column => (
               <SelectItem key={column.id} value={column.id}>
                 {column.name}
               </SelectItem>
@@ -348,7 +370,7 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
                 {(groupByColumn === 'none' || groupValue === Object.keys(groupedData)[0]) && (
                   <thead className="sticky top-0">
                     <tr className="bg-verdo-navy text-white">
-                      {site.columns.map((column) => (
+                      {currentColumns.map((column) => (
                         <th 
                           key={column.id} 
                           className="px-2 py-1 text-left font-medium border border-gray-300 min-w-[120px] cursor-pointer hover:bg-verdo-navy/80"
@@ -374,7 +396,7 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
                       "hover:bg-muted/20",
                       index % 2 === 0 ? "bg-background" : "bg-muted/10"
                     )}>
-                      {site.columns.map((column) => {
+                      {currentColumns.map((column) => {
                         const cellKey = `${item.id}-${column.id}`;
                         const isLocked = !isEditable(item.date);
                         const currentValue = editedData[cellKey] !== undefined 

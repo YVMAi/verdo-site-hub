@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Save } from 'lucide-react';
@@ -18,6 +18,29 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
+
+  // Generate meter data columns based on site configuration
+  const meterColumns = useMemo(() => {
+    if (!site?.meterConfig || activeTab !== 'meter-data') return [];
+    
+    const columns = [{ id: 'date', name: 'Date', type: 'date' as const, required: true }];
+    
+    site.meterConfig.meters.forEach(meter => {
+      site.meterConfig!.types.forEach(type => {
+        columns.push({
+          id: `${meter.toLowerCase().replace(' ', '-')}-${type.toLowerCase()}`,
+          name: `${meter} - ${type}`,
+          type: 'number' as const,
+          required: true
+        });
+      });
+    });
+    
+    return columns;
+  }, [site, activeTab]);
+
+  // Use appropriate columns based on tab type
+  const currentColumns = activeTab === 'meter-data' ? meterColumns : (site?.columns || []);
 
   if (!site) {
     return (
@@ -44,7 +67,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
-    site.columns.forEach(column => {
+    currentColumns.forEach(column => {
       if (column.required && !formData[column.id]) {
         newErrors[column.id] = 'This field is required';
       }
@@ -101,7 +124,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
     
     // Map pasted values to columns (simplified)
     const newFormData: Record<string, any> = {};
-    site.columns.forEach((column, index) => {
+    currentColumns.forEach((column, index) => {
       if (values[index] && column.id !== 'date') {
         newFormData[column.id] = values[index];
       }
@@ -154,7 +177,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
           <table className="w-full text-sm border-collapse">
             <thead className="sticky top-0">
               <tr className="bg-verdo-navy text-white">
-                {site.columns.map((column) => (
+                {currentColumns.map((column) => (
                   <th key={column.id} className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
                     {column.name}
                     {column.required && <span className="text-red-300 ml-1">*</span>}
@@ -164,7 +187,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
             </thead>
             <tbody>
               <tr className="hover:bg-muted/20">
-                {site.columns.map((column) => (
+                {currentColumns.map((column) => (
                   <td key={column.id} className="px-3 py-2 border border-gray-300">
                     {column.id === 'date' ? (
                       <div className="text-sm py-1 px-2 bg-muted/50 rounded">
