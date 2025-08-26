@@ -1,8 +1,9 @@
+
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Download, Edit, Save } from 'lucide-react';
+import { Download, Edit, Save, ChevronDown } from 'lucide-react';
 import { Site, TabType, GenerationData } from '@/types/generation';
 import { mockHistoricData } from '@/data/mockGenerationData';
 import { useToast } from '@/hooks/use-toast';
@@ -11,12 +12,34 @@ import { cn } from '@/lib/utils';
 import { MeterHistoricDataTable } from './MeterHistoricDataTable';
 import { ExportDialog } from '@/components/common/ExportDialog';
 import { ConfirmationDialog } from '@/components/common/ConfirmationDialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface HistoricDataTableProps {
   site: Site | null;
   activeTab: TabType;
   allowedEditDays: number;
 }
+
+const MONTHS = [
+  { value: 'all', label: 'All Months' },
+  { value: '01', label: 'Jan' },
+  { value: '02', label: 'Feb' },
+  { value: '03', label: 'Mar' },
+  { value: '04', label: 'Apr' },
+  { value: '05', label: 'May' },
+  { value: '06', label: 'Jun' },
+  { value: '07', label: 'Jul' },
+  { value: '08', label: 'Aug' },
+  { value: '09', label: 'Sep' },
+  { value: '10', label: 'Oct' },
+  { value: '11', label: 'Nov' },
+  { value: '12', label: 'Dec' }
+];
+
+const YEARS = Array.from({ length: 10 }, (_, i) => {
+  const year = new Date().getFullYear() - i;
+  return { value: year.toString(), label: year.toString() };
+});
 
 export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({ 
   site, 
@@ -28,6 +51,8 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
   const [sortColumn, setSortColumn] = useState<string>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [filterValue, setFilterValue] = useState('');
+  const [selectedMonth, setSelectedMonth] = useState<string>('all');
+  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
   const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
   const { toast } = useToast();
 
@@ -37,6 +62,17 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
     return mockHistoricData.filter(
       item => item.siteId === site.id && item.tabType === activeTab
     ).filter(item => {
+      // Month filter
+      if (selectedMonth !== 'all') {
+        const itemDate = new Date(item.date);
+        const itemMonth = (itemDate.getMonth() + 1).toString().padStart(2, '0');
+        const itemYear = itemDate.getFullYear().toString();
+        if (itemMonth !== selectedMonth || itemYear !== selectedYear) {
+          return false;
+        }
+      }
+      
+      // Text filter
       if (!filterValue) return true;
       return Object.values(item.values).some(val =>
         val?.toString().toLowerCase().includes(filterValue.toLowerCase())
@@ -58,7 +94,7 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
         return aValue > bValue ? -1 : 1;
       }
     });
-  }, [site, activeTab, filterValue, sortColumn, sortDirection]);
+  }, [site, activeTab, filterValue, sortColumn, sortDirection, selectedMonth, selectedYear]);
 
   // Use specialized meter historic table for meter-data tab
   if (activeTab === 'meter-data') {
@@ -194,6 +230,37 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
             onChange={(e) => setFilterValue(e.target.value)}
             className="h-7 text-xs flex-1 min-w-[120px]"
           />
+          
+          {/* Month Filter */}
+          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+            <SelectTrigger className="w-32 h-7 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-white z-50">
+              {MONTHS.map((month) => (
+                <SelectItem key={month.value} value={month.value}>
+                  {month.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Year Filter - only show when a specific month is selected */}
+          {selectedMonth !== 'all' && (
+            <Select value={selectedYear} onValueChange={setSelectedYear}>
+              <SelectTrigger className="w-20 h-7 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-white z-50">
+                {YEARS.map((year) => (
+                  <SelectItem key={year.value} value={year.value}>
+                    {year.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          
           <Badge variant="secondary">
             {historicData.length} Records
           </Badge>
