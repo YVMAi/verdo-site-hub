@@ -260,8 +260,8 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
                               value={currentValue || ''}
                               onChange={(e) => handleCellEdit(row.date, column.id, e.target.value)}
                               className={cn(
-                                "h-6 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
-                                isEditMode && "bg-blue-100",
+                                "h-6 text-xs border-0 focus:bg-background focus:border focus:border-ring",
+                                isEditMode ? "bg-blue-100" : "bg-gray-100",
                                 hasChanges && "bg-yellow-50 border border-yellow-300"
                               )}
                               readOnly={!isEditMode}
