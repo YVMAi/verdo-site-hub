@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -9,6 +9,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { TableHeader } from './TableHeader';
 import { MobileCard } from './MobileCard';
 import { EmptyState } from './EmptyState';
+import { Search } from 'lucide-react';
 
 interface MeterDataTableProps {
   site: Site | null;
@@ -24,6 +25,7 @@ interface MeterRow {
 export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDate }) => {
   const [meterData, setMeterData] = useState<MeterRow[]>([]);
   const [errors, setErrors] = useState<Record<number, string>>({});
+  const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -39,6 +41,16 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
       setMeterData(rows);
     }
   }, [site]);
+
+  // Filter meter data based on search term
+  const filteredMeterData = useMemo(() => {
+    if (!searchTerm.trim()) return meterData;
+    
+    return meterData.filter(row => 
+      row.meter.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.type.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [meterData, searchTerm]);
 
   if (!site || !site.meterConfig) {
     return <EmptyState message="Select a site to begin meter data entry" />;
@@ -129,12 +141,17 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
     });
   };
 
-  // Group meter data by meter name for mobile cards
-  const groupedData = meterData.reduce((acc, row, index) => {
+  // Group filtered meter data by meter name for mobile cards
+  const groupedData = filteredMeterData.reduce((acc, row, originalIndex) => {
+    // Find the original index in the unfiltered data
+    const actualIndex = meterData.findIndex(
+      (originalRow, idx) => originalRow.meter === row.meter && originalRow.type === row.type && idx >= originalIndex
+    );
+    
     if (!acc[row.meter]) {
       acc[row.meter] = [];
     }
-    acc[row.meter].push({ ...row, index });
+    acc[row.meter].push({ ...row, index: actualIndex });
     return acc;
   }, {} as Record<string, Array<MeterRow & { index: number }>>);
 
@@ -146,6 +163,20 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
           selectedDate={selectedDate}
           onSave={handleSave}
         />
+        
+        {/* Search Bar */}
+        <div className="p-4 border-b">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search meters..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
         
         <div className="p-4 space-y-4" onPaste={handlePasteFromExcel} tabIndex={0}>
           {Object.entries(groupedData).map(([meterName, rows]) => (
@@ -162,6 +193,11 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
               }))}
             />
           ))}
+          {filteredMeterData.length === 0 && searchTerm && (
+            <div className="text-center py-8 text-muted-foreground">
+              No meters found matching "{searchTerm}"
+            </div>
+          )}
         </div>
       </div>
     );
@@ -174,6 +210,20 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
         selectedDate={selectedDate}
         onSave={handleSave}
       />
+      
+      {/* Search Bar */}
+      <div className="p-4 border-b">
+        <div className="relative max-w-sm">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search meters..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+      </div>
       
       <div className="overflow-x-auto">
         <div className="min-w-full" onPaste={handlePasteFromExcel} tabIndex={0}>
@@ -192,38 +242,55 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
               </tr>
             </thead>
             <tbody>
-              {meterData.map((row, index) => (
-                <tr key={index} className="hover:bg-muted/20">
-                  <td className="px-3 py-2 border border-gray-300">
-                    <div className="text-sm py-1 px-2 bg-muted/50 rounded">
-                      {row.meter}
-                    </div>
-                  </td>
-                  <td className="px-3 py-2 border border-gray-300">
-                    <div className="text-sm py-1 px-2 bg-muted/50 rounded">
-                      {row.type}
-                    </div>
-                  </td>
-                  <td className="px-3 py-2 border border-gray-300">
-                    <div className="space-y-1">
-                      <Input
-                        type="number"
-                        value={row.value}
-                        onChange={(e) => handleValueChange(index, e.target.value)}
-                        className={cn(
-                          "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
-                          errors[index] && "border-destructive focus:border-destructive"
+              {filteredMeterData.map((row, displayIndex) => {
+                // Find the original index for this row
+                const originalIndex = meterData.findIndex(
+                  (originalRow, idx) => 
+                    originalRow.meter === row.meter && 
+                    originalRow.type === row.type && 
+                    idx >= (displayIndex === 0 ? 0 : meterData.findIndex(r => r === filteredMeterData[displayIndex - 1]) + 1)
+                );
+                
+                return (
+                  <tr key={`${row.meter}-${row.type}-${originalIndex}`} className="hover:bg-muted/20">
+                    <td className="px-3 py-2 border border-gray-300">
+                      <div className="text-sm py-1 px-2 bg-muted/50 rounded">
+                        {row.meter}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2 border border-gray-300">
+                      <div className="text-sm py-1 px-2 bg-muted/50 rounded">
+                        {row.type}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2 border border-gray-300">
+                      <div className="space-y-1">
+                        <Input
+                          type="number"
+                          value={row.value}
+                          onChange={(e) => handleValueChange(originalIndex, e.target.value)}
+                          className={cn(
+                            "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
+                            errors[originalIndex] && "border-destructive focus:border-destructive"
+                          )}
+                          placeholder="0.00"
+                          step="0.01"
+                        />
+                        {errors[originalIndex] && (
+                          <p className="text-xs text-destructive">{errors[originalIndex]}</p>
                         )}
-                        placeholder="0.00"
-                        step="0.01"
-                      />
-                      {errors[index] && (
-                        <p className="text-xs text-destructive">{errors[index]}</p>
-                      )}
-                    </div>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+              {filteredMeterData.length === 0 && searchTerm && (
+                <tr>
+                  <td colSpan={3} className="px-3 py-8 text-center text-muted-foreground">
+                    No meters found matching "{searchTerm}"
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
