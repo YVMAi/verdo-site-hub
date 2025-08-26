@@ -38,6 +38,9 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
     );
   }
 
+  // Filter out the date column from site columns
+  const filteredColumns = site.columns.filter(column => column.id !== 'date');
+
   const handleInputChange = (columnId: string, value: any) => {
     setFormData(prev => ({ ...prev, [columnId]: value }));
     
@@ -50,7 +53,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
-    site.columns.forEach(column => {
+    filteredColumns.forEach(column => {
       if (column.required && !formData[column.id]) {
         newErrors[column.id] = 'This field is required';
       }
@@ -107,8 +110,8 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
     
     // Map pasted values to columns (simplified)
     const newFormData: Record<string, any> = {};
-    site.columns.forEach((column, index) => {
-      if (values[index] && column.id !== 'date') {
+    filteredColumns.forEach((column, index) => {
+      if (values[index]) {
         newFormData[column.id] = values[index];
       }
     });
@@ -160,7 +163,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
           <table className="w-full text-sm border-collapse">
             <thead className="sticky top-0">
               <tr className="bg-verdo-navy text-white">
-                {site.columns.map((column) => (
+                {filteredColumns.map((column) => (
                   <th key={column.id} className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
                     {column.name}
                     {column.required && <span className="text-red-300 ml-1">*</span>}
@@ -170,30 +173,24 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
             </thead>
             <tbody>
               <tr className="hover:bg-muted/20">
-                {site.columns.map((column) => (
+                {filteredColumns.map((column) => (
                   <td key={column.id} className="px-3 py-2 border border-gray-300">
-                    {column.id === 'date' ? (
-                      <div className="text-sm py-1 px-2 bg-muted/50 rounded">
-                        {format(selectedDate, 'yyyy-MM-dd')}
-                      </div>
-                    ) : (
-                      <div className="space-y-1">
-                        <Input
-                          type={getInputType(column)}
-                          value={formData[column.id] || ''}
-                          onChange={(e) => handleInputChange(column.id, e.target.value)}
-                          className={cn(
-                            "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
-                            errors[column.id] && "border-destructive focus:border-destructive"
-                          )}
-                          placeholder={getPlaceholder(column)}
-                          step={column.type === 'number' ? '0.01' : undefined}
-                        />
-                        {errors[column.id] && (
-                          <p className="text-xs text-destructive">{errors[column.id]}</p>
+                    <div className="space-y-1">
+                      <Input
+                        type={getInputType(column)}
+                        value={formData[column.id] || ''}
+                        onChange={(e) => handleInputChange(column.id, e.target.value)}
+                        className={cn(
+                          "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
+                          errors[column.id] && "border-destructive focus:border-destructive"
                         )}
-                      </div>
-                    )}
+                        placeholder={getPlaceholder(column)}
+                        step={column.type === 'number' ? '0.01' : undefined}
+                      />
+                      {errors[column.id] && (
+                        <p className="text-xs text-destructive">{errors[column.id]}</p>
+                      )}
+                    </div>
                   </td>
                 ))}
               </tr>
