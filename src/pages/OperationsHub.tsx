@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -175,7 +176,7 @@ export default function OperationsHub() {
       {/* Top Navigation Bar */}
       <div className="bg-[hsl(var(--verdo-navy))] text-white px-6 py-4 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold">Operations Hub</h1>
+          <h1 className="text-xl font-bold">Daily Operations Data</h1>
           <p className="text-sm text-white/80">Centralized daily operations management</p>
         </div>
         
