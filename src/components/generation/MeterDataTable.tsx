@@ -1,11 +1,14 @@
+
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Save } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Site } from '@/types/generation';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { TableHeader } from './TableHeader';
+import { MobileCard } from './MobileCard';
+import { EmptyState } from './EmptyState';
 
 interface MeterDataTableProps {
   site: Site | null;
@@ -22,6 +25,7 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
   const [meterData, setMeterData] = useState<MeterRow[]>([]);
   const [errors, setErrors] = useState<Record<number, string>>({});
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   React.useEffect(() => {
     if (site?.meterConfig) {
@@ -37,13 +41,7 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
   }, [site]);
 
   if (!site || !site.meterConfig) {
-    return (
-      <div className="bg-white border rounded">
-        <div className="p-8 text-center">
-          <p className="text-muted-foreground">Select a site to begin meter data entry</p>
-        </div>
-      </div>
-    );
+    return <EmptyState message="Select a site to begin meter data entry" />;
   }
 
   const handleValueChange = (index: number, value: string) => {
@@ -51,7 +49,6 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
     newData[index].value = value === '' ? '' : Number(value);
     setMeterData(newData);
     
-    // Clear error for this field
     if (errors[index]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -86,7 +83,6 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
       return;
     }
 
-    // Convert meter data to the format expected by the backend
     const formattedData: Record<string, any> = {
       date: format(selectedDate, 'yyyy-MM-dd')
     };
@@ -108,7 +104,6 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
       description: `Meter data for ${format(selectedDate, 'PPP')} has been saved successfully.`,
     });
 
-    // Clear form
     const clearedData = meterData.map(row => ({ ...row, value: '' as const }));
     setMeterData(clearedData);
   };
@@ -134,27 +129,51 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
     });
   };
 
-  return (
-    <div className="bg-white rounded border">
-      <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
-        <span>Data Entry - Meter Data</span>
-        <div className="flex items-center gap-4">
-          <div className="text-sm text-white/80">
-            Date: {format(selectedDate, 'PPP')}
-          </div>
-          <div className="flex flex-col items-center">
-            <Button 
-              onClick={handleSave} 
-              variant="outline"
-              size="sm" 
-              className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0"
-            >
-              <Save className="h-4 w-4" />
-            </Button>
-            <span className="text-xs mt-1">Save</span>
-          </div>
+  // Group meter data by meter name for mobile cards
+  const groupedData = meterData.reduce((acc, row, index) => {
+    if (!acc[row.meter]) {
+      acc[row.meter] = [];
+    }
+    acc[row.meter].push({ ...row, index });
+    return acc;
+  }, {} as Record<string, Array<MeterRow & { index: number }>>);
+
+  if (isMobile) {
+    return (
+      <div className="bg-white rounded-lg border overflow-hidden">
+        <TableHeader 
+          title="Data Entry - Meter Data"
+          selectedDate={selectedDate}
+          onSave={handleSave}
+        />
+        
+        <div className="p-4 space-y-4" onPaste={handlePasteFromExcel} tabIndex={0}>
+          {Object.entries(groupedData).map(([meterName, rows]) => (
+            <MobileCard
+              key={meterName}
+              title={meterName}
+              fields={rows.map(row => ({
+                label: `${row.type} *`,
+                value: row.value,
+                onChange: (value) => handleValueChange(row.index, value),
+                error: errors[row.index],
+                type: 'number',
+                placeholder: '0.00'
+              }))}
+            />
+          ))}
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-lg border overflow-hidden">
+      <TableHeader 
+        title="Data Entry - Meter Data"
+        selectedDate={selectedDate}
+        onSave={handleSave}
+      />
       
       <div className="overflow-x-auto">
         <div className="min-w-full" onPaste={handlePasteFromExcel} tabIndex={0}>

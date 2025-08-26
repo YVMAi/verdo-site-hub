@@ -1,14 +1,17 @@
+
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Save } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { Site, TabType, SiteColumn } from '@/types/generation';
+import { Site, TabType } from '@/types/generation';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { MeterDataTable } from './MeterDataTable';
 import { HtPanelDataTable } from './HtPanelDataTable';
 import { InverterDataTable } from './InverterDataTable';
+import { TableHeader } from './TableHeader';
+import { MobileCard } from './MobileCard';
+import { EmptyState } from './EmptyState';
 
 interface DataEntryTableProps {
   site: Site | null;
@@ -20,33 +23,25 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
-  // Use specialized meter data table for meter-data tab
+  // Use specialized tables for specific tabs
   if (activeTab === 'meter-data') {
     return <MeterDataTable site={site} selectedDate={selectedDate} />;
   }
 
-  // Use specialized HT Panel data table for ht-panel tab
   if (activeTab === 'ht-panel') {
     return <HtPanelDataTable site={site} selectedDate={selectedDate} />;
   }
 
-  // Use specialized Inverter data table for inverter tab
   if (activeTab === 'inverter') {
     return <InverterDataTable site={site} selectedDate={selectedDate} />;
   }
 
   if (!site) {
-    return (
-      <div className="bg-white border rounded">
-        <div className="p-8 text-center">
-          <p className="text-muted-foreground">Select a site to begin data entry</p>
-        </div>
-      </div>
-    );
+    return <EmptyState message="Select a site to begin data entry" />;
   }
 
-  // Get columns based on active tab
   const getColumnsForTab = () => {
     if (activeTab === 'weather' && site.weatherColumns) {
       return site.weatherColumns;
@@ -59,7 +54,6 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
   const handleInputChange = (columnId: string, value: any) => {
     setFormData(prev => ({ ...prev, [columnId]: value }));
     
-    // Clear error for this field
     if (errors[columnId]) {
       setErrors(prev => ({ ...prev, [columnId]: '' }));
     }
@@ -77,7 +71,6 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
         newErrors[column.id] = 'Must be a valid number';
       }
 
-      // Time field validation
       if ((column.id.includes('Time') || column.id.includes('time')) && formData[column.id]) {
         const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
         if (!timeRegex.test(formData[column.id])) {
@@ -100,7 +93,6 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
       return;
     }
 
-    // Simulate API call
     console.log('Saving data:', {
       siteId: site.id,
       tabType: activeTab,
@@ -113,7 +105,6 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
       description: `Data for ${format(selectedDate, 'PPP')} has been saved successfully.`,
     });
 
-    // Clear form
     setFormData({});
   };
 
@@ -123,7 +114,6 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
     const rows = pastedData.split('\n');
     const values = rows[0].split('\t');
     
-    // Map pasted values to columns (simplified)
     const newFormData: Record<string, any> = {};
     filteredColumns.forEach((column, index) => {
       if (values[index]) {
@@ -151,27 +141,39 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
     return 'Enter value';
   };
 
-  return (
-    <div className="bg-white rounded border">
-      <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
-        <span>Data Entry - {activeTab.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
-        <div className="flex items-center gap-4">
-          <div className="text-sm text-white/80">
-            Date: {format(selectedDate, 'PPP')}
-          </div>
-          <div className="flex flex-col items-center">
-            <Button 
-              onClick={handleSave} 
-              variant="outline"
-              size="sm" 
-              className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0"
-            >
-              <Save className="h-4 w-4" />
-            </Button>
-            <span className="text-xs mt-1">Save</span>
-          </div>
+  if (isMobile) {
+    return (
+      <div className="bg-white rounded-lg border overflow-hidden">
+        <TableHeader 
+          title={`Data Entry - ${activeTab.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}`}
+          selectedDate={selectedDate}
+          onSave={handleSave}
+        />
+        
+        <div className="p-4 space-y-4" onPaste={handlePasteFromExcel} tabIndex={0}>
+          <MobileCard
+            title="Data Entry Form"
+            fields={filteredColumns.map(column => ({
+              label: `${column.name}${column.required ? ' *' : ''}`,
+              value: formData[column.id] || '',
+              onChange: (value) => handleInputChange(column.id, value),
+              error: errors[column.id],
+              type: getInputType(column),
+              placeholder: getPlaceholder(column)
+            }))}
+          />
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-lg border overflow-hidden">
+      <TableHeader 
+        title={`Data Entry - ${activeTab.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}`}
+        selectedDate={selectedDate}
+        onSave={handleSave}
+      />
       
       <div className="overflow-x-auto">
         <div className="min-w-full" onPaste={handlePasteFromExcel} tabIndex={0}>

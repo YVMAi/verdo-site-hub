@@ -1,11 +1,14 @@
+
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Save } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Site } from '@/types/generation';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { TableHeader } from './TableHeader';
+import { MobileCard } from './MobileCard';
+import { EmptyState } from './EmptyState';
 
 interface HtPanelDataTableProps {
   site: Site | null;
@@ -16,15 +19,10 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   if (!site) {
-    return (
-      <div className="bg-white border rounded">
-        <div className="p-8 text-center">
-          <p className="text-muted-foreground">Select a site to begin data entry</p>
-        </div>
-      </div>
-    );
+    return <EmptyState message="Select a site to begin data entry" />;
   }
 
   const blocks = site.htPanelConfig?.blockNames || ['Block 1'];
@@ -33,7 +31,6 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
     const key = `${blockName}_${field}`;
     setFormData(prev => ({ ...prev, [key]: value }));
     
-    // Clear error for this field
     if (errors[key]) {
       setErrors(prev => ({ ...prev, [key]: '' }));
     }
@@ -73,7 +70,6 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
       return;
     }
 
-    // Simulate API call
     console.log('Saving HT Panel data:', {
       siteId: site.id,
       tabType: 'ht-panel',
@@ -86,7 +82,6 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
       description: `HT Panel data for ${format(selectedDate, 'PPP')} has been saved successfully.`,
     });
 
-    // Clear form
     setFormData({});
   };
 
@@ -95,7 +90,6 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
     const pastedData = e.clipboardData.getData('text');
     const rows = pastedData.split('\n');
     
-    // Map pasted data to blocks
     const newFormData: Record<string, any> = {};
     rows.forEach((row, index) => {
       if (index < blocks.length && row.trim()) {
@@ -114,27 +108,52 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
     });
   };
 
-  return (
-    <div className="bg-white rounded border">
-      <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
-        <span>Data Entry - HT Panel</span>
-        <div className="flex items-center gap-4">
-          <div className="text-sm text-white/80">
-            Date: {format(selectedDate, 'PPP')}
-          </div>
-          <div className="flex flex-col items-center">
-            <Button 
-              onClick={handleSave} 
-              variant="outline"
-              size="sm" 
-              className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0"
-            >
-              <Save className="h-4 w-4" />
-            </Button>
-            <span className="text-xs mt-1">Save</span>
-          </div>
+  if (isMobile) {
+    return (
+      <div className="bg-white rounded-lg border overflow-hidden">
+        <TableHeader 
+          title="Data Entry - HT Panel"
+          selectedDate={selectedDate}
+          onSave={handleSave}
+        />
+        
+        <div className="p-4 space-y-4" onPaste={handlePasteFromExcel} tabIndex={0}>
+          {blocks.map((blockName) => (
+            <MobileCard
+              key={blockName}
+              title={blockName}
+              fields={[
+                {
+                  label: 'Incoming *',
+                  value: formData[`${blockName}_incoming`] || '',
+                  onChange: (value) => handleInputChange(blockName, 'incoming', value),
+                  error: errors[`${blockName}_incoming`],
+                  type: 'number',
+                  placeholder: '0.00'
+                },
+                {
+                  label: 'Outgoing *',
+                  value: formData[`${blockName}_outgoing`] || '',
+                  onChange: (value) => handleInputChange(blockName, 'outgoing', value),
+                  error: errors[`${blockName}_outgoing`],
+                  type: 'number',
+                  placeholder: '0.00'
+                }
+              ]}
+            />
+          ))}
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-lg border overflow-hidden">
+      <TableHeader 
+        title="Data Entry - HT Panel"
+        selectedDate={selectedDate}
+        onSave={handleSave}
+      />
       
       <div className="overflow-x-auto">
         <div className="min-w-full" onPaste={handlePasteFromExcel} tabIndex={0}>
@@ -153,7 +172,7 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
               </tr>
             </thead>
             <tbody>
-              {blocks.map((blockName, index) => (
+              {blocks.map((blockName) => (
                 <tr key={blockName} className="hover:bg-muted/20">
                   <td className="px-3 py-2 border border-gray-300">
                     <Input
@@ -204,7 +223,6 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
           </table>
         </div>
       </div>
-      
     </div>
   );
 };
