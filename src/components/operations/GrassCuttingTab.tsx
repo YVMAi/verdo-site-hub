@@ -54,8 +54,6 @@ export const GrassCuttingTab: React.FC = () => {
           <h3 className="text-lg font-semibold mb-3">New Data Entry</h3>
           <CompactGrassCuttingDataEntry 
             data={currentData} 
-            selectedClient={selectedClient}
-            selectedSite={selectedSite}
           />
         </div>
         
@@ -64,8 +62,6 @@ export const GrassCuttingTab: React.FC = () => {
           <h3 className="text-lg font-semibold mb-3">Historic Data</h3>
           <CompactGrassCuttingHistoric 
             data={currentData}
-            selectedClient={selectedClient}
-            selectedSite={selectedSite}
           />
         </div>
       </div>
