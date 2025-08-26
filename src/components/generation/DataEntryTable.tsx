@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,8 +37,16 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
     );
   }
 
+  // Get columns based on active tab
+  const getColumnsForTab = () => {
+    if (activeTab === 'weather' && site.weatherColumns) {
+      return site.weatherColumns;
+    }
+    return site.columns;
+  };
+
   // Filter out the date column from site columns
-  const filteredColumns = site.columns.filter(column => column.id !== 'date');
+  const filteredColumns = getColumnsForTab().filter(column => column.id !== 'date');
 
   const handleInputChange = (columnId: string, value: any) => {
     setFormData(prev => ({ ...prev, [columnId]: value }));

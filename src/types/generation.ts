@@ -10,6 +10,7 @@ export interface Site {
   name: string;
   clientId: string;
   columns: SiteColumn[];
+  weatherColumns?: SiteColumn[];
   meterConfig?: {
     meterCount: number;
     meterNames: string[];
