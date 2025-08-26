@@ -8,6 +8,7 @@ import { Site, TabType, SiteColumn } from '@/types/generation';
 import { useToast } from '@/hooks/use-toast';
 import { MeterDataTable } from './MeterDataTable';
 import { HtPanelDataTable } from './HtPanelDataTable';
+import { InverterDataTable } from './InverterDataTable';
 
 interface DataEntryTableProps {
   site: Site | null;
@@ -28,6 +29,11 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
   // Use specialized HT Panel data table for ht-panel tab
   if (activeTab === 'ht-panel') {
     return <HtPanelDataTable site={site} selectedDate={selectedDate} />;
+  }
+
+  // Use specialized Inverter data table for inverter tab
+  if (activeTab === 'inverter') {
+    return <InverterDataTable site={site} selectedDate={selectedDate} />;
   }
 
   if (!site) {
@@ -51,7 +57,6 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
     return site.columns;
   };
 
-  // Filter out the date column from site columns
   const filteredColumns = getColumnsForTab().filter(column => column.id !== 'date');
 
   const handleInputChange = (columnId: string, value: any) => {

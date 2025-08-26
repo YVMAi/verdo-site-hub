@@ -34,6 +34,11 @@ export const mockSites: Site[] = [
       { id: 'incoming', name: 'Incoming', type: 'number', required: true },
       { id: 'outgoing', name: 'Outgoing', type: 'number', required: true },
     ],
+    inverterColumns: [
+      { id: 'block', name: 'Block', type: 'text', required: true },
+      { id: 'inverter', name: 'Inverter', type: 'text', required: true },
+      { id: 'generation', name: 'Generation', type: 'number', required: true },
+    ],
     meterConfig: {
       meterCount: 2,
       meterNames: ['Meter 1', 'Meter 2']
@@ -41,6 +46,12 @@ export const mockSites: Site[] = [
     htPanelConfig: {
       blockCount: 3,
       blockNames: ['Block 1', 'Block 2', 'Block 3']
+    },
+    inverterConfig: {
+      blocks: [
+        { blockName: 'B1', inverters: ['Inv1', 'Inv2'] },
+        { blockName: 'B2', inverters: ['Inv1', 'Inv2'] }
+      ]
     }
   },
   {
@@ -70,6 +81,11 @@ export const mockSites: Site[] = [
       { id: 'incoming', name: 'Incoming', type: 'number', required: true },
       { id: 'outgoing', name: 'Outgoing', type: 'number', required: true },
     ],
+    inverterColumns: [
+      { id: 'block', name: 'Block', type: 'text', required: true },
+      { id: 'inverter', name: 'Inverter', type: 'text', required: true },
+      { id: 'generation', name: 'Generation', type: 'number', required: true },
+    ],
     meterConfig: {
       meterCount: 3,
       meterNames: ['Meter 1', 'Meter 2', 'Meter 3']
@@ -77,6 +93,13 @@ export const mockSites: Site[] = [
     htPanelConfig: {
       blockCount: 4,
       blockNames: ['Block 1', 'Block 2', 'Block 3', 'Block 4']
+    },
+    inverterConfig: {
+      blocks: [
+        { blockName: 'B1', inverters: ['Inv1', 'Inv2'] },
+        { blockName: 'B2', inverters: ['Inv1', 'Inv2'] },
+        { blockName: 'B3', inverters: ['Inv1'] }
+      ]
     }
   },
   {
@@ -104,6 +127,11 @@ export const mockSites: Site[] = [
       { id: 'incoming', name: 'Incoming', type: 'number', required: true },
       { id: 'outgoing', name: 'Outgoing', type: 'number', required: true },
     ],
+    inverterColumns: [
+      { id: 'block', name: 'Block', type: 'text', required: true },
+      { id: 'inverter', name: 'Inverter', type: 'text', required: true },
+      { id: 'generation', name: 'Generation', type: 'number', required: true },
+    ],
     meterConfig: {
       meterCount: 1,
       meterNames: ['Main Meter']
@@ -111,6 +139,12 @@ export const mockSites: Site[] = [
     htPanelConfig: {
       blockCount: 2,
       blockNames: ['Block 1', 'Block 2']
+    },
+    inverterConfig: {
+      blocks: [
+        { blockName: 'B1', inverters: ['Inv1'] },
+        { blockName: 'B2', inverters: ['Inv1'] }
+      ]
     }
   },
 ];
@@ -309,14 +343,81 @@ export const mockHistoricData: GenerationData[] = [
     date: '2024-08-25',
     values: {
       date: '2024-08-25',
-      plantStartTime: '06:30',
-      plantEndTime: '18:45',
-      peakLoad: 45.2,
-      peakLoadTime: '13:15',
-      ghi: 850,
-      gti: 920,
+      block: 'B1',
+      inverter: 'Inv1',
+      generation: 15541,
     },
     createdAt: '2024-08-25T08:00:00Z',
     updatedAt: '2024-08-25T08:00:00Z',
+  },
+  {
+    id: '13',
+    siteId: '1',
+    tabType: 'inverter',
+    date: '2024-08-25',
+    values: {
+      date: '2024-08-25',
+      block: 'B1',
+      inverter: 'Inv2',
+      generation: 16632,
+    },
+    createdAt: '2024-08-25T08:00:00Z',
+    updatedAt: '2024-08-25T08:00:00Z',
+  },
+  {
+    id: '14',
+    siteId: '1',
+    tabType: 'inverter',
+    date: '2024-08-25',
+    values: {
+      date: '2024-08-25',
+      block: 'B2',
+      inverter: 'Inv1',
+      generation: 16532,
+    },
+    createdAt: '2024-08-25T08:00:00Z',
+    updatedAt: '2024-08-25T08:00:00Z',
+  },
+  {
+    id: '15',
+    siteId: '1',
+    tabType: 'inverter',
+    date: '2024-08-25',
+    values: {
+      date: '2024-08-25',
+      block: 'B2',
+      inverter: 'Inv2',
+      generation: 78232,
+    },
+    createdAt: '2024-08-25T08:00:00Z',
+    updatedAt: '2024-08-25T08:00:00Z',
+  },
+  {
+    id: '16',
+    siteId: '1',
+    tabType: 'inverter',
+    date: '2024-08-24',
+    values: {
+      date: '2024-08-24',
+      block: 'B1',
+      inverter: 'Inv1',
+      generation: 15123,
+    },
+    createdAt: '2024-08-24T08:00:00Z',
+    updatedAt: '2024-08-24T08:00:00Z',
+  },
+  {
+    id: '17',
+    siteId: '1',
+    tabType: 'inverter',
+    date: '2024-08-24',
+    values: {
+      date: '2024-08-24',
+      block: 'B1',
+      inverter: 'Inv2',
+      generation: 16234,
+    },
+    createdAt: '2024-08-24T08:00:00Z',
+    updatedAt: '2024-08-24T08:00:00Z',
   },
 ];

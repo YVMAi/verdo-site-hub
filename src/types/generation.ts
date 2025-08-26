@@ -12,6 +12,7 @@ export interface Site {
   columns: SiteColumn[];
   weatherColumns?: SiteColumn[];
   htPanelColumns?: SiteColumn[];
+  inverterColumns?: SiteColumn[];
   meterConfig?: {
     meterCount: number;
     meterNames: string[];
@@ -19,6 +20,12 @@ export interface Site {
   htPanelConfig?: {
     blockCount: number;
     blockNames: string[];
+  };
+  inverterConfig?: {
+    blocks: Array<{
+      blockName: string;
+      inverters: string[];
+    }>;
   };
 }
 

@@ -96,6 +96,9 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
     if (activeTab === 'ht-panel' && site.htPanelColumns) {
       return site.htPanelColumns;
     }
+    if (activeTab === 'inverter' && site.inverterColumns) {
+      return site.inverterColumns;
+    }
     return site.columns;
   };
 
