@@ -22,7 +22,7 @@ export const BulkUploadModal: React.FC<BulkUploadModalProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [uploadedData, setUploadedData] = useState<any[]>([]);
-  const [uploadType, setUploadType] = useState<'single' | 'all'>('single');
+  const [uploadType, setUploadType] = useState<string>('all');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -102,20 +102,20 @@ export const BulkUploadModal: React.FC<BulkUploadModalProps> = ({
     let headers: string[] = [];
     let sampleData: string[] = [];
 
-    if (uploadType === 'single') {
-      // Single tab template
-      headers = selectedSite.columns.map(col => col.name);
-      sampleData = [
-        '2024-08-26,' + selectedSite.columns.slice(1).map(() => '0').join(','),
-        '2024-08-27,' + selectedSite.columns.slice(1).map(() => '0').join(',')
-      ];
-    } else {
+    if (uploadType === 'all') {
       // All tabs template
       headers = ['Date', 'Tab', ...selectedSite.columns.slice(1).map(col => col.name)];
       sampleData = [
         '2024-08-26,plant-data,' + selectedSite.columns.slice(1).map(() => '0').join(','),
         '2024-08-26,meter-data,' + selectedSite.columns.slice(1).map(() => '0').join(','),
         '2024-08-27,plant-data,' + selectedSite.columns.slice(1).map(() => '0').join(',')
+      ];
+    } else {
+      // Single tab template
+      headers = selectedSite.columns.map(col => col.name);
+      sampleData = [
+        '2024-08-26,' + selectedSite.columns.slice(1).map(() => '0').join(','),
+        '2024-08-27,' + selectedSite.columns.slice(1).map(() => '0').join(',')
       ];
     }
     
@@ -130,7 +130,7 @@ export const BulkUploadModal: React.FC<BulkUploadModalProps> = ({
 
     toast({
       title: "Template Downloaded",
-      description: `Template for ${uploadType === 'single' ? 'single tab' : 'all tabs'} has been downloaded`,
+      description: `Template for ${uploadType === 'all' ? 'all tabs' : tabConfigs.find(t => t.id === uploadType)?.label} has been downloaded`,
     });
   };
 
@@ -167,13 +167,17 @@ export const BulkUploadModal: React.FC<BulkUploadModalProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Upload Type</label>
-              <Select value={uploadType} onValueChange={(value) => setUploadType(value as 'single' | 'all')}>
+              <Select value={uploadType} onValueChange={(value) => setUploadType(value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="single">Current Tab Only</SelectItem>
                   <SelectItem value="all">All Tabs Combined</SelectItem>
+                  {tabConfigs.map(tab => (
+                    <SelectItem key={tab.id} value={tab.id}>
+                      {tab.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -262,6 +266,7 @@ export const BulkUploadModal: React.FC<BulkUploadModalProps> = ({
             <Button 
               onClick={handleUpload} 
               disabled={uploadedData.length === 0}
+              className="bg-[hsl(var(--verdo-navy))] hover:bg-[hsl(var(--verdo-navy))]/90 text-white"
             >
               Upload Data
             </Button>
