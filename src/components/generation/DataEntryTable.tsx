@@ -1,11 +1,11 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Save } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { Site, TabType, SiteColumn } from '@/types/generation';
+import { Site, TabType } from '@/types/generation';
 import { useToast } from '@/hooks/use-toast';
 
 interface DataEntryTableProps {
@@ -18,31 +18,6 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
-
-  // Generate meter data columns based on site configuration
-  const meterColumns = useMemo(() => {
-    if (!site?.meterConfig || activeTab !== 'meter-data') return [];
-    
-    const columns: SiteColumn[] = [];
-    
-    site.meterConfig.meters.forEach(meter => {
-      site.meterConfig!.types.forEach(type => {
-        columns.push({
-          id: `${meter.toLowerCase().replace(' ', '-')}-${type.toLowerCase()}`,
-          name: `${meter} - ${type}`,
-          type: 'number',
-          required: true
-        });
-      });
-    });
-    
-    return columns;
-  }, [site, activeTab]);
-
-  // Use appropriate columns based on tab type (excluding date column)
-  const currentColumns = activeTab === 'meter-data' 
-    ? meterColumns 
-    : (site?.columns?.filter(col => col.id !== 'date') || []);
 
   if (!site) {
     return (
@@ -69,7 +44,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
-    currentColumns.forEach(column => {
+    site.columns.forEach(column => {
       if (column.required && !formData[column.id]) {
         newErrors[column.id] = 'This field is required';
       }
@@ -126,8 +101,8 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
     
     // Map pasted values to columns (simplified)
     const newFormData: Record<string, any> = {};
-    currentColumns.forEach((column, index) => {
-      if (values[index]) {
+    site.columns.forEach((column, index) => {
+      if (values[index] && column.id !== 'date') {
         newFormData[column.id] = values[index];
       }
     });
@@ -179,7 +154,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
           <table className="w-full text-sm border-collapse">
             <thead className="sticky top-0">
               <tr className="bg-verdo-navy text-white">
-                {currentColumns.map((column) => (
+                {site.columns.map((column) => (
                   <th key={column.id} className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
                     {column.name}
                     {column.required && <span className="text-red-300 ml-1">*</span>}
@@ -189,24 +164,30 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
             </thead>
             <tbody>
               <tr className="hover:bg-muted/20">
-                {currentColumns.map((column) => (
+                {site.columns.map((column) => (
                   <td key={column.id} className="px-3 py-2 border border-gray-300">
-                    <div className="space-y-1">
-                      <Input
-                        type={getInputType(column)}
-                        value={formData[column.id] || ''}
-                        onChange={(e) => handleInputChange(column.id, e.target.value)}
-                        className={cn(
-                          "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
-                          errors[column.id] && "border-destructive focus:border-destructive"
+                    {column.id === 'date' ? (
+                      <div className="text-sm py-1 px-2 bg-muted/50 rounded">
+                        {format(selectedDate, 'yyyy-MM-dd')}
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <Input
+                          type={getInputType(column)}
+                          value={formData[column.id] || ''}
+                          onChange={(e) => handleInputChange(column.id, e.target.value)}
+                          className={cn(
+                            "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
+                            errors[column.id] && "border-destructive focus:border-destructive"
+                          )}
+                          placeholder={getPlaceholder(column)}
+                          step={column.type === 'number' ? '0.01' : undefined}
+                        />
+                        {errors[column.id] && (
+                          <p className="text-xs text-destructive">{errors[column.id]}</p>
                         )}
-                        placeholder={getPlaceholder(column)}
-                        step={column.type === 'number' ? '0.01' : undefined}
-                      />
-                      {errors[column.id] && (
-                        <p className="text-xs text-destructive">{errors[column.id]}</p>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </td>
                 ))}
               </tr>
