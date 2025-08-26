@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -11,19 +12,6 @@ import { ComingSoonTab } from "@/components/operations/ComingSoonTab";
 import { AllOperationsSummary } from "@/components/operations/AllOperationsSummary";
 import { useClientContext } from "@/contexts/ClientContext";
 import { mockSites } from "@/data/mockGenerationData";
-import { format } from 'date-fns';
-
-// Mock function to get last updated date for operations data
-const getOperationsLastUpdatedDate = (siteId: string): Date => {
-  // Mock data - in real app this would come from API
-  const mockLastUpdated: Record<string, Date> = {
-    '1': new Date('2024-08-26T09:15:00'),
-    '2': new Date('2024-08-25T17:30:00'),
-    '3': new Date('2024-08-24T14:45:00')
-  };
-  
-  return mockLastUpdated[siteId] || new Date();
-};
 
 const getOperationsForSite = (siteId: string | null, siteName: string | null) => {
   const baseOperations = [{
@@ -190,35 +178,19 @@ export default function OperationsHub() {
         <div>
           <h1 className="text-xl font-bold">Daily Operations Data</h1>
           <p className="text-sm text-white/80">Centralized daily operations management</p>
-          {selectedSite && (
-            <div className="flex items-center gap-2 mt-2">
-              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-              <p className="text-sm text-blue-200 font-medium">
-                Last updated: {format(getOperationsLastUpdatedDate(selectedSite.id), "MMM dd, yyyy 'at' HH:mm")}
-              </p>
-            </div>
-          )}
         </div>
         
         <div className="flex items-center gap-4">
           {/* Site Selector */}
           <div className="flex items-center gap-2 min-w-[300px]">
             <Select onValueChange={handleSiteChange} disabled={!selectedClient} value={selectedSite?.id || ""}>
-              <SelectTrigger className="bg-white/10 border-white/20 text-white h-10 text-base">
+              <SelectTrigger className="bg-white/10 border-white/20 text-white h-8 text-sm">
                 <SelectValue placeholder={selectedClient ? "Select a site..." : "Select client from sidebar first"} />
               </SelectTrigger>
-              <SelectContent className="bg-[hsl(var(--verdo-navy))] border border-white/20 shadow-lg">
+              <SelectContent>
                 {availableSites.map(site => (
-                  <SelectItem key={site.id} value={site.id} className="py-4 px-4 hover:bg-white/10 cursor-pointer text-white">
-                    <div className="flex flex-col gap-1">
-                      <span className="font-medium text-white text-base">{site.name}</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
-                        <span className="text-sm text-white/80 font-medium">
-                          Updated: {format(getOperationsLastUpdatedDate(site.id), "MMM dd, HH:mm")}
-                        </span>
-                      </div>
-                    </div>
+                  <SelectItem key={site.id} value={site.id} className="text-sm">
+                    {site.name}
                   </SelectItem>
                 ))}
               </SelectContent>

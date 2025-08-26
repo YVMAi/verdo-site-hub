@@ -24,18 +24,6 @@ const iconMap = {
   'cpu': Cpu
 };
 
-// Mock function to get last updated date for a site
-const getLastUpdatedDate = (siteId: string): Date => {
-  // Mock data - in real app this would come from API
-  const mockLastUpdated: Record<string, Date> = {
-    '1': new Date('2024-08-26T14:30:00'),
-    '2': new Date('2024-08-25T16:45:00'),
-    '3': new Date('2024-08-24T12:15:00')
-  };
-  
-  return mockLastUpdated[siteId] || new Date();
-};
-
 const GenerationData = () => {
   const {
     selectedClient,
@@ -87,37 +75,19 @@ const GenerationData = () => {
         <div>
           <h1 className="text-xl font-bold">Daily Generation Data</h1>
           <p className="text-sm text-white/80">Enter and manage generation data across multiple sites</p>
-          {selectedSite && (
-            <div className="flex items-center gap-2 mt-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-              <p className="text-sm text-green-200 font-medium">
-                Last updated: {format(getLastUpdatedDate(selectedSite.id), "MMM dd, yyyy 'at' HH:mm")}
-              </p>
-            </div>
-          )}
         </div>
         
         <div className="flex items-center gap-4">
           {/* Site Selector */}
-          <div className="flex items-center gap-2 min-w-[300px]">
+          <div className="flex items-center gap-2 min-w-[200px]">
             <Select onValueChange={handleSiteChange} disabled={!selectedClient} value={selectedSite?.id || ""}>
-              <SelectTrigger className="bg-white/10 border-white/20 text-white h-10 text-base">
+              <SelectTrigger className="bg-white/10 border-white/20 text-white h-8 text-sm">
                 <SelectValue placeholder={selectedClient ? "Select a site..." : "Select client from sidebar first"} />
               </SelectTrigger>
-              <SelectContent className="bg-[hsl(var(--verdo-navy))] border border-white/20 shadow-lg">
-                {availableSites.map(site => (
-                  <SelectItem key={site.id} value={site.id} className="py-4 px-4 hover:bg-white/10 cursor-pointer text-white">
-                    <div className="flex flex-col gap-1">
-                      <span className="font-medium text-white text-base">{site.name}</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
-                        <span className="text-sm text-white/80 font-medium">
-                          Updated: {format(getLastUpdatedDate(site.id), "MMM dd, HH:mm")}
-                        </span>
-                      </div>
-                    </div>
-                  </SelectItem>
-                ))}
+              <SelectContent>
+                {availableSites.map(site => <SelectItem key={site.id} value={site.id} className="text-sm">
+                    {site.name}
+                  </SelectItem>)}
               </SelectContent>
             </Select>
           </div>
