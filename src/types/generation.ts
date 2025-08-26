@@ -16,6 +16,10 @@ export interface Site {
     meterCount: number;
     meterNames: string[];
   };
+  htPanelConfig?: {
+    blockCount: number;
+    blockNames: string[];
+  };
 }
 
 export interface SiteColumn {

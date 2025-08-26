@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { Site, TabType, SiteColumn } from '@/types/generation';
 import { useToast } from '@/hooks/use-toast';
 import { MeterDataTable } from './MeterDataTable';
+import { HtPanelDataTable } from './HtPanelDataTable';
 
 interface DataEntryTableProps {
   site: Site | null;
@@ -22,6 +23,11 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
   // Use specialized meter data table for meter-data tab
   if (activeTab === 'meter-data') {
     return <MeterDataTable site={site} selectedDate={selectedDate} />;
+  }
+
+  // Use specialized HT Panel data table for ht-panel tab
+  if (activeTab === 'ht-panel') {
+    return <HtPanelDataTable site={site} selectedDate={selectedDate} />;
   }
 
   if (!site) {
@@ -41,9 +47,6 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
   const getColumnsForTab = () => {
     if (activeTab === 'weather' && site.weatherColumns) {
       return site.weatherColumns;
-    }
-    if (activeTab === 'ht-panel' && site.htPanelColumns) {
-      return site.htPanelColumns;
     }
     return site.columns;
   };

@@ -30,7 +30,6 @@ export const mockSites: Site[] = [
       { id: 'humidity', name: 'Humidity (%)', type: 'number', required: false },
     ],
     htPanelColumns: [
-      { id: 'date', name: 'Date', type: 'date', required: true },
       { id: 'block', name: 'Block', type: 'text', required: true },
       { id: 'incoming', name: 'Incoming', type: 'number', required: true },
       { id: 'outgoing', name: 'Outgoing', type: 'number', required: true },
@@ -38,6 +37,10 @@ export const mockSites: Site[] = [
     meterConfig: {
       meterCount: 2,
       meterNames: ['Meter 1', 'Meter 2']
+    },
+    htPanelConfig: {
+      blockCount: 3,
+      blockNames: ['Block 1', 'Block 2', 'Block 3']
     }
   },
   {
@@ -63,7 +66,6 @@ export const mockSites: Site[] = [
       { id: 'humidity', name: 'Humidity (%)', type: 'number', required: false },
     ],
     htPanelColumns: [
-      { id: 'date', name: 'Date', type: 'date', required: true },
       { id: 'block', name: 'Block', type: 'text', required: true },
       { id: 'incoming', name: 'Incoming', type: 'number', required: true },
       { id: 'outgoing', name: 'Outgoing', type: 'number', required: true },
@@ -71,6 +73,10 @@ export const mockSites: Site[] = [
     meterConfig: {
       meterCount: 3,
       meterNames: ['Meter 1', 'Meter 2', 'Meter 3']
+    },
+    htPanelConfig: {
+      blockCount: 4,
+      blockNames: ['Block 1', 'Block 2', 'Block 3', 'Block 4']
     }
   },
   {
@@ -94,7 +100,6 @@ export const mockSites: Site[] = [
       { id: 'humidity', name: 'Humidity (%)', type: 'number', required: false },
     ],
     htPanelColumns: [
-      { id: 'date', name: 'Date', type: 'date', required: true },
       { id: 'block', name: 'Block', type: 'text', required: true },
       { id: 'incoming', name: 'Incoming', type: 'number', required: true },
       { id: 'outgoing', name: 'Outgoing', type: 'number', required: true },
@@ -102,6 +107,10 @@ export const mockSites: Site[] = [
     meterConfig: {
       meterCount: 1,
       meterNames: ['Main Meter']
+    },
+    htPanelConfig: {
+      blockCount: 2,
+      blockNames: ['Block 1', 'Block 2']
     }
   },
 ];
