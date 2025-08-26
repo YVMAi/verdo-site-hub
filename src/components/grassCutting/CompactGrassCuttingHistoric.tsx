@@ -18,7 +18,7 @@ export const CompactGrassCuttingHistoric: React.FC<CompactGrassCuttingHistoricPr
   const [editedData, setEditedData] = useState<Record<string, any>>({});
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [sortColumn, setSortColumn] = useState<string>('date');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [sortDirection, setSortDirection<'asc' | 'desc'>> = useState('desc');
   const [filterValue, setFilterValue] = useState('');
   const { toast } = useToast();
   const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
