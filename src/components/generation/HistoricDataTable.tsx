@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -88,6 +87,19 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
       </div>
     );
   }
+
+  // Get columns based on active tab
+  const getColumnsForTab = () => {
+    if (activeTab === 'weather' && site.weatherColumns) {
+      return site.weatherColumns;
+    }
+    if (activeTab === 'ht-panel' && site.htPanelColumns) {
+      return site.htPanelColumns;
+    }
+    return site.columns;
+  };
+
+  const tabColumns = getColumnsForTab();
 
   const isEditable = (date: string) => {
     const daysDiff = differenceInDays(new Date(), new Date(date));
@@ -199,7 +211,7 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
         <table className="w-full text-xs border-collapse">
           <thead className="sticky top-0">
             <tr className="bg-verdo-navy text-white">
-              {site.columns.map((column) => (
+              {tabColumns.map((column) => (
                 <th 
                   key={column.id}
                   className="px-2 py-1 text-left font-medium border border-gray-300 min-w-[100px] cursor-pointer hover:bg-verdo-navy/80"
@@ -227,7 +239,7 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
                   "hover:bg-muted/20",
                   index % 2 === 0 ? "bg-background" : "bg-muted/10"
                 )}>
-                  {site.columns.map((column) => {
+                  {tabColumns.map((column) => {
                     const cellKey = `${row.date}-${column.id}`;
                     const currentValue = editedData[cellKey] !== undefined 
                       ? editedData[cellKey] 

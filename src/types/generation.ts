@@ -11,6 +11,7 @@ export interface Site {
   clientId: string;
   columns: SiteColumn[];
   weatherColumns?: SiteColumn[];
+  htPanelColumns?: SiteColumn[];
   meterConfig?: {
     meterCount: number;
     meterNames: string[];

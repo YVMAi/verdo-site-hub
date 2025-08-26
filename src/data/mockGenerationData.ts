@@ -1,4 +1,3 @@
-
 import { Client, Site, GenerationData, TabConfig } from '@/types/generation';
 
 export const mockClients: Client[] = [
@@ -30,6 +29,12 @@ export const mockSites: Site[] = [
       { id: 'moduleTemp', name: 'Module Temp (°C)', type: 'number', required: false },
       { id: 'humidity', name: 'Humidity (%)', type: 'number', required: false },
     ],
+    htPanelColumns: [
+      { id: 'date', name: 'Date', type: 'date', required: true },
+      { id: 'block', name: 'Block', type: 'text', required: true },
+      { id: 'incoming', name: 'Incoming', type: 'number', required: true },
+      { id: 'outgoing', name: 'Outgoing', type: 'number', required: true },
+    ],
     meterConfig: {
       meterCount: 2,
       meterNames: ['Meter 1', 'Meter 2']
@@ -57,6 +62,12 @@ export const mockSites: Site[] = [
       { id: 'moduleTemp', name: 'Module Temp (°C)', type: 'number', required: false },
       { id: 'humidity', name: 'Humidity (%)', type: 'number', required: false },
     ],
+    htPanelColumns: [
+      { id: 'date', name: 'Date', type: 'date', required: true },
+      { id: 'block', name: 'Block', type: 'text', required: true },
+      { id: 'incoming', name: 'Incoming', type: 'number', required: true },
+      { id: 'outgoing', name: 'Outgoing', type: 'number', required: true },
+    ],
     meterConfig: {
       meterCount: 3,
       meterNames: ['Meter 1', 'Meter 2', 'Meter 3']
@@ -81,6 +92,12 @@ export const mockSites: Site[] = [
       { id: 'windDirection', name: 'Wind Direction (°)', type: 'number', required: false },
       { id: 'moduleTemp', name: 'Module Temp (°C)', type: 'number', required: false },
       { id: 'humidity', name: 'Humidity (%)', type: 'number', required: false },
+    ],
+    htPanelColumns: [
+      { id: 'date', name: 'Date', type: 'date', required: true },
+      { id: 'block', name: 'Block', type: 'text', required: true },
+      { id: 'incoming', name: 'Incoming', type: 'number', required: true },
+      { id: 'outgoing', name: 'Outgoing', type: 'number', required: true },
     ],
     meterConfig: {
       meterCount: 1,
@@ -232,6 +249,7 @@ export const mockHistoricData: GenerationData[] = [
     createdAt: '2024-08-23T08:00:00Z',
     updatedAt: '2024-08-23T08:00:00Z',
   },
+  // HT Panel data entries
   {
     id: '9',
     siteId: '1',
@@ -239,18 +257,44 @@ export const mockHistoricData: GenerationData[] = [
     date: '2024-08-25',
     values: {
       date: '2024-08-25',
-      plantStartTime: '06:30',
-      plantEndTime: '18:45',
-      peakLoad: 45.2,
-      peakLoadTime: '13:15',
-      ghi: 850,
-      gti: 920,
+      block: 'Block 1',
+      incoming: 143,
+      outgoing: 15541,
     },
     createdAt: '2024-08-25T08:00:00Z',
     updatedAt: '2024-08-25T08:00:00Z',
   },
   {
     id: '10',
+    siteId: '1',
+    tabType: 'ht-panel',
+    date: '2024-08-24',
+    values: {
+      date: '2024-08-24',
+      block: 'Block 1',
+      incoming: 138,
+      outgoing: 15245,
+    },
+    createdAt: '2024-08-24T08:00:00Z',
+    updatedAt: '2024-08-24T08:00:00Z',
+  },
+  {
+    id: '11',
+    siteId: '1',
+    tabType: 'ht-panel',
+    date: '2024-08-23',
+    values: {
+      date: '2024-08-23',
+      block: 'Block 1',
+      incoming: 135,
+      outgoing: 14892,
+    },
+    createdAt: '2024-08-23T08:00:00Z',
+    updatedAt: '2024-08-23T08:00:00Z',
+  },
+  // Inverter data entries
+  {
+    id: '12',
     siteId: '1',
     tabType: 'inverter',
     date: '2024-08-25',

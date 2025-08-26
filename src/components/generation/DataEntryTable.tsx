@@ -42,6 +42,9 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
     if (activeTab === 'weather' && site.weatherColumns) {
       return site.weatherColumns;
     }
+    if (activeTab === 'ht-panel' && site.htPanelColumns) {
+      return site.htPanelColumns;
+    }
     return site.columns;
   };
 
