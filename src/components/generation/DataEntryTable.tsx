@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -142,8 +143,12 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
     return 'Enter value';
   };
 
-  // For plant-data, render as form instead of table
-  if (activeTab === 'plant-data') {
+  const getTabTitle = (tab: string) => {
+    return tab.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  // For plant-data and weather, render as form instead of table
+  if (activeTab === 'plant-data' || activeTab === 'weather') {
     const leftFields = filteredColumns.slice(0, 5);
     const rightFields = filteredColumns.slice(5);
 
@@ -151,14 +156,14 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
       return (
         <div className="bg-white rounded-lg border overflow-hidden">
           <TableHeader 
-            title="Data Entry - Plant Data"
+            title={`Data Entry - ${getTabTitle(activeTab)}`}
             selectedDate={selectedDate}
             onSave={handleSave}
           />
           
           <div className="p-4 space-y-4" onPaste={handlePasteFromExcel} tabIndex={0}>
             <MobileCard
-              title="Plant Data Entry"
+              title={`${getTabTitle(activeTab)} Data Entry`}
               fields={filteredColumns.map(column => ({
                 label: `${column.name}${column.required ? ' *' : ''}`,
                 value: formData[column.id] || '',
@@ -176,7 +181,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
     return (
       <div className="bg-white rounded-lg border overflow-hidden">
         <TableHeader 
-          title="Data Entry - Plant Data"
+          title={`Data Entry - ${getTabTitle(activeTab)}`}
           selectedDate={selectedDate}
           onSave={handleSave}
         />
@@ -249,7 +254,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
     return (
       <div className="bg-white rounded-lg border overflow-hidden">
         <TableHeader 
-          title={`Data Entry - ${activeTab.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}`}
+          title={`Data Entry - ${getTabTitle(activeTab)}`}
           selectedDate={selectedDate}
           onSave={handleSave}
         />
@@ -274,7 +279,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
   return (
     <div className="bg-white rounded-lg border overflow-hidden">
       <TableHeader 
-        title={`Data Entry - ${activeTab.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}`}
+        title={`Data Entry - ${getTabTitle(activeTab)}`}
         selectedDate={selectedDate}
         onSave={handleSave}
       />
