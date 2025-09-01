@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -143,29 +142,23 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
     return 'Enter value';
   };
 
-  // For plant-data and weather, render as form instead of table
-  if (activeTab === 'plant-data' || activeTab === 'weather') {
-    // Ensure at least 5 fields on the left, but if there are fewer than 10 total, split evenly
-    const totalFields = filteredColumns.length;
-    const leftFieldCount = totalFields < 10 ? Math.ceil(totalFields / 2) : Math.max(5, Math.ceil(totalFields / 2));
-    
-    const leftFields = filteredColumns.slice(0, leftFieldCount);
-    const rightFields = filteredColumns.slice(leftFieldCount);
-
-    const tabTitle = activeTab === 'plant-data' ? 'Plant Data' : 'Weather';
+  // For plant-data, render as form instead of table
+  if (activeTab === 'plant-data') {
+    const leftFields = filteredColumns.slice(0, 5);
+    const rightFields = filteredColumns.slice(5);
 
     if (isMobile) {
       return (
         <div className="bg-white rounded-lg border overflow-hidden">
           <TableHeader 
-            title={`Data Entry - ${tabTitle}`}
+            title="Data Entry - Plant Data"
             selectedDate={selectedDate}
             onSave={handleSave}
           />
           
           <div className="p-4 space-y-4" onPaste={handlePasteFromExcel} tabIndex={0}>
             <MobileCard
-              title={`${tabTitle} Entry`}
+              title="Plant Data Entry"
               fields={filteredColumns.map(column => ({
                 label: `${column.name}${column.required ? ' *' : ''}`,
                 value: formData[column.id] || '',
@@ -183,7 +176,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
     return (
       <div className="bg-white rounded-lg border overflow-hidden">
         <TableHeader 
-          title={`Data Entry - ${tabTitle}`}
+          title="Data Entry - Plant Data"
           selectedDate={selectedDate}
           onSave={handleSave}
         />
@@ -252,15 +245,11 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
   }
 
   // For other tabs, keep the table format
-  const getTabTitle = (tabType: string) => {
-    return tabType.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
-  };
-
   if (isMobile) {
     return (
       <div className="bg-white rounded-lg border overflow-hidden">
         <TableHeader 
-          title={`Data Entry - ${getTabTitle(activeTab)}`}
+          title={`Data Entry - ${activeTab.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}`}
           selectedDate={selectedDate}
           onSave={handleSave}
         />
@@ -285,7 +274,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
   return (
     <div className="bg-white rounded-lg border overflow-hidden">
       <TableHeader 
-        title={`Data Entry - ${getTabTitle(activeTab)}`}
+        title={`Data Entry - ${activeTab.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}`}
         selectedDate={selectedDate}
         onSave={handleSave}
       />
