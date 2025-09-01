@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Site, TabType } from '@/types/generation';
@@ -153,6 +154,25 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
     const rightFields = filteredColumns.slice(5);
 
     if (isMobile) {
+      const allFields = filteredColumns.map(column => ({
+        label: `${column.name}${column.required ? ' *' : ''}`,
+        value: formData[column.id] || '',
+        onChange: (value) => handleInputChange(column.id, value),
+        error: errors[column.id],
+        type: getInputType(column),
+        placeholder: getPlaceholder(column)
+      }));
+
+      // Add remarks field for mobile
+      allFields.push({
+        label: 'Remarks',
+        value: formData['remarks'] || '',
+        onChange: (value) => handleInputChange('remarks', value),
+        error: errors['remarks'],
+        type: 'text',
+        placeholder: 'Enter any remarks or notes...'
+      });
+
       return (
         <div className="bg-white rounded-lg border overflow-hidden">
           <TableHeader 
@@ -164,14 +184,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
           <div className="p-4 space-y-4" onPaste={handlePasteFromExcel} tabIndex={0}>
             <MobileCard
               title={`${getTabTitle(activeTab)} Data Entry`}
-              fields={filteredColumns.map(column => ({
-                label: `${column.name}${column.required ? ' *' : ''}`,
-                value: formData[column.id] || '',
-                onChange: (value) => handleInputChange(column.id, value),
-                error: errors[column.id],
-                type: getInputType(column),
-                placeholder: getPlaceholder(column)
-              }))}
+              fields={allFields}
             />
           </div>
         </div>
@@ -241,6 +254,26 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
                     )}
                   </div>
                 ))}
+                
+                {/* Remarks field */}
+                <div className="space-y-2">
+                  <Label htmlFor="remarks" className="text-sm font-medium">
+                    Remarks
+                  </Label>
+                  <Textarea
+                    id="remarks"
+                    value={formData['remarks'] || ''}
+                    onChange={(e) => handleInputChange('remarks', e.target.value)}
+                    className={cn(
+                      "w-full min-h-[80px]",
+                      errors['remarks'] && "border-destructive focus:border-destructive"
+                    )}
+                    placeholder="Enter any remarks or notes..."
+                  />
+                  {errors['remarks'] && (
+                    <p className="text-xs text-destructive">{errors['remarks']}</p>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>
