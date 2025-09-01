@@ -1,6 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Site } from '@/types/generation';
@@ -9,7 +10,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { TableHeader } from './TableHeader';
 import { MobileCard } from './MobileCard';
 import { EmptyState } from './EmptyState';
-import { Search } from 'lucide-react';
+import { Search, Table, LayoutGrid } from 'lucide-react';
 
 interface MeterDataTableProps {
   site: Site | null;
@@ -26,6 +27,7 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
   const [meterData, setMeterData] = useState<MeterRow[]>([]);
   const [errors, setErrors] = useState<Record<number, string>>({});
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState<'form' | 'table'>('form');
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -155,6 +157,29 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
     return acc;
   }, {} as Record<string, Array<MeterRow & { index: number }>>);
 
+  // Get unique meter names for table view
+  const uniqueMeters = [...new Set(meterData.map(row => row.meter))];
+
+  // Get value for specific meter and type
+  const getValue = (meterName: string, type: 'Export' | 'Import') => {
+    const row = meterData.find(r => r.meter === meterName && r.type === type);
+    return row ? row.value : '';
+  };
+
+  // Get error for specific meter and type
+  const getError = (meterName: string, type: 'Export' | 'Import') => {
+    const index = meterData.findIndex(r => r.meter === meterName && r.type === type);
+    return index !== -1 ? errors[index] : '';
+  };
+
+  // Handle value change for specific meter and type
+  const handleTableValueChange = (meterName: string, type: 'Export' | 'Import', value: string) => {
+    const index = meterData.findIndex(r => r.meter === meterName && r.type === type);
+    if (index !== -1) {
+      handleValueChange(index, value);
+    }
+  };
+
   if (isMobile) {
     return (
       <div className="bg-white rounded-lg border overflow-hidden">
@@ -211,8 +236,9 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
         onSave={handleSave}
       />
       
-      {/* Search Bar */}
-      <div className="p-4 border-b">
+      {/* Controls Bar */}
+      <div className="p-4 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        {/* Search Bar */}
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -223,76 +249,182 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
             className="pl-10"
           />
         </div>
+
+        {/* View Toggle */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">View:</span>
+          <div className="flex border rounded-md">
+            <Button
+              variant={viewMode === 'form' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('form')}
+              className="rounded-r-none border-r"
+            >
+              <LayoutGrid className="h-4 w-4 mr-1" />
+              Form
+            </Button>
+            <Button
+              variant={viewMode === 'table' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('table')}
+              className="rounded-l-none"
+            >
+              <Table className="h-4 w-4 mr-1" />
+              Table
+            </Button>
+          </div>
+        </div>
       </div>
       
       <div className="overflow-x-auto">
         <div className="min-w-full" onPaste={handlePasteFromExcel} tabIndex={0}>
-          <table className="w-full text-sm border-collapse">
-            <thead className="sticky top-0">
-              <tr className="bg-verdo-navy text-white">
-                <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
-                  Meter
-                </th>
-                <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
-                  Type
-                </th>
-                <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
-                  Value <span className="text-red-300 ml-1">*</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredMeterData.map((row, displayIndex) => {
-                // Find the original index for this row
-                const originalIndex = meterData.findIndex(
-                  (originalRow, idx) => 
-                    originalRow.meter === row.meter && 
-                    originalRow.type === row.type && 
-                    idx >= (displayIndex === 0 ? 0 : meterData.findIndex(r => r === filteredMeterData[displayIndex - 1]) + 1)
-                );
-                
-                return (
-                  <tr key={`${row.meter}-${row.type}-${originalIndex}`} className="hover:bg-muted/20">
-                    <td className="px-3 py-2 border border-gray-300">
-                      <div className="text-sm py-1 px-2 bg-muted/50 rounded">
-                        {row.meter}
-                      </div>
-                    </td>
-                    <td className="px-3 py-2 border border-gray-300">
-                      <div className="text-sm py-1 px-2 bg-muted/50 rounded">
-                        {row.type}
-                      </div>
-                    </td>
-                    <td className="px-3 py-2 border border-gray-300">
-                      <div className="space-y-1">
-                        <Input
-                          type="number"
-                          value={row.value}
-                          onChange={(e) => handleValueChange(originalIndex, e.target.value)}
-                          className={cn(
-                            "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
-                            errors[originalIndex] && "border-destructive focus:border-destructive"
+          {viewMode === 'form' ? (
+            // Original form view
+            <table className="w-full text-sm border-collapse">
+              <thead className="sticky top-0">
+                <tr className="bg-verdo-navy text-white">
+                  <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
+                    Meter
+                  </th>
+                  <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
+                    Type
+                  </th>
+                  <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
+                    Value <span className="text-red-300 ml-1">*</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredMeterData.map((row, displayIndex) => {
+                  // Find the original index for this row
+                  const originalIndex = meterData.findIndex(
+                    (originalRow, idx) => 
+                      originalRow.meter === row.meter && 
+                      originalRow.type === row.type && 
+                      idx >= (displayIndex === 0 ? 0 : meterData.findIndex(r => r === filteredMeterData[displayIndex - 1]) + 1)
+                  );
+                  
+                  return (
+                    <tr key={`${row.meter}-${row.type}-${originalIndex}`} className="hover:bg-muted/20">
+                      <td className="px-3 py-2 border border-gray-300">
+                        <div className="text-sm py-1 px-2 bg-muted/50 rounded">
+                          {row.meter}
+                        </div>
+                      </td>
+                      <td className="px-3 py-2 border border-gray-300">
+                        <div className="text-sm py-1 px-2 bg-muted/50 rounded">
+                          {row.type}
+                        </div>
+                      </td>
+                      <td className="px-3 py-2 border border-gray-300">
+                        <div className="space-y-1">
+                          <Input
+                            type="number"
+                            value={row.value}
+                            onChange={(e) => handleValueChange(originalIndex, e.target.value)}
+                            className={cn(
+                              "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
+                              errors[originalIndex] && "border-destructive focus:border-destructive"
+                            )}
+                            placeholder="0.00"
+                            step="0.01"
+                          />
+                          {errors[originalIndex] && (
+                            <p className="text-xs text-destructive">{errors[originalIndex]}</p>
                           )}
-                          placeholder="0.00"
-                          step="0.01"
-                        />
-                        {errors[originalIndex] && (
-                          <p className="text-xs text-destructive">{errors[originalIndex]}</p>
-                        )}
-                      </div>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {filteredMeterData.length === 0 && searchTerm && (
+                  <tr>
+                    <td colSpan={3} className="px-3 py-8 text-center text-muted-foreground">
+                      No meters found matching "{searchTerm}"
                     </td>
                   </tr>
-                );
-              })}
-              {filteredMeterData.length === 0 && searchTerm && (
-                <tr>
-                  <td colSpan={3} className="px-3 py-8 text-center text-muted-foreground">
-                    No meters found matching "{searchTerm}"
-                  </td>
+                )}
+              </tbody>
+            </table>
+          ) : (
+            // New horizontal table view
+            <table className="w-full text-sm border-collapse">
+              <thead className="sticky top-0">
+                <tr className="bg-verdo-navy text-white">
+                  <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
+                    {/* Empty header for row labels */}
+                  </th>
+                  {uniqueMeters.map((meter) => (
+                    <th key={meter} colSpan={2} className="px-3 py-2 text-center font-medium border border-gray-300 min-w-[200px] text-sm">
+                      {meter}
+                    </th>
+                  ))}
                 </tr>
-              )}
-            </tbody>
-          </table>
+                <tr className="bg-verdo-navy text-white">
+                  <th className="px-3 py-2 text-left font-medium border border-gray-300 text-sm">
+                    {/* Empty header for row labels */}
+                  </th>
+                  {uniqueMeters.map((meter) => (
+                    <React.Fragment key={meter}>
+                      <th className="px-3 py-2 text-center font-medium border border-gray-300 min-w-[100px] text-sm">
+                        Export
+                      </th>
+                      <th className="px-3 py-2 text-center font-medium border border-gray-300 min-w-[100px] text-sm">
+                        Import
+                      </th>
+                    </React.Fragment>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="hover:bg-muted/20">
+                  <td className="px-3 py-2 border border-gray-300 font-medium bg-muted/30">
+                    Enter Values
+                  </td>
+                  {uniqueMeters.map((meter) => (
+                    <React.Fragment key={meter}>
+                      <td className="px-3 py-2 border border-gray-300">
+                        <div className="space-y-1">
+                          <Input
+                            type="number"
+                            value={getValue(meter, 'Export')}
+                            onChange={(e) => handleTableValueChange(meter, 'Export', e.target.value)}
+                            className={cn(
+                              "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
+                              getError(meter, 'Export') && "border-destructive focus:border-destructive"
+                            )}
+                            placeholder="0.00"
+                            step="0.01"
+                          />
+                          {getError(meter, 'Export') && (
+                            <p className="text-xs text-destructive">{getError(meter, 'Export')}</p>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-3 py-2 border border-gray-300">
+                        <div className="space-y-1">
+                          <Input
+                            type="number"
+                            value={getValue(meter, 'Import')}
+                            onChange={(e) => handleTableValueChange(meter, 'Import', e.target.value)}
+                            className={cn(
+                              "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
+                              getError(meter, 'Import') && "border-destructive focus:border-destructive"
+                            )}
+                            placeholder="0.00"
+                            step="0.01"
+                          />
+                          {getError(meter, 'Import') && (
+                            <p className="text-xs text-destructive">{getError(meter, 'Import')}</p>
+                          )}
+                        </div>
+                      </td>
+                    </React.Fragment>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>
