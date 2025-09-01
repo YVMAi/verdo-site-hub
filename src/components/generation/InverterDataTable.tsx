@@ -1,6 +1,6 @@
-
 import React, { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Site } from '@/types/generation';
@@ -9,7 +9,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { TableHeader } from './TableHeader';
 import { MobileCard } from './MobileCard';
 import { EmptyState } from './EmptyState';
-import { Search } from 'lucide-react';
+import { Search, LayoutGrid, Table } from 'lucide-react';
 
 interface InverterDataTableProps {
   site: Site | null;
@@ -27,6 +27,7 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState<'form' | 'table'>('form');
 
   const inverterRows = useMemo(() => {
     if (!site || !site.inverterConfig) return [];
@@ -196,6 +197,20 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
     );
   }
 
+  // Group inverters by block for table view
+  const invertersByBlock = useMemo(() => {
+    const grouped: Record<string, InverterRow[]> = {};
+    filteredInverterRows.forEach(row => {
+      if (!grouped[row.block]) {
+        grouped[row.block] = [];
+      }
+      grouped[row.block].push(row);
+    });
+    return grouped;
+  }, [filteredInverterRows]);
+
+  const allBlocks = Object.keys(invertersByBlock);
+
   return (
     <div className="bg-white rounded-lg border overflow-hidden">
       <TableHeader 
@@ -204,8 +219,9 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
         onSave={handleSave}
       />
       
-      {/* Search Bar */}
-      <div className="p-4 border-b">
+      {/* Controls Bar */}
+      <div className="p-4 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        {/* Search Bar */}
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -216,66 +232,164 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
             className="pl-10"
           />
         </div>
+
+        {/* View Toggle */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">View:</span>
+          <div className="bg-verdo-navy rounded-md p-1 flex">
+            <Button
+              variant={viewMode === 'form' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('form')}
+              className={cn(
+                "h-8 px-3 text-sm font-medium transition-colors",
+                viewMode === 'form' 
+                  ? "bg-white text-verdo-navy hover:bg-white/90" 
+                  : "bg-transparent text-white hover:bg-white/10"
+              )}
+            >
+              <LayoutGrid className="h-4 w-4 mr-1" />
+              Form
+            </Button>
+            <Button
+              variant={viewMode === 'table' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('table')}
+              className={cn(
+                "h-8 px-3 text-sm font-medium transition-colors ml-1",
+                viewMode === 'table' 
+                  ? "bg-white text-verdo-navy hover:bg-white/90" 
+                  : "bg-transparent text-white hover:bg-white/10"
+              )}
+            >
+              <Table className="h-4 w-4 mr-1" />
+              Table
+            </Button>
+          </div>
+        </div>
       </div>
       
       <div className="overflow-x-auto">
         <div className="min-w-full" onPaste={handlePasteFromExcel} tabIndex={0}>
-          <table className="w-full text-sm border-collapse">
-            <thead className="sticky top-0">
-              <tr className="bg-verdo-navy text-white">
-                <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
-                  Block
-                </th>
-                <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
-                  Inverter
-                </th>
-                <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
-                  Generation<span className="text-red-300 ml-1">*</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredInverterRows.map((row) => (
-                <tr key={row.id} className="hover:bg-muted/20">
-                  <td className="px-3 py-2 border border-gray-300">
-                    <div className="text-xs py-1 px-2 bg-muted/50 rounded">
-                      {row.block}
-                    </div>
-                  </td>
-                  <td className="px-3 py-2 border border-gray-300">
-                    <div className="text-xs py-1 px-2 bg-muted/50 rounded">
-                      {row.inverter}
-                    </div>
-                  </td>
-                  <td className="px-3 py-2 border border-gray-300">
-                    <div className="space-y-1">
-                      <Input
-                        type="number"
-                        value={formData[row.id] || ''}
-                        onChange={(e) => handleInputChange(row.id, e.target.value)}
-                        className={cn(
-                          "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
-                          errors[row.id] && "border-destructive focus:border-destructive"
+          {viewMode === 'form' ? (
+            <table className="w-full text-sm border-collapse">
+              <thead className="sticky top-0">
+                <tr className="bg-verdo-navy text-white">
+                  <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
+                    Block
+                  </th>
+                  <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
+                    Inverter
+                  </th>
+                  <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
+                    Generation<span className="text-red-300 ml-1">*</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredInverterRows.map((row) => (
+                  <tr key={row.id} className="hover:bg-muted/20">
+                    <td className="px-3 py-2 border border-gray-300">
+                      <div className="text-xs py-1 px-2 bg-muted/50 rounded">
+                        {row.block}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2 border border-gray-300">
+                      <div className="text-xs py-1 px-2 bg-muted/50 rounded">
+                        {row.inverter}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2 border border-gray-300">
+                      <div className="space-y-1">
+                        <Input
+                          type="number"
+                          value={formData[row.id] || ''}
+                          onChange={(e) => handleInputChange(row.id, e.target.value)}
+                          className={cn(
+                            "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
+                            errors[row.id] && "border-destructive focus:border-destructive"
+                          )}
+                          placeholder="0.00"
+                          step="0.01"
+                        />
+                        {errors[row.id] && (
+                          <p className="text-xs text-destructive">{errors[row.id]}</p>
                         )}
-                        placeholder="0.00"
-                        step="0.01"
-                      />
-                      {errors[row.id] && (
-                        <p className="text-xs text-destructive">{errors[row.id]}</p>
-                      )}
-                    </div>
-                  </td>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {filteredInverterRows.length === 0 && searchTerm && (
+                  <tr>
+                    <td colSpan={3} className="px-3 py-8 text-center text-muted-foreground">
+                      No blocks or inverters found matching "{searchTerm}"
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          ) : (
+            // New horizontal table view for Inverters
+            <table className="w-full text-sm border-collapse">
+              <thead className="sticky top-0">
+                <tr className="bg-verdo-navy text-white">
+                  <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
+                    Block
+                  </th>
+                  {allBlocks.map((blockName) => (
+                    <th key={blockName} colSpan={invertersByBlock[blockName].length} className="px-3 py-2 text-center font-medium border border-gray-300 text-sm">
+                      {blockName}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-              {filteredInverterRows.length === 0 && searchTerm && (
-                <tr>
-                  <td colSpan={3} className="px-3 py-8 text-center text-muted-foreground">
-                    No blocks or inverters found matching "{searchTerm}"
-                  </td>
+                <tr className="bg-verdo-navy text-white">
+                  <th className="px-3 py-2 text-left font-medium border border-gray-300 text-sm">
+                    Inverter
+                  </th>
+                  {allBlocks.map((blockName) => (
+                    <React.Fragment key={blockName}>
+                      {invertersByBlock[blockName].map((row) => (
+                        <th key={row.id} className="px-3 py-2 text-center font-medium border border-gray-300 min-w-[100px] text-sm">
+                          {row.inverter}
+                        </th>
+                      ))}
+                    </React.Fragment>
+                  ))}
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                <tr className="hover:bg-muted/20">
+                  <td className="px-3 py-2 border border-gray-300 font-medium bg-muted/30">
+                    Generation
+                  </td>
+                  {allBlocks.map((blockName) => (
+                    <React.Fragment key={blockName}>
+                      {invertersByBlock[blockName].map((row) => (
+                        <td key={row.id} className="px-3 py-2 border border-gray-300">
+                          <div className="space-y-1">
+                            <Input
+                              type="number"
+                              value={formData[row.id] || ''}
+                              onChange={(e) => handleInputChange(row.id, e.target.value)}
+                              className={cn(
+                                "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
+                                errors[row.id] && "border-destructive focus:border-destructive"
+                              )}
+                              placeholder="0.00"
+                              step="0.01"
+                            />
+                            {errors[row.id] && (
+                              <p className="text-xs text-destructive">{errors[row.id]}</p>
+                            )}
+                          </div>
+                        </td>
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>

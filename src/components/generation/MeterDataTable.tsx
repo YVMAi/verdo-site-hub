@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { TableHeader } from './TableHeader';
 import { MobileCard } from './MobileCard';
 import { EmptyState } from './EmptyState';
-import { Search, Table, LayoutGrid } from 'lucide-react';
+import { Search, LayoutGrid, Table } from 'lucide-react';
 
 interface MeterDataTableProps {
   site: Site | null;
@@ -253,12 +252,17 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
         {/* View Toggle */}
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">View:</span>
-          <div className="flex border rounded-md">
+          <div className="bg-verdo-navy rounded-md p-1 flex">
             <Button
               variant={viewMode === 'form' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setViewMode('form')}
-              className="rounded-r-none border-r"
+              className={cn(
+                "h-8 px-3 text-sm font-medium transition-colors",
+                viewMode === 'form' 
+                  ? "bg-white text-verdo-navy hover:bg-white/90" 
+                  : "bg-transparent text-white hover:bg-white/10"
+              )}
             >
               <LayoutGrid className="h-4 w-4 mr-1" />
               Form
@@ -267,7 +271,12 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
               variant={viewMode === 'table' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setViewMode('table')}
-              className="rounded-l-none"
+              className={cn(
+                "h-8 px-3 text-sm font-medium transition-colors ml-1",
+                viewMode === 'table' 
+                  ? "bg-white text-verdo-navy hover:bg-white/90" 
+                  : "bg-transparent text-white hover:bg-white/10"
+              )}
             >
               <Table className="h-4 w-4 mr-1" />
               Table
@@ -279,7 +288,6 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
       <div className="overflow-x-auto">
         <div className="min-w-full" onPaste={handlePasteFromExcel} tabIndex={0}>
           {viewMode === 'form' ? (
-            // Original form view
             <table className="w-full text-sm border-collapse">
               <thead className="sticky top-0">
                 <tr className="bg-verdo-navy text-white">
@@ -347,7 +355,6 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
               </tbody>
             </table>
           ) : (
-            // New horizontal table view
             <table className="w-full text-sm border-collapse">
               <thead className="sticky top-0">
                 <tr className="bg-verdo-navy text-white">
