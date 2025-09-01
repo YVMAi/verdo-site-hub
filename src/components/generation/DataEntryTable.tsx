@@ -247,15 +247,15 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
   }
 
   // For other tabs, keep the table format
-  const getTabTitle = () => {
-    return activeTab.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const getTabTitle = (tabType: string) => {
+    return tabType.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
   if (isMobile) {
     return (
       <div className="bg-white rounded-lg border overflow-hidden">
         <TableHeader 
-          title={`Data Entry - ${getTabTitle()}`}
+          title={`Data Entry - ${getTabTitle(activeTab)}`}
           selectedDate={selectedDate}
           onSave={handleSave}
         />
@@ -280,7 +280,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
   return (
     <div className="bg-white rounded-lg border overflow-hidden">
       <TableHeader 
-        title={`Data Entry - ${getTabTitle()}`}
+        title={`Data Entry - ${getTabTitle(activeTab)}`}
         selectedDate={selectedDate}
         onSave={handleSave}
       />
