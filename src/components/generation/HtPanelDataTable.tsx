@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -10,8 +9,9 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { TableHeader } from './TableHeader';
 import { MobileCard } from './MobileCard';
 import { EmptyState } from './EmptyState';
-import { Search, Plus, Trash2 } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Search, Plus, Trash2, Check, ChevronsUpDown } from 'lucide-react';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface HtPanelDataTableProps {
   site: Site | null;
@@ -38,6 +38,7 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
       remarks: ''
     }
   ]);
+  const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -105,7 +106,6 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
     }
   };
 
-  // Legacy functions for table view
   const handleInputChange = (blockName: string, field: string, value: any) => {
     const key = `${blockName}_${field}`;
     setFormData(prev => ({ ...prev, [key]: value }));
@@ -379,18 +379,49 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
                 {filteredFormRows.map((row) => (
                   <div key={row.id} className="grid grid-cols-5 gap-0 items-center">
                     <div className="px-2 py-2 border-r">
-                      <Select value={row.block} onValueChange={(value) => updateFormRow(row.id, 'block', value)}>
-                        <SelectTrigger className="h-8 border-0 shadow-none">
-                          <SelectValue placeholder="Select Block" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {blocks.map(block => (
-                            <SelectItem key={block} value={block}>
-                              {block}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Popover open={openDropdowns[`${row.id}-block`]} onOpenChange={(open) => 
+                        setOpenDropdowns(prev => ({ ...prev, [`${row.id}-block`]: open }))
+                      }>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={openDropdowns[`${row.id}-block`]}
+                            className="w-full justify-between h-8 border-0 shadow-none"
+                          >
+                            {row.block || "Select Block"}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[200px] p-0">
+                          <Command>
+                            <CommandInput placeholder="Search blocks..." />
+                            <CommandList>
+                              <CommandEmpty>No block found.</CommandEmpty>
+                              <CommandGroup>
+                                {blocks.map((block) => (
+                                  <CommandItem
+                                    key={block}
+                                    value={block}
+                                    onSelect={() => {
+                                      updateFormRow(row.id, 'block', block);
+                                      setOpenDropdowns(prev => ({ ...prev, [`${row.id}-block`]: false }));
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        row.block === block ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                    {block}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                     </div>
                     
                     <div className="px-2 py-2 border-r">

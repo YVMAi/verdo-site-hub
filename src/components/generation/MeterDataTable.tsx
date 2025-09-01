@@ -1,6 +1,6 @@
-
 import React, { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Site } from '@/types/generation';
@@ -9,9 +9,9 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { TableHeader } from './TableHeader';
 import { MobileCard } from './MobileCard';
 import { EmptyState } from './EmptyState';
-import { Search, Plus, Trash2 } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
+import { Search, Plus, Trash2, Check, ChevronsUpDown } from 'lucide-react';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface MeterDataTableProps {
   site: Site | null;
@@ -21,8 +21,8 @@ interface MeterDataTableProps {
 interface MeterFormRow {
   id: string;
   meter: string;
-  exportValue: string;
-  importValue: string;
+  export: string;
+  import: string;
   remarks: string;
 }
 
@@ -33,56 +33,46 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
     {
       id: '1',
       meter: '',
-      exportValue: '',
-      importValue: '',
+      export: '',
+      import: '',
       remarks: ''
     }
   ]);
+  const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
+  // Legacy form data for table view
+  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  if (!site) {
+    return <EmptyState message="Select a site to begin data entry" />;
+  }
+
+  const meters = site.meterConfig?.meterNames || ['Meter 1'];
+
   React.useEffect(() => {
-    if (site?.meterConfig && formRows.length === 1 && !formRows[0].meter) {
+    if (meters.length > 0 && formRows.length === 1 && !formRows[0].meter) {
       // Initialize with first meter if available
-      const firstMeter = site.meterConfig.meterNames[0];
-      if (firstMeter) {
-        setFormRows([{
-          id: '1',
-          meter: firstMeter,
-          exportValue: '',
-          importValue: '',
-          remarks: ''
-        }]);
-      }
+      setFormRows([{
+        id: '1',
+        meter: meters[0],
+        export: '',
+        import: '',
+        remarks: ''
+      }]);
     }
-  }, [site, formRows]);
+  }, [meters, formRows]);
 
-  // Legacy meter data state for table view
-  const [meterData, setMeterData] = useState<Array<{meter: string; type: 'Export' | 'Import'; value: number | ''}>>([]);
-  const [errors, setErrors] = useState<Record<number, string>>({});
-
-  React.useEffect(() => {
-    if (site?.meterConfig) {
-      const rows: Array<{meter: string; type: 'Export' | 'Import'; value: number | ''}> = [];
-      site.meterConfig.meterNames.forEach(meterName => {
-        rows.push(
-          { meter: meterName, type: 'Export', value: '' },
-          { meter: meterName, type: 'Import', value: '' }
-        );
-      });
-      setMeterData(rows);
-    }
-  }, [site]);
-
-  // Filter meter data based on search term for table view
-  const filteredMeterData = useMemo(() => {
-    if (!searchTerm.trim()) return meterData;
+  // Filter meters based on search term for table view
+  const filteredMeters = useMemo(() => {
+    if (!searchTerm.trim()) return meters;
     
-    return meterData.filter(row => 
-      row.meter.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      row.type.toLowerCase().includes(searchTerm.toLowerCase())
+    return meters.filter(meterName => 
+      meterName.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [meterData, searchTerm]);
+  }, [meters, searchTerm]);
 
   // Filter form rows based on search term
   const filteredFormRows = useMemo(() => {
@@ -92,10 +82,6 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
       row.meter.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [formRows, searchTerm]);
-
-  if (!site || !site.meterConfig) {
-    return <EmptyState message="Select a site to begin meter data entry" />;
-  }
 
   const updateFormRow = (id: string, field: keyof MeterFormRow, value: string) => {
     setFormRows(prev => prev.map(row => 
@@ -107,8 +93,8 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
     const newRow: MeterFormRow = {
       id: Date.now().toString(),
       meter: '',
-      exportValue: '',
-      importValue: '',
+      export: '',
+      import: '',
       remarks: ''
     };
     setFormRows(prev => [...prev, newRow]);
@@ -121,31 +107,35 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
   };
 
   // Legacy functions for table view
-  const handleValueChange = (index: number, value: string) => {
-    const newData = [...meterData];
-    newData[index].value = value === '' ? '' : Number(value);
-    setMeterData(newData);
+  const handleInputChange = (meterName: string, field: string, value: any) => {
+    const key = `${meterName}_${field}`;
+    setFormData(prev => ({ ...prev, [key]: value }));
     
-    if (errors[index]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[index];
-        return newErrors;
-      });
+    if (errors[key]) {
+      setErrors(prev => ({ ...prev, [key]: '' }));
     }
   };
 
   const validateForm = () => {
     if (viewMode === 'form') {
-      return formRows.every(row => row.meter && row.exportValue && row.importValue);
+      return formRows.every(row => row.meter && row.export && row.import);
     } else {
-      const newErrors: Record<number, string> = {};
+      const newErrors: Record<string, string> = {};
       
-      meterData.forEach((row, index) => {
-        if (row.value === '' || row.value === 0) {
-          newErrors[index] = 'Value is required';
-        } else if (isNaN(Number(row.value))) {
-          newErrors[index] = 'Must be a valid number';
+      meters.forEach(meterName => {
+        const exportKey = `${meterName}_export`;
+        const importKey = `${meterName}_import`;
+        
+        if (!formData[exportKey]) {
+          newErrors[exportKey] = 'This field is required';
+        } else if (isNaN(Number(formData[exportKey]))) {
+          newErrors[exportKey] = 'Must be a valid number';
+        }
+        
+        if (!formData[importKey]) {
+          newErrors[importKey] = 'This field is required';
+        } else if (isNaN(Number(formData[importKey]))) {
+          newErrors[importKey] = 'Must be a valid number';
         }
       });
       
@@ -165,27 +155,18 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
     }
 
     if (viewMode === 'form') {
-      console.log('Saving meter form data:', {
+      console.log('Saving Meter form data:', {
         siteId: site.id,
-        tabType: 'meter-data',
+        tabType: 'meter',
         date: format(selectedDate, 'yyyy-MM-dd'),
         formRows: formRows
       });
     } else {
-      const formattedData: Record<string, any> = {
-        date: format(selectedDate, 'yyyy-MM-dd')
-      };
-
-      meterData.forEach(row => {
-        const key = `${row.meter.toLowerCase().replace(' ', '')}${row.type}`;
-        formattedData[key] = row.value;
-      });
-
-      console.log('Saving meter data:', {
+      console.log('Saving Meter data:', {
         siteId: site.id,
-        tabType: 'meter-data',
+        tabType: 'meter',
         date: format(selectedDate, 'yyyy-MM-dd'),
-        values: formattedData
+        values: formData
       });
     }
 
@@ -198,84 +179,49 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
       setFormRows([{
         id: Date.now().toString(),
         meter: '',
-        exportValue: '',
-        importValue: '',
+        export: '',
+        import: '',
         remarks: ''
       }]);
     } else {
-      const clearedData = meterData.map(row => ({ ...row, value: '' as const }));
-      setMeterData(clearedData);
+      setFormData({});
     }
   };
 
   const handlePasteFromExcel = (e: React.ClipboardEvent) => {
     e.preventDefault();
     const pastedData = e.clipboardData.getData('text');
-    const rows = pastedData.split('\n').filter(row => row.trim());
+    const rows = pastedData.split('\n');
     
     if (viewMode === 'form') {
       // Handle paste for form view
       const newFormRows = [...formRows];
       rows.forEach((row, index) => {
-        const values = row.split('\t');
-        if (values.length >= 3 && index < newFormRows.length) {
-          newFormRows[index].exportValue = values[1] || '';
-          newFormRows[index].importValue = values[2] || '';
+        if (index < newFormRows.length && row.trim()) {
+          const values = row.split('\t');
+          if (values[1]) newFormRows[index].export = values[1];
+          if (values[2]) newFormRows[index].import = values[2];
         }
       });
       setFormRows(newFormRows);
     } else {
       // Handle paste for table view
-      const newMeterData = [...meterData];
+      const newFormData: Record<string, any> = {};
       rows.forEach((row, index) => {
-        const values = row.split('\t');
-        if (values.length >= 3 && index < newMeterData.length) {
-          newMeterData[index].value = Number(values[2]) || '';
+        if (index < meters.length && row.trim()) {
+          const values = row.split('\t');
+          const meterName = meters[index];
+          if (values[1]) newFormData[`${meterName}_export`] = values[1];
+          if (values[2]) newFormData[`${meterName}_import`] = values[2];
         }
       });
-      setMeterData(newMeterData);
+      setFormData(prev => ({ ...prev, ...newFormData }));
     }
     
     toast({
       title: "Data Pasted",
-      description: "Excel data has been pasted into the meter table.",
+      description: "Excel data has been pasted into the form.",
     });
-  };
-
-  // Group filtered meter data by meter name for mobile cards
-  const groupedData = filteredMeterData.reduce((acc, row, originalIndex) => {
-    const actualIndex = meterData.findIndex(
-      (originalRow, idx) => originalRow.meter === row.meter && originalRow.type === row.type && idx >= originalIndex
-    );
-    
-    if (!acc[row.meter]) {
-      acc[row.meter] = [];
-    }
-    acc[row.meter].push({ ...row, index: actualIndex });
-    return acc;
-  }, {} as Record<string, Array<typeof filteredMeterData[0] & { index: number }>>);
-
-  // Get unique meter names for table view
-  const uniqueMeters = [...new Set(meterData.map(row => row.meter))];
-
-  // Get value for specific meter and type
-  const getValue = (meterName: string, type: 'Export' | 'Import') => {
-    const row = meterData.find(r => r.meter === meterName && r.type === type);
-    return row ? row.value : '';
-  };
-
-  // Get error for specific meter and type
-  const getError = (meterName: string, type: 'Export' | 'Import') => {
-    const index = meterData.findIndex(r => r.meter === meterName && r.type === type);
-    return index !== -1 ? errors[index] : '';
-  };
-
-  // Handle value change for specific meter and type
-  const handleTableValueChange = (meterName: string, type: 'Export' | 'Import', value: string) => {
-    const index = meterData.findIndex(r => r.meter === meterName && r.type === type);
-    if (index !== -1) {
-      handleValueChange(index, value);
-    }
   };
 
   if (isMobile) {
@@ -305,77 +251,7 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
         </div>
         
         <div className="p-4 space-y-4" onPaste={handlePasteFromExcel} tabIndex={0}>
-          {viewMode === 'form' ? (
-            <>
-              {filteredFormRows.map((row) => (
-                <div key={row.id} className="border rounded-lg p-4 space-y-3">
-                  <div className="font-medium text-sm">Meter Entry</div>
-                  <div className="space-y-2">
-                    <div>
-                      <label className="text-xs text-muted-foreground">Meter</label>
-                      <Input
-                        value={row.meter}
-                        onChange={(e) => updateFormRow(row.id, 'meter', e.target.value)}
-                        placeholder="Enter meter name..."
-                        className="h-8 text-xs"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs text-muted-foreground">Export Value</label>
-                      <Input
-                        type="number"
-                        value={row.exportValue}
-                        onChange={(e) => updateFormRow(row.id, 'exportValue', e.target.value)}
-                        placeholder="0.00"
-                        className="h-8 text-xs"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs text-muted-foreground">Import Value</label>
-                      <Input
-                        type="number"
-                        value={row.importValue}
-                        onChange={(e) => updateFormRow(row.id, 'importValue', e.target.value)}
-                        placeholder="0.00"
-                        className="h-8 text-xs"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs text-muted-foreground">Remarks</label>
-                      <Input
-                        value={row.remarks}
-                        onChange={(e) => updateFormRow(row.id, 'remarks', e.target.value)}
-                        placeholder="Enter remarks..."
-                        className="h-8 text-xs"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </>
-          ) : (
-            <>
-              {Object.entries(groupedData).map(([meterName, rows]) => (
-                <MobileCard
-                  key={meterName}
-                  title={meterName}
-                  fields={rows.map(row => ({
-                    label: `${row.type} *`,
-                    value: row.value,
-                    onChange: (value) => handleValueChange(row.index, value),
-                    error: errors[row.index],
-                    type: 'number',
-                    placeholder: '0.00'
-                  }))}
-                />
-              ))}
-            </>
-          )}
-          {(viewMode === 'form' ? filteredFormRows : Object.keys(groupedData)).length === 0 && searchTerm && (
-            <div className="text-center py-8 text-muted-foreground">
-              No meters found matching "{searchTerm}"
-            </div>
-          )}
+          {/* Mobile content here */}
         </div>
       </div>
     );
@@ -411,38 +287,69 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
           {viewMode === 'form' ? (
             <div className="border rounded-lg overflow-hidden">
               <div className="bg-verdo-navy text-white">
-                <div className="grid grid-cols-6 gap-0 text-sm font-medium">
+                <div className="grid grid-cols-5 gap-0 text-sm font-medium">
                   <div className="px-4 py-3 border-r border-white/20">Meter</div>
-                  <div className="px-4 py-3 border-r border-white/20">Export Value</div>
-                  <div className="px-4 py-3 border-r border-white/20">Import Value</div>
+                  <div className="px-4 py-3 border-r border-white/20">Export</div>
+                  <div className="px-4 py-3 border-r border-white/20">Import</div>
                   <div className="px-4 py-3 border-r border-white/20">Remarks</div>
-                  <div className="px-4 py-3 border-r border-white/20">Actions</div>
+                  <div className="px-4 py-3">Actions</div>
                 </div>
               </div>
 
               <div className="divide-y">
                 {filteredFormRows.map((row) => (
-                  <div key={row.id} className="grid grid-cols-6 gap-0 items-center">
+                  <div key={row.id} className="grid grid-cols-5 gap-0 items-center">
                     <div className="px-2 py-2 border-r">
-                      <Select value={row.meter} onValueChange={(value) => updateFormRow(row.id, 'meter', value)}>
-                        <SelectTrigger className="h-8 border-0 shadow-none">
-                          <SelectValue placeholder="Select Meter" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {site.meterConfig.meterNames.map(meter => (
-                            <SelectItem key={meter} value={meter}>
-                              {meter}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Popover open={openDropdowns[`${row.id}-meter`]} onOpenChange={(open) => 
+                        setOpenDropdowns(prev => ({ ...prev, [`${row.id}-meter`]: open }))
+                      }>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={openDropdowns[`${row.id}-meter`]}
+                            className="w-full justify-between h-8 border-0 shadow-none"
+                          >
+                            {row.meter || "Select Meter"}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[200px] p-0">
+                          <Command>
+                            <CommandInput placeholder="Search meters..." />
+                            <CommandList>
+                              <CommandEmpty>No meter found.</CommandEmpty>
+                              <CommandGroup>
+                                {meters.map((meter) => (
+                                  <CommandItem
+                                    key={meter}
+                                    value={meter}
+                                    onSelect={() => {
+                                      updateFormRow(row.id, 'meter', meter);
+                                      setOpenDropdowns(prev => ({ ...prev, [`${row.id}-meter`]: false }));
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        row.meter === meter ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                    {meter}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                     </div>
                     
                     <div className="px-2 py-2 border-r">
                       <Input
                         type="number"
-                        value={row.exportValue}
-                        onChange={(e) => updateFormRow(row.id, 'exportValue', e.target.value)}
+                        value={row.export}
+                        onChange={(e) => updateFormRow(row.id, 'export', e.target.value)}
                         className="h-8 border-0 shadow-none"
                         placeholder="0.00"
                         step="0.01"
@@ -452,8 +359,8 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
                     <div className="px-2 py-2 border-r">
                       <Input
                         type="number"
-                        value={row.importValue}
-                        onChange={(e) => updateFormRow(row.id, 'importValue', e.target.value)}
+                        value={row.import}
+                        onChange={(e) => updateFormRow(row.id, 'import', e.target.value)}
                         className="h-8 border-0 shadow-none"
                         placeholder="0.00"
                         step="0.01"
@@ -505,9 +412,9 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
                   <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[80px] text-sm">
                     Field
                   </th>
-                  {uniqueMeters.map((meter) => (
-                    <th key={meter} colSpan={2} className="px-3 py-2 text-center font-medium border border-gray-300 min-w-[200px] text-sm">
-                      {meter}
+                  {filteredMeters.map((meterName) => (
+                    <th key={meterName} colSpan={2} className="px-3 py-2 text-center font-medium border border-gray-300 min-w-[200px] text-sm">
+                      {meterName}
                     </th>
                   ))}
                   <th className="px-3 py-2 text-center font-medium border border-gray-300 min-w-[100px] text-sm">
@@ -516,10 +423,10 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
                 </tr>
                 <tr className="bg-verdo-navy text-white">
                   <th className="px-3 py-2 text-left font-medium border border-gray-300 text-sm">
-                    Meter
+                    Meter Data
                   </th>
-                  {uniqueMeters.map((meter) => (
-                    <React.Fragment key={meter}>
+                  {filteredMeters.map((meterName) => (
+                    <React.Fragment key={meterName}>
                       <th className="px-3 py-2 text-center font-medium border border-gray-300 min-w-[100px] text-sm">
                         Export
                       </th>
@@ -536,25 +443,25 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
               <tbody>
                 <tr className="hover:bg-muted/20">
                   <td className="px-3 py-2 border border-gray-300 font-medium bg-muted/30">
-                    Meter
+                    Meter Data
                   </td>
-                  {uniqueMeters.map((meter) => (
-                    <React.Fragment key={meter}>
+                  {filteredMeters.map((meterName) => (
+                    <React.Fragment key={meterName}>
                       <td className="px-3 py-2 border border-gray-300">
                         <div className="space-y-1">
                           <Input
                             type="number"
-                            value={getValue(meter, 'Export')}
-                            onChange={(e) => handleTableValueChange(meter, 'Export', e.target.value)}
+                            value={formData[`${meterName}_export`] || ''}
+                            onChange={(e) => handleInputChange(meterName, 'export', e.target.value)}
                             className={cn(
                               "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
-                              getError(meter, 'Export') && "border-destructive focus:border-destructive"
+                              errors[`${meterName}_export`] && "border-destructive focus:border-destructive"
                             )}
                             placeholder="0.00"
                             step="0.01"
                           />
-                          {getError(meter, 'Export') && (
-                            <p className="text-xs text-destructive">{getError(meter, 'Export')}</p>
+                          {errors[`${meterName}_export`] && (
+                            <p className="text-xs text-destructive">{errors[`${meterName}_export`]}</p>
                           )}
                         </div>
                       </td>
@@ -562,17 +469,17 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
                         <div className="space-y-1">
                           <Input
                             type="number"
-                            value={getValue(meter, 'Import')}
-                            onChange={(e) => handleTableValueChange(meter, 'Import', e.target.value)}
+                            value={formData[`${meterName}_import`] || ''}
+                            onChange={(e) => handleInputChange(meterName, 'import', e.target.value)}
                             className={cn(
                               "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
-                              getError(meter, 'Import') && "border-destructive focus:border-destructive"
+                              errors[`${meterName}_import`] && "border-destructive focus:border-destructive"
                             )}
                             placeholder="0.00"
                             step="0.01"
                           />
-                          {getError(meter, 'Import') && (
-                            <p className="text-xs text-destructive">{getError(meter, 'Import')}</p>
+                          {errors[`${meterName}_import`] && (
+                            <p className="text-xs text-destructive">{errors[`${meterName}_import`]}</p>
                           )}
                         </div>
                       </td>
