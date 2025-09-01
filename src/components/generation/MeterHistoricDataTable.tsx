@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,8 +22,9 @@ interface MeterHistoricRow {
   id: string;
   date: string;
   meter: string;
-  type: 'Export' | 'Import';
-  value: number;
+  exportValue: number | null;
+  importValue: number | null;
+  remarks: string;
   originalData: GenerationData;
 }
 
@@ -91,41 +93,58 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
 
     const rows: MeterHistoricRow[] = [];
     
+    // Group data by date and meter
+    const groupedData = new Map<string, Map<string, {exportValue: number | null, importValue: number | null, originalData: GenerationData}>>();
+    
     meterHistoricData.forEach(dataItem => {
+      if (!groupedData.has(dataItem.date)) {
+        groupedData.set(dataItem.date, new Map());
+      }
+      const dateGroup = groupedData.get(dataItem.date)!;
+      
       site.meterConfig!.meterNames.forEach(meterName => {
         const meterKey = meterName.toLowerCase().replace(' ', '');
         const exportKey = `${meterKey}Export`;
         const importKey = `${meterKey}Import`;
         
-        if (dataItem.values[exportKey] !== undefined) {
-          rows.push({
-            id: `${dataItem.id}-${meterKey}-export`,
-            date: dataItem.date,
-            meter: meterName,
-            type: 'Export',
-            value: dataItem.values[exportKey],
+        if (!dateGroup.has(meterName)) {
+          dateGroup.set(meterName, {
+            exportValue: null,
+            importValue: null,
             originalData: dataItem
           });
         }
         
-        if (dataItem.values[importKey] !== undefined) {
-          rows.push({
-            id: `${dataItem.id}-${meterKey}-import`,
-            date: dataItem.date,
-            meter: meterName,
-            type: 'Import',
-            value: dataItem.values[importKey],
-            originalData: dataItem
-          });
+        const meterData = dateGroup.get(meterName)!;
+        if (dataItem.values[exportKey] !== undefined) {
+          meterData.exportValue = dataItem.values[exportKey];
         }
+        if (dataItem.values[importKey] !== undefined) {
+          meterData.importValue = dataItem.values[importKey];
+        }
+      });
+    });
+
+    // Convert grouped data to rows
+    groupedData.forEach((meters, date) => {
+      meters.forEach((data, meterName) => {
+        rows.push({
+          id: `${date}-${meterName}`,
+          date,
+          meter: meterName,
+          exportValue: data.exportValue,
+          importValue: data.importValue,
+          remarks: data.originalData.values.remarks || '',
+          originalData: data.originalData
+        });
       });
     });
 
     return rows.filter(row => {
       // Text filter
       if (!filterValue) return true;
-      return [row.meter, row.type, row.value.toString(), row.date].some(val =>
-        val.toLowerCase().includes(filterValue.toLowerCase())
+      return [row.meter, row.exportValue?.toString(), row.importValue?.toString(), row.remarks, row.date].some(val =>
+        val?.toLowerCase().includes(filterValue.toLowerCase())
       );
     }).sort((a, b) => {
       let aValue: any, bValue: any;
@@ -139,13 +158,17 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
           aValue = a.meter;
           bValue = b.meter;
           break;
-        case 'type':
-          aValue = a.type;
-          bValue = b.type;
+        case 'exportValue':
+          aValue = a.exportValue || 0;
+          bValue = b.exportValue || 0;
           break;
-        case 'value':
-          aValue = a.value;
-          bValue = b.value;
+        case 'importValue':
+          aValue = a.importValue || 0;
+          bValue = b.importValue || 0;
+          break;
+        case 'remarks':
+          aValue = a.remarks;
+          bValue = b.remarks;
           break;
         default:
           aValue = a.date;
@@ -185,8 +208,9 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
     return daysDiff <= allowedEditDays;
   };
 
-  const handleCellEdit = (rowId: string, value: any) => {
-    setEditedData(prev => ({ ...prev, [rowId]: value }));
+  const handleCellEdit = (rowId: string, field: string, value: any) => {
+    const key = `${rowId}-${field}`;
+    setEditedData(prev => ({ ...prev, [key]: value }));
   };
 
   const handleSort = (columnId: string) => {
@@ -334,11 +358,11 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
                 </th>
                 <th 
                   className="px-2 py-1 text-left font-medium border border-gray-300 min-w-[100px] cursor-pointer hover:bg-verdo-navy/80"
-                  onClick={() => handleSort('type')}
+                  onClick={() => handleSort('exportValue')}
                 >
                   <div className="flex items-center justify-between">
-                    Type
-                    {sortColumn === 'type' && (
+                    Export Value
+                    {sortColumn === 'exportValue' && (
                       <span className="text-xs">
                         {sortDirection === 'asc' ? '↑' : '↓'}
                       </span>
@@ -347,11 +371,24 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
                 </th>
                 <th 
                   className="px-2 py-1 text-left font-medium border border-gray-300 min-w-[100px] cursor-pointer hover:bg-verdo-navy/80"
-                  onClick={() => handleSort('value')}
+                  onClick={() => handleSort('importValue')}
                 >
                   <div className="flex items-center justify-between">
-                    Value
-                    {sortColumn === 'value' && (
+                    Import Value
+                    {sortColumn === 'importValue' && (
+                      <span className="text-xs">
+                        {sortDirection === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </div>
+                </th>
+                <th 
+                  className="px-2 py-1 text-left font-medium border border-gray-300 min-w-[150px] cursor-pointer hover:bg-verdo-navy/80"
+                  onClick={() => handleSort('remarks')}
+                >
+                  <div className="flex items-center justify-between">
+                    Remarks
+                    {sortColumn === 'remarks' && (
                       <span className="text-xs">
                         {sortDirection === 'asc' ? '↑' : '↓'}
                       </span>
@@ -364,10 +401,24 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
             <tbody>
               {processedData.map((row, index) => {
                 const isLocked = !isEditable(row.date);
-                const currentValue = editedData[row.id] !== undefined 
-                  ? editedData[row.id] 
-                  : row.value;
-                const hasChanges = editedData[row.id] !== undefined;
+                
+                const exportKey = `${row.id}-exportValue`;
+                const importKey = `${row.id}-importValue`;
+                const remarksKey = `${row.id}-remarks`;
+                
+                const currentExportValue = editedData[exportKey] !== undefined 
+                  ? editedData[exportKey] 
+                  : row.exportValue || '';
+                const currentImportValue = editedData[importKey] !== undefined 
+                  ? editedData[importKey] 
+                  : row.importValue || '';
+                const currentRemarks = editedData[remarksKey] !== undefined 
+                  ? editedData[remarksKey] 
+                  : row.remarks;
+                
+                const hasExportChanges = editedData[exportKey] !== undefined;
+                const hasImportChanges = editedData[importKey] !== undefined;
+                const hasRemarksChanges = editedData[remarksKey] !== undefined;
 
                 return (
                   <tr key={row.id} className={cn(
@@ -385,22 +436,45 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
                       </div>
                     </td>
                     <td className="px-2 py-1 border border-gray-300">
-                      <div className="text-xs py-1 px-2 bg-muted/50 rounded">
-                        {row.type}
-                      </div>
+                      <Input
+                        type="number"
+                        value={currentExportValue}
+                        onChange={(e) => handleCellEdit(row.id, 'exportValue', e.target.value)}
+                        className={cn(
+                          "h-6 text-xs border-0 focus:bg-background focus:border focus:border-ring",
+                          isEditMode ? "bg-blue-100" : "bg-gray-100",
+                          hasExportChanges && "bg-yellow-50 border border-yellow-300"
+                        )}
+                        readOnly={!isEditMode}
+                        step="0.01"
+                      />
                     </td>
                     <td className="px-2 py-1 border border-gray-300">
                       <Input
                         type="number"
-                        value={currentValue || ''}
-                        onChange={(e) => handleCellEdit(row.id, e.target.value)}
+                        value={currentImportValue}
+                        onChange={(e) => handleCellEdit(row.id, 'importValue', e.target.value)}
                         className={cn(
                           "h-6 text-xs border-0 focus:bg-background focus:border focus:border-ring",
                           isEditMode ? "bg-blue-100" : "bg-gray-100",
-                          hasChanges && "bg-yellow-50 border border-yellow-300"
+                          hasImportChanges && "bg-yellow-50 border border-yellow-300"
                         )}
                         readOnly={!isEditMode}
                         step="0.01"
+                      />
+                    </td>
+                    <td className="px-2 py-1 border border-gray-300">
+                      <Input
+                        type="text"
+                        value={currentRemarks}
+                        onChange={(e) => handleCellEdit(row.id, 'remarks', e.target.value)}
+                        className={cn(
+                          "h-6 text-xs border-0 focus:bg-background focus:border focus:border-ring",
+                          isEditMode ? "bg-blue-100" : "bg-gray-100",
+                          hasRemarksChanges && "bg-yellow-50 border border-yellow-300"
+                        )}
+                        readOnly={!isEditMode}
+                        placeholder="Add remarks..."
                       />
                     </td>
                   </tr>
