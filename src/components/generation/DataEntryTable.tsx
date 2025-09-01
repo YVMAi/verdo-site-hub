@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -248,11 +247,15 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
   }
 
   // For other tabs, keep the table format
+  const getTabTitle = () => {
+    return activeTab.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
   if (isMobile) {
     return (
       <div className="bg-white rounded-lg border overflow-hidden">
         <TableHeader 
-          title={`Data Entry - ${activeTab.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}`}
+          title={`Data Entry - ${getTabTitle()}`}
           selectedDate={selectedDate}
           onSave={handleSave}
         />
@@ -277,7 +280,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
   return (
     <div className="bg-white rounded-lg border overflow-hidden">
       <TableHeader 
-        title={`Data Entry - ${activeTab.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}`}
+        title={`Data Entry - ${getTabTitle()}`}
         selectedDate={selectedDate}
         onSave={handleSave}
       />
