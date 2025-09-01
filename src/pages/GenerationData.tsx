@@ -118,10 +118,10 @@ const GenerationData = () => {
       <div className="flex-1 bg-white overflow-hidden">
         <Tabs value={activeTab} onValueChange={value => setActiveTab(value as TabType)} className="h-full flex flex-col">
           <div className="border-b bg-gray-50/50 px-6 py-3 flex-shrink-0">
-            <TabsList className="flex h-auto p-0 gap-1 bg-transparent">
+            <TabsList className="w-full h-auto p-0 gap-0 bg-transparent justify-start">
               {tabConfigs.map(tab => {
               const IconComponent = iconMap[tab.icon as keyof typeof iconMap];
-              return <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-2 h-10 px-4 data-[state=active]:bg-[hsl(var(--verdo-navy))] data-[state=active]:text-white data-[state=active]:shadow-sm border data-[state=active]:border-[hsl(var(--verdo-navy))] text-gray-600 text-sm whitespace-nowrap">
+              return <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-2 h-10 px-4 flex-1 data-[state=active]:bg-[hsl(var(--verdo-navy))] data-[state=active]:text-white data-[state=active]:shadow-sm border data-[state=active]:border-[hsl(var(--verdo-navy))] text-gray-600 text-sm whitespace-nowrap justify-center">
                     <IconComponent className="h-4 w-4" />
                     {tab.label}
                     {selectedSite && getStatusIcon(tab.id)}
