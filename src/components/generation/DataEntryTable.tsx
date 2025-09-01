@@ -1,6 +1,7 @@
-
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Site, TabType } from '@/types/generation';
@@ -141,6 +142,109 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
     return 'Enter value';
   };
 
+  // For plant-data, render as form instead of table
+  if (activeTab === 'plant-data') {
+    const leftFields = filteredColumns.slice(0, 5);
+    const rightFields = filteredColumns.slice(5);
+
+    if (isMobile) {
+      return (
+        <div className="bg-white rounded-lg border overflow-hidden">
+          <TableHeader 
+            title="Data Entry - Plant Data"
+            selectedDate={selectedDate}
+            onSave={handleSave}
+          />
+          
+          <div className="p-4 space-y-4" onPaste={handlePasteFromExcel} tabIndex={0}>
+            <MobileCard
+              title="Plant Data Entry"
+              fields={filteredColumns.map(column => ({
+                label: `${column.name}${column.required ? ' *' : ''}`,
+                value: formData[column.id] || '',
+                onChange: (value) => handleInputChange(column.id, value),
+                error: errors[column.id],
+                type: getInputType(column),
+                placeholder: getPlaceholder(column)
+              }))}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="bg-white rounded-lg border overflow-hidden">
+        <TableHeader 
+          title="Data Entry - Plant Data"
+          selectedDate={selectedDate}
+          onSave={handleSave}
+        />
+        
+        <Card className="border-0 rounded-none">
+          <CardContent className="p-6" onPaste={handlePasteFromExcel} tabIndex={0}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Left Column */}
+              <div className="space-y-4">
+                {leftFields.map((column) => (
+                  <div key={column.id} className="space-y-2">
+                    <Label htmlFor={column.id} className="text-sm font-medium">
+                      {column.name}
+                      {column.required && <span className="text-destructive ml-1">*</span>}
+                    </Label>
+                    <Input
+                      id={column.id}
+                      type={getInputType(column)}
+                      value={formData[column.id] || ''}
+                      onChange={(e) => handleInputChange(column.id, e.target.value)}
+                      className={cn(
+                        "w-full",
+                        errors[column.id] && "border-destructive focus:border-destructive"
+                      )}
+                      placeholder={getPlaceholder(column)}
+                      step={column.type === 'number' ? '0.01' : undefined}
+                    />
+                    {errors[column.id] && (
+                      <p className="text-xs text-destructive">{errors[column.id]}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Right Column */}
+              <div className="space-y-4">
+                {rightFields.map((column) => (
+                  <div key={column.id} className="space-y-2">
+                    <Label htmlFor={column.id} className="text-sm font-medium">
+                      {column.name}
+                      {column.required && <span className="text-destructive ml-1">*</span>}
+                    </Label>
+                    <Input
+                      id={column.id}
+                      type={getInputType(column)}
+                      value={formData[column.id] || ''}
+                      onChange={(e) => handleInputChange(column.id, e.target.value)}
+                      className={cn(
+                        "w-full",
+                        errors[column.id] && "border-destructive focus:border-destructive"
+                      )}
+                      placeholder={getPlaceholder(column)}
+                      step={column.type === 'number' ? '0.01' : undefined}
+                    />
+                    {errors[column.id] && (
+                      <p className="text-xs text-destructive">{errors[column.id]}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // For other tabs, keep the table format
   if (isMobile) {
     return (
       <div className="bg-white rounded-lg border overflow-hidden">
