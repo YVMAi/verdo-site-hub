@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -144,8 +145,12 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
 
   // For plant-data and weather, render as form instead of table
   if (activeTab === 'plant-data' || activeTab === 'weather') {
-    const leftFields = filteredColumns.slice(0, Math.ceil(filteredColumns.length / 2));
-    const rightFields = filteredColumns.slice(Math.ceil(filteredColumns.length / 2));
+    // Ensure at least 5 fields on the left, but if there are fewer than 10 total, split evenly
+    const totalFields = filteredColumns.length;
+    const leftFieldCount = totalFields < 10 ? Math.ceil(totalFields / 2) : Math.max(5, Math.ceil(totalFields / 2));
+    
+    const leftFields = filteredColumns.slice(0, leftFieldCount);
+    const rightFields = filteredColumns.slice(leftFieldCount);
 
     const tabTitle = activeTab === 'plant-data' ? 'Plant Data' : 'Weather';
 
