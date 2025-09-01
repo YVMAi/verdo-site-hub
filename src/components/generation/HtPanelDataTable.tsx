@@ -1,5 +1,4 @@
 
-
 import React, { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -11,20 +10,40 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { TableHeader } from './TableHeader';
 import { MobileCard } from './MobileCard';
 import { EmptyState } from './EmptyState';
-import { Search } from 'lucide-react';
+import { Search, Plus, Trash2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface HtPanelDataTableProps {
   site: Site | null;
   selectedDate: Date;
 }
 
+interface HtPanelFormRow {
+  id: string;
+  block: string;
+  incoming: string;
+  outgoing: string;
+  remarks: string;
+}
+
 export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, selectedDate }) => {
-  const [formData, setFormData] = useState<Record<string, any>>({});
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'form' | 'table'>('form');
+  const [formRows, setFormRows] = useState<HtPanelFormRow[]>([
+    {
+      id: '1',
+      block: '',
+      incoming: '',
+      outgoing: '',
+      remarks: ''
+    }
+  ]);
   const { toast } = useToast();
   const isMobile = useIsMobile();
+
+  // Legacy form data for table view
+  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   if (!site) {
     return <EmptyState message="Select a site to begin data entry" />;
@@ -32,7 +51,20 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
 
   const blocks = site.htPanelConfig?.blockNames || ['Block 1'];
 
-  // Filter blocks based on search term
+  React.useEffect(() => {
+    if (blocks.length > 0 && formRows.length === 1 && !formRows[0].block) {
+      // Initialize with first block if available
+      setFormRows([{
+        id: '1',
+        block: blocks[0],
+        incoming: '',
+        outgoing: '',
+        remarks: ''
+      }]);
+    }
+  }, [blocks, formRows]);
+
+  // Filter blocks based on search term for table view
   const filteredBlocks = useMemo(() => {
     if (!searchTerm.trim()) return blocks;
     
@@ -41,6 +73,39 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
     );
   }, [blocks, searchTerm]);
 
+  // Filter form rows based on search term
+  const filteredFormRows = useMemo(() => {
+    if (!searchTerm.trim()) return formRows;
+    
+    return formRows.filter(row => 
+      row.block.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [formRows, searchTerm]);
+
+  const updateFormRow = (id: string, field: keyof HtPanelFormRow, value: string) => {
+    setFormRows(prev => prev.map(row => 
+      row.id === id ? { ...row, [field]: value } : row
+    ));
+  };
+
+  const addFormRow = () => {
+    const newRow: HtPanelFormRow = {
+      id: Date.now().toString(),
+      block: '',
+      incoming: '',
+      outgoing: '',
+      remarks: ''
+    };
+    setFormRows(prev => [...prev, newRow]);
+  };
+
+  const removeFormRow = (id: string) => {
+    if (formRows.length > 1) {
+      setFormRows(prev => prev.filter(row => row.id !== id));
+    }
+  };
+
+  // Legacy functions for table view
   const handleInputChange = (blockName: string, field: string, value: any) => {
     const key = `${blockName}_${field}`;
     setFormData(prev => ({ ...prev, [key]: value }));
@@ -51,27 +116,31 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
   };
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-    
-    blocks.forEach(blockName => {
-      const incomingKey = `${blockName}_incoming`;
-      const outgoingKey = `${blockName}_outgoing`;
+    if (viewMode === 'form') {
+      return formRows.every(row => row.block && row.incoming && row.outgoing);
+    } else {
+      const newErrors: Record<string, string> = {};
       
-      if (!formData[incomingKey]) {
-        newErrors[incomingKey] = 'This field is required';
-      } else if (isNaN(Number(formData[incomingKey]))) {
-        newErrors[incomingKey] = 'Must be a valid number';
-      }
+      blocks.forEach(blockName => {
+        const incomingKey = `${blockName}_incoming`;
+        const outgoingKey = `${blockName}_outgoing`;
+        
+        if (!formData[incomingKey]) {
+          newErrors[incomingKey] = 'This field is required';
+        } else if (isNaN(Number(formData[incomingKey]))) {
+          newErrors[incomingKey] = 'Must be a valid number';
+        }
+        
+        if (!formData[outgoingKey]) {
+          newErrors[outgoingKey] = 'This field is required';
+        } else if (isNaN(Number(formData[outgoingKey]))) {
+          newErrors[outgoingKey] = 'Must be a valid number';
+        }
+      });
       
-      if (!formData[outgoingKey]) {
-        newErrors[outgoingKey] = 'This field is required';
-      } else if (isNaN(Number(formData[outgoingKey]))) {
-        newErrors[outgoingKey] = 'Must be a valid number';
-      }
-    });
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+      setErrors(newErrors);
+      return Object.keys(newErrors).length === 0;
+    }
   };
 
   const handleSave = () => {
@@ -84,19 +153,38 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
       return;
     }
 
-    console.log('Saving HT Panel data:', {
-      siteId: site.id,
-      tabType: 'ht-panel',
-      date: format(selectedDate, 'yyyy-MM-dd'),
-      values: formData
-    });
+    if (viewMode === 'form') {
+      console.log('Saving HT Panel form data:', {
+        siteId: site.id,
+        tabType: 'ht-panel',
+        date: format(selectedDate, 'yyyy-MM-dd'),
+        formRows: formRows
+      });
+    } else {
+      console.log('Saving HT Panel data:', {
+        siteId: site.id,
+        tabType: 'ht-panel',
+        date: format(selectedDate, 'yyyy-MM-dd'),
+        values: formData
+      });
+    }
 
     toast({
       title: "Data Saved",
       description: `HT Panel data for ${format(selectedDate, 'PPP')} has been saved successfully.`,
     });
 
-    setFormData({});
+    if (viewMode === 'form') {
+      setFormRows([{
+        id: Date.now().toString(),
+        block: '',
+        incoming: '',
+        outgoing: '',
+        remarks: ''
+      }]);
+    } else {
+      setFormData({});
+    }
   };
 
   const handlePasteFromExcel = (e: React.ClipboardEvent) => {
@@ -104,17 +192,30 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
     const pastedData = e.clipboardData.getData('text');
     const rows = pastedData.split('\n');
     
-    const newFormData: Record<string, any> = {};
-    rows.forEach((row, index) => {
-      if (index < blocks.length && row.trim()) {
-        const values = row.split('\t');
-        const blockName = blocks[index];
-        if (values[1]) newFormData[`${blockName}_incoming`] = values[1];
-        if (values[2]) newFormData[`${blockName}_outgoing`] = values[2];
-      }
-    });
-    
-    setFormData(prev => ({ ...prev, ...newFormData }));
+    if (viewMode === 'form') {
+      // Handle paste for form view
+      const newFormRows = [...formRows];
+      rows.forEach((row, index) => {
+        if (index < newFormRows.length && row.trim()) {
+          const values = row.split('\t');
+          if (values[1]) newFormRows[index].incoming = values[1];
+          if (values[2]) newFormRows[index].outgoing = values[2];
+        }
+      });
+      setFormRows(newFormRows);
+    } else {
+      // Handle paste for table view
+      const newFormData: Record<string, any> = {};
+      rows.forEach((row, index) => {
+        if (index < blocks.length && row.trim()) {
+          const values = row.split('\t');
+          const blockName = blocks[index];
+          if (values[1]) newFormData[`${blockName}_incoming`] = values[1];
+          if (values[2]) newFormData[`${blockName}_outgoing`] = values[2];
+        }
+      });
+      setFormData(prev => ({ ...prev, ...newFormData }));
+    }
     
     toast({
       title: "Data Pasted",
@@ -149,31 +250,83 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
         </div>
         
         <div className="p-4 space-y-4" onPaste={handlePasteFromExcel} tabIndex={0}>
-          {filteredBlocks.map((blockName) => (
-            <MobileCard
-              key={blockName}
-              title={blockName}
-              fields={[
-                {
-                  label: 'Incoming *',
-                  value: formData[`${blockName}_incoming`] || '',
-                  onChange: (value) => handleInputChange(blockName, 'incoming', value),
-                  error: errors[`${blockName}_incoming`],
-                  type: 'number',
-                  placeholder: '0.00'
-                },
-                {
-                  label: 'Outgoing *',
-                  value: formData[`${blockName}_outgoing`] || '',
-                  onChange: (value) => handleInputChange(blockName, 'outgoing', value),
-                  error: errors[`${blockName}_outgoing`],
-                  type: 'number',
-                  placeholder: '0.00'
-                }
-              ]}
-            />
-          ))}
-          {filteredBlocks.length === 0 && searchTerm && (
+          {viewMode === 'form' ? (
+            <>
+              {filteredFormRows.map((row) => (
+                <div key={row.id} className="border rounded-lg p-4 space-y-3">
+                  <div className="font-medium text-sm">HT Panel Entry</div>
+                  <div className="space-y-2">
+                    <div>
+                      <label className="text-xs text-muted-foreground">Block</label>
+                      <Input
+                        value={row.block}
+                        onChange={(e) => updateFormRow(row.id, 'block', e.target.value)}
+                        placeholder="Enter block name..."
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-muted-foreground">Incoming</label>
+                      <Input
+                        type="number"
+                        value={row.incoming}
+                        onChange={(e) => updateFormRow(row.id, 'incoming', e.target.value)}
+                        placeholder="0.00"
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-muted-foreground">Outgoing</label>
+                      <Input
+                        type="number"
+                        value={row.outgoing}
+                        onChange={(e) => updateFormRow(row.id, 'outgoing', e.target.value)}
+                        placeholder="0.00"
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-muted-foreground">Remarks</label>
+                      <Input
+                        value={row.remarks}
+                        onChange={(e) => updateFormRow(row.id, 'remarks', e.target.value)}
+                        placeholder="Enter remarks..."
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </>
+          ) : (
+            <>
+              {filteredBlocks.map((blockName) => (
+                <MobileCard
+                  key={blockName}
+                  title={blockName}
+                  fields={[
+                    {
+                      label: 'Incoming *',
+                      value: formData[`${blockName}_incoming`] || '',
+                      onChange: (value) => handleInputChange(blockName, 'incoming', value),
+                      error: errors[`${blockName}_incoming`],
+                      type: 'number',
+                      placeholder: '0.00'
+                    },
+                    {
+                      label: 'Outgoing *',
+                      value: formData[`${blockName}_outgoing`] || '',
+                      onChange: (value) => handleInputChange(blockName, 'outgoing', value),
+                      error: errors[`${blockName}_outgoing`],
+                      type: 'number',
+                      placeholder: '0.00'
+                    }
+                  ]}
+                />
+              ))}
+            </>
+          )}
+          {(viewMode === 'form' ? filteredFormRows.length : filteredBlocks.length) === 0 && searchTerm && (
             <div className="text-center py-8 text-muted-foreground">
               No blocks found matching "{searchTerm}"
             </div>
@@ -211,77 +364,95 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
       <div className="overflow-x-auto">
         <div className="min-w-full" onPaste={handlePasteFromExcel} tabIndex={0}>
           {viewMode === 'form' ? (
-            <table className="w-full text-sm border-collapse">
-              <thead className="sticky top-0">
-                <tr className="bg-verdo-navy text-white">
-                  <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
-                    Block<span className="text-red-300 ml-1">*</span>
-                  </th>
-                  <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
-                    Incoming<span className="text-red-300 ml-1">*</span>
-                  </th>
-                  <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
-                    Outgoing<span className="text-red-300 ml-1">*</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredBlocks.map((blockName) => (
-                  <tr key={blockName} className="hover:bg-muted/20">
-                    <td className="px-3 py-2 border border-gray-300">
+            <div className="border rounded-lg overflow-hidden">
+              <div className="bg-verdo-navy text-white">
+                <div className="grid grid-cols-5 gap-0 text-sm font-medium">
+                  <div className="px-4 py-3 border-r border-white/20">Block</div>
+                  <div className="px-4 py-3 border-r border-white/20">Incoming</div>
+                  <div className="px-4 py-3 border-r border-white/20">Outgoing</div>
+                  <div className="px-4 py-3 border-r border-white/20">Remarks</div>
+                  <div className="px-4 py-3">Actions</div>
+                </div>
+              </div>
+
+              <div className="divide-y">
+                {filteredFormRows.map((row) => (
+                  <div key={row.id} className="grid grid-cols-5 gap-0 items-center">
+                    <div className="px-2 py-2 border-r">
+                      <Select value={row.block} onValueChange={(value) => updateFormRow(row.id, 'block', value)}>
+                        <SelectTrigger className="h-8 border-0 shadow-none">
+                          <SelectValue placeholder="Select Block" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {blocks.map(block => (
+                            <SelectItem key={block} value={block}>
+                              {block}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="px-2 py-2 border-r">
                       <Input
-                        value={blockName}
-                        readOnly
-                        className="h-8 text-xs border-0 bg-gray-50 focus:bg-gray-50"
+                        type="number"
+                        value={row.incoming}
+                        onChange={(e) => updateFormRow(row.id, 'incoming', e.target.value)}
+                        className="h-8 border-0 shadow-none"
+                        placeholder="0.00"
+                        step="0.01"
                       />
-                    </td>
-                    <td className="px-3 py-2 border border-gray-300">
-                      <div className="space-y-1">
-                        <Input
-                          type="number"
-                          value={formData[`${blockName}_incoming`] || ''}
-                          onChange={(e) => handleInputChange(blockName, 'incoming', e.target.value)}
-                          className={cn(
-                            "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
-                            errors[`${blockName}_incoming`] && "border-destructive focus:border-destructive"
-                          )}
-                          placeholder="0.00"
-                          step="0.01"
-                        />
-                        {errors[`${blockName}_incoming`] && (
-                          <p className="text-xs text-destructive">{errors[`${blockName}_incoming`]}</p>
-                        )}
+                    </div>
+                    
+                    <div className="px-2 py-2 border-r">
+                      <Input
+                        type="number"
+                        value={row.outgoing}
+                        onChange={(e) => updateFormRow(row.id, 'outgoing', e.target.value)}
+                        className="h-8 border-0 shadow-none"
+                        placeholder="0.00"
+                        step="0.01"
+                      />
+                    </div>
+                    
+                    <div className="px-2 py-2 border-r">
+                      <Input
+                        value={row.remarks}
+                        onChange={(e) => updateFormRow(row.id, 'remarks', e.target.value)}
+                        placeholder="Enter remarks..."
+                        className="h-8 border-0 shadow-none"
+                      />
+                    </div>
+                    
+                    <div className="px-2 py-2 flex items-center justify-center gap-1">
+                      <div className="flex flex-col items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFormRow(row.id)}
+                          disabled={formRows.length === 1}
+                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                        <span className="text-xs text-gray-600">Delete</span>
                       </div>
-                    </td>
-                    <td className="px-3 py-2 border border-gray-300">
-                      <div className="space-y-1">
-                        <Input
-                          type="number"
-                          value={formData[`${blockName}_outgoing`] || ''}
-                          onChange={(e) => handleInputChange(blockName, 'outgoing', e.target.value)}
-                          className={cn(
-                            "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
-                            errors[`${blockName}_outgoing`] && "border-destructive focus:border-destructive"
-                          )}
-                          placeholder="0.00"
-                          step="0.01"
-                        />
-                        {errors[`${blockName}_outgoing`] && (
-                          <p className="text-xs text-destructive">{errors[`${blockName}_outgoing`]}</p>
-                        )}
+                      <div className="flex flex-col items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={addFormRow}
+                          className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                        <span className="text-xs text-gray-600">Add</span>
                       </div>
-                    </td>
-                  </tr>
+                    </div>
+                  </div>
                 ))}
-                {filteredBlocks.length === 0 && searchTerm && (
-                  <tr>
-                    <td colSpan={3} className="px-3 py-8 text-center text-muted-foreground">
-                      No blocks found matching "{searchTerm}"
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+              </div>
+            </div>
           ) : (
             <table className="w-full text-sm border-collapse">
               <thead className="sticky top-0">

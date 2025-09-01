@@ -1,6 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Site } from '@/types/generation';
@@ -9,11 +10,20 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { TableHeader } from './TableHeader';
 import { MobileCard } from './MobileCard';
 import { EmptyState } from './EmptyState';
-import { Search } from 'lucide-react';
+import { Search, Plus, Trash2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface InverterDataTableProps {
   site: Site | null;
   selectedDate: Date;
+}
+
+interface InverterFormRow {
+  id: string;
+  block: string;
+  inverter: string;
+  generation: string;
+  remarks: string;
 }
 
 interface InverterRow {
@@ -28,6 +38,19 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
   const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'form' | 'table'>('form');
+  const [formRows, setFormRows] = useState<InverterFormRow[]>([
+    {
+      id: '1',
+      block: '',
+      inverter: '',
+      generation: '',
+      remarks: ''
+    }
+  ]);
+
+  // Legacy data for table view
+  const [formData, setFormData] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const inverterRows = useMemo(() => {
     if (!site || !site.inverterConfig) return [];
@@ -46,7 +69,23 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
     return rows;
   }, [site]);
 
-  // Filter inverter rows based on search term
+  React.useEffect(() => {
+    if (site?.inverterConfig && formRows.length === 1 && !formRows[0].block) {
+      // Initialize with first block and inverter if available
+      const firstBlock = site.inverterConfig.blocks[0];
+      if (firstBlock && firstBlock.inverters.length > 0) {
+        setFormRows([{
+          id: '1',
+          block: firstBlock.blockName,
+          inverter: firstBlock.inverters[0],
+          generation: '',
+          remarks: ''
+        }]);
+      }
+    }
+  }, [site, formRows]);
+
+  // Filter inverter rows based on search term for table view
   const filteredInverterRows = useMemo(() => {
     if (!searchTerm.trim()) return inverterRows;
     
@@ -56,9 +95,45 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
     );
   }, [inverterRows, searchTerm]);
 
-  const [formData, setFormData] = useState<Record<string, string>>({});
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  // Filter form rows based on search term
+  const filteredFormRows = useMemo(() => {
+    if (!searchTerm.trim()) return formRows;
+    
+    return formRows.filter(row => 
+      row.block.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.inverter.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [formRows, searchTerm]);
 
+  const updateFormRow = (id: string, field: keyof InverterFormRow, value: string) => {
+    setFormRows(prev => prev.map(row => 
+      row.id === id ? { ...row, [field]: value } : row
+    ));
+  };
+
+  const addFormRow = () => {
+    const newRow: InverterFormRow = {
+      id: Date.now().toString(),
+      block: '',
+      inverter: '',
+      generation: '',
+      remarks: ''
+    };
+    setFormRows(prev => [...prev, newRow]);
+  };
+
+  const removeFormRow = (id: string) => {
+    if (formRows.length > 1) {
+      setFormRows(prev => prev.filter(row => row.id !== id));
+    }
+  };
+
+  const getInvertersForBlock = (blockName: string) => {
+    const block = site?.inverterConfig?.blocks.find(b => b.blockName === blockName);
+    return block ? block.inverters : [];
+  };
+
+  // Legacy functions for table view
   const handleInputChange = (rowId: string, value: string) => {
     setFormData(prev => ({ ...prev, [rowId]: value }));
     
@@ -68,19 +143,23 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
   };
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-    
-    inverterRows.forEach(row => {
-      const value = formData[row.id];
-      if (!value) {
-        newErrors[row.id] = 'Generation value is required';
-      } else if (isNaN(Number(value))) {
-        newErrors[row.id] = 'Must be a valid number';
-      }
-    });
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    if (viewMode === 'form') {
+      return formRows.every(row => row.block && row.inverter && row.generation);
+    } else {
+      const newErrors: Record<string, string> = {};
+      
+      inverterRows.forEach(row => {
+        const value = formData[row.id];
+        if (!value) {
+          newErrors[row.id] = 'Generation value is required';
+        } else if (isNaN(Number(value))) {
+          newErrors[row.id] = 'Must be a valid number';
+        }
+      });
+      
+      setErrors(newErrors);
+      return Object.keys(newErrors).length === 0;
+    }
   };
 
   const handleSave = () => {
@@ -93,26 +172,45 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
       return;
     }
 
-    const saveData = inverterRows.map(row => ({
-      siteId: site?.id,
-      tabType: 'inverter',
-      date: format(selectedDate, 'yyyy-MM-dd'),
-      values: {
+    if (viewMode === 'form') {
+      console.log('Saving inverter form data:', {
+        siteId: site?.id,
+        tabType: 'inverter',
         date: format(selectedDate, 'yyyy-MM-dd'),
-        block: row.block,
-        inverter: row.inverter,
-        generation: Number(formData[row.id])
-      }
-    }));
+        formRows: formRows
+      });
+    } else {
+      const saveData = inverterRows.map(row => ({
+        siteId: site?.id,
+        tabType: 'inverter',
+        date: format(selectedDate, 'yyyy-MM-dd'),
+        values: {
+          date: format(selectedDate, 'yyyy-MM-dd'),
+          block: row.block,
+          inverter: row.inverter,
+          generation: Number(formData[row.id])
+        }
+      }));
 
-    console.log('Saving inverter data:', saveData);
+      console.log('Saving inverter data:', saveData);
+    }
 
     toast({
       title: "Data Saved",
       description: `Inverter data for ${format(selectedDate, 'PPP')} has been saved successfully.`,
     });
 
-    setFormData({});
+    if (viewMode === 'form') {
+      setFormRows([{
+        id: Date.now().toString(),
+        block: '',
+        inverter: '',
+        generation: '',
+        remarks: ''
+      }]);
+    } else {
+      setFormData({});
+    }
   };
 
   const handlePasteFromExcel = (e: React.ClipboardEvent) => {
@@ -120,15 +218,27 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
     const pastedData = e.clipboardData.getData('text');
     const rows = pastedData.split('\n').filter(row => row.trim());
     
-    const newFormData: Record<string, string> = {};
-    rows.forEach((row, index) => {
-      const values = row.split('\t');
-      if (values.length >= 3 && inverterRows[index]) {
-        newFormData[inverterRows[index].id] = values[2];
-      }
-    });
-    
-    setFormData(prev => ({ ...prev, ...newFormData }));
+    if (viewMode === 'form') {
+      // Handle paste for form view
+      const newFormRows = [...formRows];
+      rows.forEach((row, index) => {
+        const values = row.split('\t');
+        if (values.length >= 3 && index < newFormRows.length) {
+          newFormRows[index].generation = values[2];
+        }
+      });
+      setFormRows(newFormRows);
+    } else {
+      // Handle paste for table view
+      const newFormData: Record<string, string> = {};
+      rows.forEach((row, index) => {
+        const values = row.split('\t');
+        if (values.length >= 3 && inverterRows[index]) {
+          newFormData[inverterRows[index].id] = values[2];
+        }
+      });
+      setFormData(prev => ({ ...prev, ...newFormData }));
+    }
     
     toast({
       title: "Data Pasted",
@@ -176,21 +286,72 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
         </div>
         
         <div className="p-4 space-y-4" onPaste={handlePasteFromExcel} tabIndex={0}>
-          {Object.entries(groupedData).map(([blockName, rows]) => (
-            <MobileCard
-              key={blockName}
-              title={blockName}
-              fields={rows.map(row => ({
-                label: `${row.inverter} *`,
-                value: formData[row.id] || '',
-                onChange: (value) => handleInputChange(row.id, value),
-                error: errors[row.id],
-                type: 'number',
-                placeholder: '0.00'
-              }))}
-            />
-          ))}
-          {filteredInverterRows.length === 0 && searchTerm && (
+          {viewMode === 'form' ? (
+            <>
+              {filteredFormRows.map((row) => (
+                <div key={row.id} className="border rounded-lg p-4 space-y-3">
+                  <div className="font-medium text-sm">Inverter Entry</div>
+                  <div className="space-y-2">
+                    <div>
+                      <label className="text-xs text-muted-foreground">Block</label>
+                      <Input
+                        value={row.block}
+                        onChange={(e) => updateFormRow(row.id, 'block', e.target.value)}
+                        placeholder="Enter block name..."
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-muted-foreground">Inverter</label>
+                      <Input
+                        value={row.inverter}
+                        onChange={(e) => updateFormRow(row.id, 'inverter', e.target.value)}
+                        placeholder="Enter inverter name..."
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-muted-foreground">Generation</label>
+                      <Input
+                        type="number"
+                        value={row.generation}
+                        onChange={(e) => updateFormRow(row.id, 'generation', e.target.value)}
+                        placeholder="0.00"
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-muted-foreground">Remarks</label>
+                      <Input
+                        value={row.remarks}
+                        onChange={(e) => updateFormRow(row.id, 'remarks', e.target.value)}
+                        placeholder="Enter remarks..."
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </>
+          ) : (
+            <>
+              {Object.entries(groupedData).map(([blockName, rows]) => (
+                <MobileCard
+                  key={blockName}
+                  title={blockName}
+                  fields={rows.map(row => ({
+                    label: `${row.inverter} *`,
+                    value: formData[row.id] || '',
+                    onChange: (value) => handleInputChange(row.id, value),
+                    error: errors[row.id],
+                    type: 'number',
+                    placeholder: '0.00'
+                  }))}
+                />
+              ))}
+            </>
+          )}
+          {(viewMode === 'form' ? filteredFormRows.length : Object.keys(groupedData).length) === 0 && searchTerm && (
             <div className="text-center py-8 text-muted-foreground">
               No blocks or inverters found matching "{searchTerm}"
             </div>
@@ -242,62 +403,103 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
       <div className="overflow-x-auto">
         <div className="min-w-full" onPaste={handlePasteFromExcel} tabIndex={0}>
           {viewMode === 'form' ? (
-            <table className="w-full text-sm border-collapse">
-              <thead className="sticky top-0">
-                <tr className="bg-verdo-navy text-white">
-                  <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
-                    Block
-                  </th>
-                  <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
-                    Inverter
-                  </th>
-                  <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
-                    Generation<span className="text-red-300 ml-1">*</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredInverterRows.map((row) => (
-                  <tr key={row.id} className="hover:bg-muted/20">
-                    <td className="px-3 py-2 border border-gray-300">
-                      <div className="text-xs py-1 px-2 bg-muted/50 rounded">
-                        {row.block}
+            <div className="border rounded-lg overflow-hidden">
+              <div className="bg-verdo-navy text-white">
+                <div className="grid grid-cols-5 gap-0 text-sm font-medium">
+                  <div className="px-4 py-3 border-r border-white/20">Block</div>
+                  <div className="px-4 py-3 border-r border-white/20">Inverter</div>
+                  <div className="px-4 py-3 border-r border-white/20">Generation</div>
+                  <div className="px-4 py-3 border-r border-white/20">Remarks</div>
+                  <div className="px-4 py-3">Actions</div>
+                </div>
+              </div>
+
+              <div className="divide-y">
+                {filteredFormRows.map((row) => (
+                  <div key={row.id} className="grid grid-cols-5 gap-0 items-center">
+                    <div className="px-2 py-2 border-r">
+                      <Select value={row.block} onValueChange={(value) => updateFormRow(row.id, 'block', value)}>
+                        <SelectTrigger className="h-8 border-0 shadow-none">
+                          <SelectValue placeholder="Select Block" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {site.inverterConfig.blocks.map(block => (
+                            <SelectItem key={block.blockName} value={block.blockName}>
+                              {block.blockName}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="px-2 py-2 border-r">
+                      <Select 
+                        value={row.inverter} 
+                        onValueChange={(value) => updateFormRow(row.id, 'inverter', value)}
+                        disabled={!row.block}
+                      >
+                        <SelectTrigger className="h-8 border-0 shadow-none">
+                          <SelectValue placeholder="Select Inverter" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getInvertersForBlock(row.block).map(inverter => (
+                            <SelectItem key={inverter} value={inverter}>
+                              {inverter}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="px-2 py-2 border-r">
+                      <Input
+                        type="number"
+                        value={row.generation}
+                        onChange={(e) => updateFormRow(row.id, 'generation', e.target.value)}
+                        className="h-8 border-0 shadow-none"
+                        placeholder="0.00"
+                        step="0.01"
+                      />
+                    </div>
+                    
+                    <div className="px-2 py-2 border-r">
+                      <Input
+                        value={row.remarks}
+                        onChange={(e) => updateFormRow(row.id, 'remarks', e.target.value)}
+                        placeholder="Enter remarks..."
+                        className="h-8 border-0 shadow-none"
+                      />
+                    </div>
+                    
+                    <div className="px-2 py-2 flex items-center justify-center gap-1">
+                      <div className="flex flex-col items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFormRow(row.id)}
+                          disabled={formRows.length === 1}
+                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                        <span className="text-xs text-gray-600">Delete</span>
                       </div>
-                    </td>
-                    <td className="px-3 py-2 border border-gray-300">
-                      <div className="text-xs py-1 px-2 bg-muted/50 rounded">
-                        {row.inverter}
+                      <div className="flex flex-col items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={addFormRow}
+                          className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                        <span className="text-xs text-gray-600">Add</span>
                       </div>
-                    </td>
-                    <td className="px-3 py-2 border border-gray-300">
-                      <div className="space-y-1">
-                        <Input
-                          type="number"
-                          value={formData[row.id] || ''}
-                          onChange={(e) => handleInputChange(row.id, e.target.value)}
-                          className={cn(
-                            "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
-                            errors[row.id] && "border-destructive focus:border-destructive"
-                          )}
-                          placeholder="0.00"
-                          step="0.01"
-                        />
-                        {errors[row.id] && (
-                          <p className="text-xs text-destructive">{errors[row.id]}</p>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
+                    </div>
+                  </div>
                 ))}
-                {filteredInverterRows.length === 0 && searchTerm && (
-                  <tr>
-                    <td colSpan={3} className="px-3 py-8 text-center text-muted-foreground">
-                      No blocks or inverters found matching "{searchTerm}"
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+              </div>
+            </div>
           ) : (
             <table className="w-full text-sm border-collapse">
               <thead className="sticky top-0">
