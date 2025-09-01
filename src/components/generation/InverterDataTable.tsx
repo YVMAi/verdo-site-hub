@@ -48,7 +48,19 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
     return <EmptyState message="Select a site to begin data entry" />;
   }
 
-  const inverters = site.inverterConfig?.inverterNames || ['Inverter 1'];
+  // Extract all inverter names from the blocks structure
+  const inverters = useMemo(() => {
+    if (!site.inverterConfig?.blocks) return ['Inverter 1'];
+    
+    const allInverters: string[] = [];
+    site.inverterConfig.blocks.forEach(block => {
+      block.inverters.forEach(inverter => {
+        allInverters.push(`${block.blockName}-${inverter}`);
+      });
+    });
+    
+    return allInverters.length > 0 ? allInverters : ['Inverter 1'];
+  }, [site.inverterConfig]);
 
   React.useEffect(() => {
     if (inverters.length > 0 && formRows.length === 1 && !formRows[0].inverter) {
@@ -448,11 +460,13 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
                   <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
                     Field
                   </th>
-                  {filteredInverters.map((inverterName) => (
-                    <th key={inverterName} className="px-3 py-2 text-center font-medium border border-gray-300 min-w-[200px] text-sm">
-                      {inverterName}
-                    </th>
-                  ))}
+                  {site.inverterConfig?.blocks.map((block) => 
+                    block.inverters.map((inverter) => (
+                      <th key={`${block.blockName}-${inverter}`} className="px-3 py-2 text-center font-medium border border-gray-300 min-w-[200px] text-sm">
+                        {block.blockName}-{inverter}
+                      </th>
+                    ))
+                  )}
                   <th className="px-3 py-2 text-center font-medium border border-gray-300 min-w-[100px] text-sm">
                     Remarks
                   </th>
@@ -461,28 +475,33 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
               <tbody>
                 <tr className="hover:bg-muted/20">
                   <td className="px-3 py-2 border border-gray-300 font-medium bg-muted/30">
-                    Inverter
+                    Generation
                   </td>
-                  {filteredInverters.map((inverterName) => (
-                    <td key={inverterName} className="px-3 py-2 border border-gray-300">
-                      <div className="space-y-1">
-                        <Input
-                          type="number"
-                          value={formData[`${inverterName}_generation`] || ''}
-                          onChange={(e) => handleInputChange(inverterName, 'generation', e.target.value)}
-                          className={cn(
-                            "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
-                            errors[`${inverterName}_generation`] && "border-destructive focus:border-destructive"
-                          )}
-                          placeholder="0.00"
-                          step="0.01"
-                        />
-                        {errors[`${inverterName}_generation`] && (
-                          <p className="text-xs text-destructive">{errors[`${inverterName}_generation`]}</p>
-                        )}
-                      </div>
-                    </td>
-                  ))}
+                  {site.inverterConfig?.blocks.map((block) => 
+                    block.inverters.map((inverter) => {
+                      const key = `${block.blockName}-${inverter}`;
+                      return (
+                        <td key={key} className="px-3 py-2 border border-gray-300">
+                          <div className="space-y-1">
+                            <Input
+                              type="number"
+                              value={formData[`${key}_generation`] || ''}
+                              onChange={(e) => handleInputChange(key, 'generation', e.target.value)}
+                              className={cn(
+                                "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
+                                errors[`${key}_generation`] && "border-destructive focus:border-destructive"
+                              )}
+                              placeholder="0.00"
+                              step="0.01"
+                            />
+                            {errors[`${key}_generation`] && (
+                              <p className="text-xs text-destructive">{errors[`${key}_generation`]}</p>
+                            )}
+                          </div>
+                        </td>
+                      );
+                    })
+                  )}
                   <td className="px-3 py-2 border border-gray-300">
                     <Input
                       type="text"
