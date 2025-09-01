@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -282,22 +283,24 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
               </tbody>
             </table>
           ) : (
-            // New horizontal table view for HT Panel
             <table className="w-full text-sm border-collapse">
               <thead className="sticky top-0">
                 <tr className="bg-verdo-navy text-white">
-                  <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
-                    {/* Empty header for row labels */}
+                  <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[80px] text-sm">
+                    Field
                   </th>
                   {filteredBlocks.map((blockName) => (
                     <th key={blockName} colSpan={2} className="px-3 py-2 text-center font-medium border border-gray-300 min-w-[200px] text-sm">
                       {blockName}
                     </th>
                   ))}
+                  <th className="px-3 py-2 text-center font-medium border border-gray-300 min-w-[100px] text-sm">
+                    Remarks
+                  </th>
                 </tr>
                 <tr className="bg-verdo-navy text-white">
                   <th className="px-3 py-2 text-left font-medium border border-gray-300 text-sm">
-                    {/* Empty header for row labels */}
+                    HT Panel
                   </th>
                   {filteredBlocks.map((blockName) => (
                     <React.Fragment key={blockName}>
@@ -309,12 +312,15 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
                       </th>
                     </React.Fragment>
                   ))}
+                  <th className="px-3 py-2 text-center font-medium border border-gray-300 text-sm">
+                    {/* Empty for remarks */}
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="hover:bg-muted/20">
                   <td className="px-3 py-2 border border-gray-300 font-medium bg-muted/30">
-                    Enter Values
+                    HT Panel
                   </td>
                   {filteredBlocks.map((blockName) => (
                     <React.Fragment key={blockName}>
@@ -356,6 +362,13 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
                       </td>
                     </React.Fragment>
                   ))}
+                  <td className="px-3 py-2 border border-gray-300">
+                    <Input
+                      type="text"
+                      className="h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring"
+                      placeholder="Add remarks..."
+                    />
+                  </td>
                 </tr>
               </tbody>
             </table>

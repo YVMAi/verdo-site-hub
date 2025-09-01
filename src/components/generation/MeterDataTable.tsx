@@ -327,18 +327,21 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
             <table className="w-full text-sm border-collapse">
               <thead className="sticky top-0">
                 <tr className="bg-verdo-navy text-white">
-                  <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
-                    {/* Empty header for row labels */}
+                  <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[80px] text-sm">
+                    Field
                   </th>
                   {uniqueMeters.map((meter) => (
                     <th key={meter} colSpan={2} className="px-3 py-2 text-center font-medium border border-gray-300 min-w-[200px] text-sm">
                       {meter}
                     </th>
                   ))}
+                  <th className="px-3 py-2 text-center font-medium border border-gray-300 min-w-[100px] text-sm">
+                    Remarks
+                  </th>
                 </tr>
                 <tr className="bg-verdo-navy text-white">
                   <th className="px-3 py-2 text-left font-medium border border-gray-300 text-sm">
-                    {/* Empty header for row labels */}
+                    Type
                   </th>
                   {uniqueMeters.map((meter) => (
                     <React.Fragment key={meter}>
@@ -350,12 +353,15 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
                       </th>
                     </React.Fragment>
                   ))}
+                  <th className="px-3 py-2 text-center font-medium border border-gray-300 text-sm">
+                    {/* Empty for remarks */}
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="hover:bg-muted/20">
                   <td className="px-3 py-2 border border-gray-300 font-medium bg-muted/30">
-                    Enter Values
+                    Meter
                   </td>
                   {uniqueMeters.map((meter) => (
                     <React.Fragment key={meter}>
@@ -397,6 +403,13 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
                       </td>
                     </React.Fragment>
                   ))}
+                  <td className="px-3 py-2 border border-gray-300">
+                    <Input
+                      type="text"
+                      className="h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring"
+                      placeholder="Add remarks..."
+                    />
+                  </td>
                 </tr>
               </tbody>
             </table>
