@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ interface InverterDataTableProps {
 
 interface InverterFormRow {
   id: string;
+  block: string;
   inverter: string;
   generation: string;
   remarks: string;
@@ -31,6 +33,7 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
   const [formRows, setFormRows] = useState<InverterFormRow[]>([
     {
       id: '1',
+      block: '',
       inverter: '',
       generation: '',
       remarks: ''
@@ -62,17 +65,18 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
     return allInverters.length > 0 ? allInverters : ['Inverter 1'];
   }, [site.inverterConfig]);
 
-  React.useEffect(() => {
-    if (inverters.length > 0 && formRows.length === 1 && !formRows[0].inverter) {
-      // Initialize with first inverter if available
-      setFormRows([{
-        id: '1',
-        inverter: inverters[0],
-        generation: '',
-        remarks: ''
-      }]);
-    }
-  }, [inverters, formRows]);
+  // Extract block names
+  const blocks = useMemo(() => {
+    if (!site.inverterConfig?.blocks) return [];
+    return site.inverterConfig.blocks.map(block => block.blockName);
+  }, [site.inverterConfig]);
+
+  // Get inverters for a specific block
+  const getInvertersForBlock = (blockName: string) => {
+    if (!site.inverterConfig?.blocks) return [];
+    const block = site.inverterConfig.blocks.find(b => b.blockName === blockName);
+    return block ? block.inverters : [];
+  };
 
   // Filter inverters based on search term for table view
   const filteredInverters = useMemo(() => {
@@ -88,19 +92,29 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
     if (!searchTerm.trim()) return formRows;
     
     return formRows.filter(row => 
+      row.block.toLowerCase().includes(searchTerm.toLowerCase()) ||
       row.inverter.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [formRows, searchTerm]);
 
   const updateFormRow = (id: string, field: keyof InverterFormRow, value: string) => {
-    setFormRows(prev => prev.map(row => 
-      row.id === id ? { ...row, [field]: value } : row
-    ));
+    setFormRows(prev => prev.map(row => {
+      if (row.id === id) {
+        const updatedRow = { ...row, [field]: value };
+        // Clear inverter selection when block changes
+        if (field === 'block') {
+          updatedRow.inverter = '';
+        }
+        return updatedRow;
+      }
+      return row;
+    }));
   };
 
   const addFormRow = () => {
     const newRow: InverterFormRow = {
       id: Date.now().toString(),
+      block: '',
       inverter: '',
       generation: '',
       remarks: ''
@@ -126,7 +140,7 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
 
   const validateForm = () => {
     if (viewMode === 'form') {
-      return formRows.every(row => row.inverter && row.generation);
+      return formRows.every(row => row.block && row.inverter && row.generation);
     } else {
       const newErrors: Record<string, string> = {};
       
@@ -179,6 +193,7 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
     if (viewMode === 'form') {
       setFormRows([{
         id: Date.now().toString(),
+        block: '',
         inverter: '',
         generation: '',
         remarks: ''
@@ -199,7 +214,7 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
       rows.forEach((row, index) => {
         if (index < newFormRows.length && row.trim()) {
           const values = row.split('\t');
-          if (values[1]) newFormRows[index].generation = values[1];
+          if (values[2]) newFormRows[index].generation = values[2]; // Generation is now the 3rd column
         }
       });
       setFormRows(newFormRows);
@@ -255,6 +270,15 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
                 <div key={row.id} className="border rounded-lg p-4 space-y-3">
                   <div className="font-medium text-sm">Inverter Entry</div>
                   <div className="space-y-2">
+                    <div>
+                      <label className="text-xs text-muted-foreground">Block</label>
+                      <Input
+                        value={row.block}
+                        onChange={(e) => updateFormRow(row.id, 'block', e.target.value)}
+                        placeholder="Enter block name..."
+                        className="h-8 text-xs"
+                      />
+                    </div>
                     <div>
                       <label className="text-xs text-muted-foreground">Inverter</label>
                       <Input
@@ -347,7 +371,8 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
           {viewMode === 'form' ? (
             <div className="border rounded-lg overflow-hidden">
               <div className="bg-verdo-navy text-white">
-                <div className="grid grid-cols-4 gap-0 text-sm font-medium">
+                <div className="grid grid-cols-5 gap-0 text-sm font-medium">
+                  <div className="px-4 py-3 border-r border-white/20">Block</div>
                   <div className="px-4 py-3 border-r border-white/20">Inverter</div>
                   <div className="px-4 py-3 border-r border-white/20">Generation</div>
                   <div className="px-4 py-3 border-r border-white/20">Remarks</div>
@@ -357,7 +382,53 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
 
               <div className="divide-y">
                 {filteredFormRows.map((row) => (
-                  <div key={row.id} className="grid grid-cols-4 gap-0 items-center">
+                  <div key={row.id} className="grid grid-cols-5 gap-0 items-center">
+                    <div className="px-2 py-2 border-r">
+                      <Popover open={openDropdowns[`${row.id}-block`]} onOpenChange={(open) => 
+                        setOpenDropdowns(prev => ({ ...prev, [`${row.id}-block`]: open }))
+                      }>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={openDropdowns[`${row.id}-block`]}
+                            className="w-full justify-between h-8 border-0 shadow-none"
+                          >
+                            {row.block || "Select Block"}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[200px] p-0">
+                          <Command>
+                            <CommandInput placeholder="Search blocks..." />
+                            <CommandList>
+                              <CommandEmpty>No block found.</CommandEmpty>
+                              <CommandGroup>
+                                {blocks.map((block) => (
+                                  <CommandItem
+                                    key={block}
+                                    value={block}
+                                    onSelect={() => {
+                                      updateFormRow(row.id, 'block', block);
+                                      setOpenDropdowns(prev => ({ ...prev, [`${row.id}-block`]: false }));
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        row.block === block ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                    {block}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
                     <div className="px-2 py-2 border-r">
                       <Popover open={openDropdowns[`${row.id}-inverter`]} onOpenChange={(open) => 
                         setOpenDropdowns(prev => ({ ...prev, [`${row.id}-inverter`]: open }))
@@ -368,6 +439,7 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
                             role="combobox"
                             aria-expanded={openDropdowns[`${row.id}-inverter`]}
                             className="w-full justify-between h-8 border-0 shadow-none"
+                            disabled={!row.block}
                           >
                             {row.inverter || "Select Inverter"}
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -379,7 +451,7 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
                             <CommandList>
                               <CommandEmpty>No inverter found.</CommandEmpty>
                               <CommandGroup>
-                                {inverters.map((inverter) => (
+                                {getInvertersForBlock(row.block).map((inverter) => (
                                   <CommandItem
                                     key={inverter}
                                     value={inverter}
