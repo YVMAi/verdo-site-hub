@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { ExportDialog } from '@/components/common/ExportDialog';
 import { ConfirmationDialog } from '@/components/common/ConfirmationDialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CollapsibleBlockHeader } from '@/components/grassCutting/CollapsibleBlockHeader';
 
 interface MeterHistoricDataTableProps {
   site: Site | null;
@@ -39,6 +39,7 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
   const [filterValue, setFilterValue] = useState('');
   const [selectedMonth, setSelectedMonth] = useState<string>('all');
   const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
+  const [expandedBlocks, setExpandedBlocks] = useState<{[key: string]: boolean}>({});
   const { toast } = useToast();
 
   const rawMeterData = useMemo(() => {
@@ -49,7 +50,6 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
     );
   }, [site]);
 
-  // Generate dynamic month options based on available data
   const availableMonths = useMemo(() => {
     const monthsSet = new Set<string>();
     
@@ -64,7 +64,6 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
       const [value, label] = item.split('|');
       return { value, label };
     }).sort((a, b) => {
-      // Sort by year and month (most recent first)
       const [aMonth, aYear] = a.value.split('-');
       const [bMonth, bYear] = b.value.split('-');
       if (aYear !== bYear) {
@@ -80,7 +79,6 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
     if (!site || !site.meterConfig) return [];
 
     const meterHistoricData = rawMeterData.filter(item => {
-      // Month filter
       if (selectedMonth !== 'all') {
         const itemDate = new Date(item.date);
         const itemMonthYear = format(itemDate, 'MM-yyyy');
@@ -93,7 +91,6 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
 
     const rows: MeterHistoricRow[] = [];
     
-    // Group data by date and meter
     const groupedData = new Map<string, Map<string, {exportValue: number | null, importValue: number | null, originalData: GenerationData}>>();
     
     meterHistoricData.forEach(dataItem => {
@@ -125,7 +122,6 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
       });
     });
 
-    // Convert grouped data to rows
     groupedData.forEach((meters, date) => {
       meters.forEach((data, meterName) => {
         rows.push({
@@ -141,7 +137,6 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
     });
 
     return rows.filter(row => {
-      // Text filter
       if (!filterValue) return true;
       return [row.meter, row.exportValue?.toString(), row.importValue?.toString(), row.remarks, row.date].some(val =>
         val?.toLowerCase().includes(filterValue.toLowerCase())
@@ -182,6 +177,13 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
       }
     });
   }, [site, rawMeterData, filterValue, sortColumn, sortDirection, selectedMonth]);
+
+  const toggleBlock = (blockId: string) => {
+    setExpandedBlocks(prev => ({
+      ...prev,
+      [blockId]: !prev[blockId]
+    }));
+  };
 
   if (!site || !site.meterConfig) {
     return (
@@ -251,6 +253,22 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
 
   const hasUnsavedChanges = Object.keys(editedData).length > 0;
 
+  // Group meters by blocks if available
+  const meterBlocks = useMemo(() => {
+    if (!site.meterConfig?.blocks) {
+      return [{
+        id: 'all-meters',
+        name: 'All Meters',
+        meters: site.meterConfig?.meterNames || []
+      }];
+    }
+    return site.meterConfig.blocks.map(block => ({
+      id: block.blockName,
+      name: block.blockName,
+      meters: block.meterNames || []
+    }));
+  }, [site.meterConfig]);
+
   return (
     <>
       <div className="bg-white rounded border">
@@ -297,7 +315,6 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
             className="h-7 text-xs flex-1 min-w-[120px]"
           />
           
-          {/* Month Filter */}
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
             <SelectTrigger className="w-40 h-7 text-xs">
               <SelectValue />
@@ -330,154 +347,111 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
           <table className="w-full text-xs border-collapse">
             <thead className="sticky top-0">
               <tr className="bg-verdo-navy text-white">
-                <th 
-                  className="px-2 py-1 text-left font-medium border border-gray-300 min-w-[100px] cursor-pointer hover:bg-verdo-navy/80"
-                  onClick={() => handleSort('date')}
-                >
-                  <div className="flex items-center justify-between">
-                    Date
-                    {sortColumn === 'date' && (
-                      <span className="text-xs">
-                        {sortDirection === 'asc' ? '↑' : '↓'}
-                      </span>
-                    )}
-                  </div>
-                </th>
-                <th 
-                  className="px-2 py-1 text-left font-medium border border-gray-300 min-w-[100px] cursor-pointer hover:bg-verdo-navy/80"
-                  onClick={() => handleSort('meter')}
-                >
-                  <div className="flex items-center justify-between">
-                    Meter
-                    {sortColumn === 'meter' && (
-                      <span className="text-xs">
-                        {sortDirection === 'asc' ? '↑' : '↓'}
-                      </span>
-                    )}
-                  </div>
-                </th>
-                <th 
-                  className="px-2 py-1 text-left font-medium border border-gray-300 min-w-[100px] cursor-pointer hover:bg-verdo-navy/80"
-                  onClick={() => handleSort('exportValue')}
-                >
-                  <div className="flex items-center justify-between">
-                    Export Value
-                    {sortColumn === 'exportValue' && (
-                      <span className="text-xs">
-                        {sortDirection === 'asc' ? '↑' : '↓'}
-                      </span>
-                    )}
-                  </div>
-                </th>
-                <th 
-                  className="px-2 py-1 text-left font-medium border border-gray-300 min-w-[100px] cursor-pointer hover:bg-verdo-navy/80"
-                  onClick={() => handleSort('importValue')}
-                >
-                  <div className="flex items-center justify-between">
-                    Import Value
-                    {sortColumn === 'importValue' && (
-                      <span className="text-xs">
-                        {sortDirection === 'asc' ? '↑' : '↓'}
-                      </span>
-                    )}
-                  </div>
-                </th>
-                <th 
-                  className="px-2 py-1 text-left font-medium border border-gray-300 min-w-[150px] cursor-pointer hover:bg-verdo-navy/80"
-                  onClick={() => handleSort('remarks')}
-                >
-                  <div className="flex items-center justify-between">
-                    Remarks
-                    {sortColumn === 'remarks' && (
-                      <span className="text-xs">
-                        {sortDirection === 'asc' ? '↑' : '↓'}
-                      </span>
-                    )}
-                  </div>
-                </th>
+                <th className="px-2 py-1 text-left font-medium border border-gray-300 w-24">Field</th>
+                {meterBlocks.map(block => (
+                  <CollapsibleBlockHeader
+                    key={block.id}
+                    blockName={block.name}
+                    blockId={block.id}
+                    inverterCount={block.meters.length}
+                    isExpanded={expandedBlocks[block.id]}
+                    onToggle={() => toggleBlock(block.id)}
+                  />
+                ))}
+                <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-verdo-navy w-32">Remarks</th>
               </tr>
+              {Object.keys(expandedBlocks).some(key => expandedBlocks[key]) && (
+                <tr className="bg-blue-800 text-white">
+                  <th className="px-2 py-1 border border-gray-300">Meter</th>
+                  {meterBlocks.map(block => (
+                    expandedBlocks[block.id] ? (
+                      block.meters.map(meter => (
+                        <th key={`${block.id}-${meter}`} className="px-2 py-1 text-center font-medium border border-gray-300 w-24">
+                          {meter}
+                        </th>
+                      ))
+                    ) : null
+                  ))}
+                  <th className="px-2 py-1 border border-gray-300"></th>
+                </tr>
+              )}
             </thead>
             
             <tbody>
-              {processedData.map((row, index) => {
-                const isLocked = !isEditable(row.date);
+              {/* Group data by date */}
+              {Array.from(new Set(processedData.map(row => row.date))).map(date => {
+                const dateRows = processedData.filter(row => row.date === date);
                 
-                const exportKey = `${row.id}-exportValue`;
-                const importKey = `${row.id}-importValue`;
-                const remarksKey = `${row.id}-remarks`;
-                
-                const currentExportValue = editedData[exportKey] !== undefined 
-                  ? editedData[exportKey] 
-                  : row.exportValue || '';
-                const currentImportValue = editedData[importKey] !== undefined 
-                  ? editedData[importKey] 
-                  : row.importValue || '';
-                const currentRemarks = editedData[remarksKey] !== undefined 
-                  ? editedData[remarksKey] 
-                  : row.remarks;
-                
-                const hasExportChanges = editedData[exportKey] !== undefined;
-                const hasImportChanges = editedData[importKey] !== undefined;
-                const hasRemarksChanges = editedData[remarksKey] !== undefined;
-
                 return (
-                  <tr key={row.id} className={cn(
-                    "hover:bg-muted/20",
-                    index % 2 === 0 ? "bg-background" : "bg-muted/10"
-                  )}>
-                    <td className="px-2 py-1 border border-gray-300">
-                      <div className="text-xs py-1 px-2 bg-muted/50 rounded">
-                        {format(new Date(row.date), 'yyyy-MM-dd')}
-                      </div>
-                    </td>
-                    <td className="px-2 py-1 border border-gray-300">
-                      <div className="text-xs py-1 px-2 bg-muted/50 rounded">
-                        {row.meter}
-                      </div>
-                    </td>
-                    <td className="px-2 py-1 border border-gray-300">
-                      <Input
-                        type="number"
-                        value={currentExportValue}
-                        onChange={(e) => handleCellEdit(row.id, 'exportValue', e.target.value)}
-                        className={cn(
-                          "h-6 text-xs border-0 focus:bg-background focus:border focus:border-ring",
-                          isEditMode ? "bg-blue-100" : "bg-gray-100",
-                          hasExportChanges && "bg-yellow-50 border border-yellow-300"
+                  <React.Fragment key={date}>
+                    {/* Export Value Row */}
+                    <tr className="bg-white">
+                      <td className="px-2 py-1 border border-gray-300">
+                        <div className="text-xs py-1 px-2 bg-muted/50 rounded">
+                          {format(new Date(date), 'dd-MMM-yy')}
+                        </div>
+                      </td>
+                      {meterBlocks.map(block => {
+                        if (expandedBlocks[block.id]) {
+                          return block.meters.map(meterName => {
+                            const meterRow = dateRows.find(row => row.meter === meterName);
+                            const exportKey = `${meterRow?.id}-exportValue`;
+                            const currentExportValue = editedData[exportKey] !== undefined 
+                              ? editedData[exportKey] 
+                              : meterRow?.exportValue || '';
+                            const hasExportChanges = editedData[exportKey] !== undefined;
+
+                            return (
+                              <td key={`${block.id}-${meterName}-export`} className="px-2 py-1 border border-gray-300">
+                                <Input
+                                  type="number"
+                                  value={currentExportValue}
+                                  onChange={(e) => meterRow && handleCellEdit(meterRow.id, 'exportValue', e.target.value)}
+                                  className={cn(
+                                    "h-6 text-xs border-0 focus:bg-background focus:border focus:border-ring text-center",
+                                    isEditMode ? "bg-blue-100" : "bg-gray-100",
+                                    hasExportChanges && "bg-yellow-50 border border-yellow-300"
+                                  )}
+                                  readOnly={!isEditMode}
+                                  step="0.01"
+                                  placeholder="Export"
+                                />
+                              </td>
+                            );
+                          });
+                        } else {
+                          // Show aggregated export value for collapsed block
+                          const blockExportTotal = block.meters.reduce((sum, meterName) => {
+                            const meterRow = dateRows.find(row => row.meter === meterName);
+                            return sum + (Number(meterRow?.exportValue) || 0);
+                          }, 0);
+                          return (
+                            <td key={`${block.id}-export`} className="px-2 py-1 text-center border border-gray-300">
+                              {blockExportTotal}
+                            </td>
+                          );
+                        }
+                      })}
+                      <td className="px-2 py-1 border border-gray-300">
+                        {dateRows[0] && (
+                          <Input
+                            type="text"
+                            value={editedData[`${dateRows[0].id}-remarks`] !== undefined 
+                              ? editedData[`${dateRows[0].id}-remarks`] 
+                              : dateRows[0].remarks}
+                            onChange={(e) => handleCellEdit(dateRows[0].id, 'remarks', e.target.value)}
+                            className={cn(
+                              "h-6 text-xs border-0 focus:bg-background focus:border focus:border-ring",
+                              isEditMode ? "bg-blue-100" : "bg-gray-100",
+                              editedData[`${dateRows[0].id}-remarks`] !== undefined && "bg-yellow-50 border border-yellow-300"
+                            )}
+                            readOnly={!isEditMode}
+                            placeholder="Add remarks..."
+                          />
                         )}
-                        readOnly={!isEditMode}
-                        step="0.01"
-                      />
-                    </td>
-                    <td className="px-2 py-1 border border-gray-300">
-                      <Input
-                        type="number"
-                        value={currentImportValue}
-                        onChange={(e) => handleCellEdit(row.id, 'importValue', e.target.value)}
-                        className={cn(
-                          "h-6 text-xs border-0 focus:bg-background focus:border focus:border-ring",
-                          isEditMode ? "bg-blue-100" : "bg-gray-100",
-                          hasImportChanges && "bg-yellow-50 border border-yellow-300"
-                        )}
-                        readOnly={!isEditMode}
-                        step="0.01"
-                      />
-                    </td>
-                    <td className="px-2 py-1 border border-gray-300">
-                      <Input
-                        type="text"
-                        value={currentRemarks}
-                        onChange={(e) => handleCellEdit(row.id, 'remarks', e.target.value)}
-                        className={cn(
-                          "h-6 text-xs border-0 focus:bg-background focus:border focus:border-ring",
-                          isEditMode ? "bg-blue-100" : "bg-gray-100",
-                          hasRemarksChanges && "bg-yellow-50 border border-yellow-300"
-                        )}
-                        readOnly={!isEditMode}
-                        placeholder="Add remarks..."
-                      />
-                    </td>
-                  </tr>
+                      </td>
+                    </tr>
+                  </React.Fragment>
                 );
               })}
             </tbody>

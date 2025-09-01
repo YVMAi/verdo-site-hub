@@ -12,6 +12,7 @@ import { MeterHistoricDataTable } from './MeterHistoricDataTable';
 import { ExportDialog } from '@/components/common/ExportDialog';
 import { ConfirmationDialog } from '@/components/common/ConfirmationDialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CollapsibleBlockHeader } from '@/components/grassCutting/CollapsibleBlockHeader';
 
 interface HistoricDataTableProps {
   site: Site | null;
@@ -31,6 +32,7 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
   const [filterValue, setFilterValue] = useState('');
   const [selectedMonth, setSelectedMonth] = useState<string>('all');
   const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
+  const [expandedBlocks, setExpandedBlocks] = useState<{[key: string]: boolean}>({});
   const { toast } = useToast();
 
   const rawHistoricData = useMemo(() => {
@@ -41,7 +43,6 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
     );
   }, [site, activeTab]);
 
-  // Generate dynamic month options based on available data
   const availableMonths = useMemo(() => {
     const monthsSet = new Set<string>();
     
@@ -56,7 +57,6 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
       const [value, label] = item.split('|');
       return { value, label };
     }).sort((a, b) => {
-      // Sort by year and month (most recent first)
       const [aMonth, aYear] = a.value.split('-');
       const [bMonth, bYear] = b.value.split('-');
       if (aYear !== bYear) {
@@ -70,7 +70,6 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
 
   const historicData = useMemo(() => {
     return rawHistoricData.filter(item => {
-      // Month filter
       if (selectedMonth !== 'all') {
         const itemDate = new Date(item.date);
         const itemMonthYear = format(itemDate, 'MM-yyyy');
@@ -79,7 +78,6 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
         }
       }
       
-      // Text filter
       if (!filterValue) return true;
       return Object.values(item.values).some(val =>
         val?.toString().toLowerCase().includes(filterValue.toLowerCase())
@@ -102,6 +100,13 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
       }
     });
   }, [rawHistoricData, filterValue, sortColumn, sortDirection, selectedMonth]);
+
+  const toggleBlock = (blockId: string) => {
+    setExpandedBlocks(prev => ({
+      ...prev,
+      [blockId]: !prev[blockId]
+    }));
+  };
 
   // Use specialized meter historic table for meter-data tab
   if (activeTab === 'meter-data') {
@@ -192,6 +197,27 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
 
   const hasUnsavedChanges = Object.keys(editedData).length > 0;
 
+  // Get block structure based on tab type
+  const getBlockStructure = () => {
+    if (activeTab === 'inverter' && site.inverterConfig?.blocks) {
+      return site.inverterConfig.blocks.map(block => ({
+        id: block.blockName,
+        name: block.blockName,
+        items: block.inverters
+      }));
+    }
+    if (activeTab === 'ht-panel' && site.htPanelConfig?.blocks) {
+      return site.htPanelConfig.blocks.map(block => ({
+        id: block.blockName,
+        name: block.blockName,
+        items: block.htPanels || []
+      }));
+    }
+    return [];
+  };
+
+  const blockStructure = getBlockStructure();
+
   return (
     <>
       <div className="bg-white rounded border">
@@ -238,7 +264,6 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
             className="h-7 text-xs flex-1 min-w-[120px]"
           />
           
-          {/* Month Filter */}
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
             <SelectTrigger className="w-40 h-7 text-xs">
               <SelectValue />
@@ -271,23 +296,51 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
           <table className="w-full text-xs border-collapse">
             <thead className="sticky top-0">
               <tr className="bg-verdo-navy text-white">
-                {tabColumns.map((column) => (
-                  <th 
-                    key={column.id}
-                    className="px-2 py-1 text-left font-medium border border-gray-300 min-w-[100px] cursor-pointer hover:bg-verdo-navy/80"
-                    onClick={() => handleSort(column.id)}
-                  >
-                    <div className="flex items-center justify-between">
-                      {column.name}
-                      {sortColumn === column.id && (
-                        <span className="text-xs">
-                          {sortDirection === 'asc' ? '↑' : '↓'}
-                        </span>
-                      )}
-                    </div>
-                  </th>
-                ))}
+                <th className="px-2 py-1 text-left font-medium border border-gray-300 w-24">Field</th>
+                {blockStructure.length > 0 ? (
+                  blockStructure.map(block => (
+                    <CollapsibleBlockHeader
+                      key={block.id}
+                      blockName={block.name}
+                      blockId={block.id}
+                      inverterCount={block.items.length}
+                      isExpanded={expandedBlocks[block.id]}
+                      onToggle={() => toggleBlock(block.id)}
+                    />
+                  ))
+                ) : (
+                  tabColumns.filter(col => col.id !== 'date').map((column) => (
+                    <th 
+                      key={column.id}
+                      className="px-2 py-1 text-left font-medium border border-gray-300 min-w-[100px] cursor-pointer hover:bg-verdo-navy/80"
+                      onClick={() => handleSort(column.id)}
+                    >
+                      <div className="flex items-center justify-between">
+                        {column.name}
+                        {sortColumn === column.id && (
+                          <span className="text-xs">
+                            {sortDirection === 'asc' ? '↑' : '↓'}
+                          </span>
+                        )}
+                      </div>
+                    </th>
+                  ))
+                )}
               </tr>
+              {blockStructure.length > 0 && Object.keys(expandedBlocks).some(key => expandedBlocks[key]) && (
+                <tr className="bg-blue-800 text-white">
+                  <th className="px-2 py-1 border border-gray-300">Item</th>
+                  {blockStructure.map(block => (
+                    expandedBlocks[block.id] ? (
+                      block.items.map((item: string) => (
+                        <th key={`${block.id}-${item}`} className="px-2 py-1 text-center font-medium border border-gray-300 w-16">
+                          {item}
+                        </th>
+                      ))
+                    ) : null
+                  ))}
+                </tr>
+              )}
             </thead>
             
             <tbody>
@@ -299,20 +352,62 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
                     "hover:bg-muted/20",
                     index % 2 === 0 ? "bg-background" : "bg-muted/10"
                   )}>
-                    {tabColumns.map((column) => {
-                      const cellKey = `${row.date}-${column.id}`;
-                      const currentValue = editedData[cellKey] !== undefined 
-                        ? editedData[cellKey] 
-                        : row.values[column.id];
-                      const hasChanges = editedData[cellKey] !== undefined;
+                    <td className="px-2 py-1 border border-gray-300">
+                      <div className="text-xs py-1 px-2 bg-muted/50 rounded">
+                        {format(new Date(row.date), 'dd-MMM-yy')}
+                      </div>
+                    </td>
+                    {blockStructure.length > 0 ? (
+                      blockStructure.map(block => {
+                        if (expandedBlocks[block.id]) {
+                          return block.items.map((item: string) => {
+                            const columnId = `${block.name.toLowerCase()}${item}`;
+                            const cellKey = `${row.date}-${columnId}`;
+                            const currentValue = editedData[cellKey] !== undefined 
+                              ? editedData[cellKey] 
+                              : row.values[columnId] || '';
+                            const hasChanges = editedData[cellKey] !== undefined;
 
-                      return (
-                        <td key={column.id} className="px-2 py-1 border border-gray-300">
-                          {column.id === 'date' ? (
-                            <div className="text-xs py-1 px-2 bg-muted/50 rounded">
-                              {format(new Date(row.date), 'yyyy-MM-dd')}
-                            </div>
-                          ) : (
+                            return (
+                              <td key={`${block.id}-${item}`} className="px-2 py-1 border border-gray-300">
+                                <Input
+                                  type="number"
+                                  value={currentValue}
+                                  onChange={(e) => handleCellEdit(row.date, columnId, e.target.value)}
+                                  className={cn(
+                                    "h-6 text-xs border-0 focus:bg-background focus:border focus:border-ring text-center",
+                                    isEditMode ? "bg-blue-100" : "bg-gray-100",
+                                    hasChanges && "bg-yellow-50 border border-yellow-300"
+                                  )}
+                                  readOnly={!isEditMode}
+                                  step="0.01"
+                                />
+                              </td>
+                            );
+                          });
+                        } else {
+                          // Show aggregated value for collapsed block
+                          const blockTotal = block.items.reduce((sum, item) => {
+                            const columnId = `${block.name.toLowerCase()}${item}`;
+                            return sum + (Number(row.values[columnId]) || 0);
+                          }, 0);
+                          return (
+                            <td key={block.id} className="px-2 py-1 text-center border border-gray-300">
+                              {blockTotal}
+                            </td>
+                          );
+                        }
+                      })
+                    ) : (
+                      tabColumns.filter(col => col.id !== 'date').map((column) => {
+                        const cellKey = `${row.date}-${column.id}`;
+                        const currentValue = editedData[cellKey] !== undefined 
+                          ? editedData[cellKey] 
+                          : row.values[column.id];
+                        const hasChanges = editedData[cellKey] !== undefined;
+
+                        return (
+                          <td key={column.id} className="px-2 py-1 border border-gray-300">
                             <Input
                               type={column.type === 'number' ? 'number' : 'text'}
                               value={currentValue || ''}
@@ -325,10 +420,10 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
                               readOnly={!isEditMode}
                               step={column.type === 'number' ? '0.01' : undefined}
                             />
-                          )}
-                        </td>
-                      );
-                    })}
+                          </td>
+                        );
+                      })
+                    )}
                   </tr>
                 );
               })}
