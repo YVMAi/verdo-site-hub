@@ -327,6 +327,7 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
                     </th>
                   ))
                 )}
+                <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-verdo-navy w-32">Remarks</th>
               </tr>
               {blockStructure.length > 0 && Object.keys(expandedBlocks).some(key => expandedBlocks[key]) && (
                 <tr className="bg-blue-800 text-white">
@@ -340,6 +341,7 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
                       ))
                     ) : null
                   ))}
+                  <th className="px-2 py-1 border border-gray-300"></th>
                 </tr>
               )}
             </thead>
@@ -425,6 +427,22 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
                         );
                       })
                     )}
+                    <td className="px-2 py-1 border border-gray-300">
+                      <Input
+                        type="text"
+                        value={editedData[`${row.date}-remarks`] !== undefined 
+                          ? editedData[`${row.date}-remarks`] 
+                          : row.values.remarks || ''}
+                        onChange={(e) => handleCellEdit(row.date, 'remarks', e.target.value)}
+                        className={cn(
+                          "h-6 text-xs border-0 focus:bg-background focus:border focus:border-ring",
+                          isEditMode ? "bg-blue-100" : "bg-gray-100",
+                          editedData[`${row.date}-remarks`] !== undefined && "bg-yellow-50 border border-yellow-300"
+                        )}
+                        readOnly={!isEditMode}
+                        placeholder="Add remarks..."
+                      />
+                    </td>
                   </tr>
                 );
               })}
