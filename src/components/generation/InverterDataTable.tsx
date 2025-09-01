@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Site } from '@/types/generation';
@@ -9,7 +8,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { TableHeader } from './TableHeader';
 import { MobileCard } from './MobileCard';
 import { EmptyState } from './EmptyState';
-import { Search, LayoutGrid, Table } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 interface InverterDataTableProps {
   site: Site | null;
@@ -156,6 +155,9 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
           title="Data Entry - Inverter"
           selectedDate={selectedDate}
           onSave={handleSave}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          showViewToggle={true}
         />
         
         {/* Search Bar */}
@@ -217,11 +219,13 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
         title="Data Entry - Inverter"
         selectedDate={selectedDate}
         onSave={handleSave}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        showViewToggle={true}
       />
       
-      {/* Controls Bar */}
-      <div className="p-4 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        {/* Search Bar */}
+      {/* Search Bar */}
+      <div className="p-4 border-b">
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -231,41 +235,6 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
           />
-        </div>
-
-        {/* View Toggle */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">View:</span>
-          <div className="bg-verdo-navy rounded-md p-1 flex">
-            <Button
-              variant={viewMode === 'form' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('form')}
-              className={cn(
-                "h-8 px-3 text-sm font-medium transition-colors",
-                viewMode === 'form' 
-                  ? "bg-white text-verdo-navy hover:bg-white/90" 
-                  : "bg-transparent text-white hover:bg-white/10"
-              )}
-            >
-              <LayoutGrid className="h-4 w-4 mr-1" />
-              Form
-            </Button>
-            <Button
-              variant={viewMode === 'table' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('table')}
-              className={cn(
-                "h-8 px-3 text-sm font-medium transition-colors ml-1",
-                viewMode === 'table' 
-                  ? "bg-white text-verdo-navy hover:bg-white/90" 
-                  : "bg-transparent text-white hover:bg-white/10"
-              )}
-            >
-              <Table className="h-4 w-4 mr-1" />
-              Table
-            </Button>
-          </div>
         </div>
       </div>
       
