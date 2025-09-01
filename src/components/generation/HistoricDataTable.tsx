@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -206,11 +207,11 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
         items: block.inverters
       }));
     }
-    if (activeTab === 'ht-panel' && site.htPanelConfig?.blocks) {
-      return site.htPanelConfig.blocks.map(block => ({
-        id: block.blockName,
-        name: block.blockName,
-        items: block.htPanels || []
+    if (activeTab === 'ht-panel' && site.htPanelConfig?.blockNames) {
+      return site.htPanelConfig.blockNames.map(blockName => ({
+        id: blockName,
+        name: blockName,
+        items: ['incoming', 'outgoing'] // HT Panel has incoming/outgoing values
       }));
     }
     return [];

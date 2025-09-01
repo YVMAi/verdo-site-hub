@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -253,20 +254,13 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
 
   const hasUnsavedChanges = Object.keys(editedData).length > 0;
 
-  // Group meters by blocks if available
+  // Group meters by blocks if available - using meterNames directly
   const meterBlocks = useMemo(() => {
-    if (!site.meterConfig?.blocks) {
-      return [{
-        id: 'all-meters',
-        name: 'All Meters',
-        meters: site.meterConfig?.meterNames || []
-      }];
-    }
-    return site.meterConfig.blocks.map(block => ({
-      id: block.blockName,
-      name: block.blockName,
-      meters: block.meterNames || []
-    }));
+    return [{
+      id: 'all-meters',
+      name: 'All Meters',
+      meters: site.meterConfig?.meterNames || []
+    }];
   }, [site.meterConfig]);
 
   return (
