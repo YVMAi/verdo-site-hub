@@ -120,6 +120,7 @@ const getOperationsForSite = (siteId: string | null, siteName: string | null) =>
 export default function OperationsHub() {
   const [activeTab, setActiveTab] = useState('grass-cutting');
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const tabsPerPage = 5;
   
   const {

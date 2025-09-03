@@ -7,7 +7,11 @@ import { mockCleaningData } from "@/data/mockCleaningData";
 import { CleaningSiteData } from "@/types/cleaning";
 import { Droplets } from "lucide-react";
 
-export const CleaningTab: React.FC = () => {
+interface CleaningTabProps {
+  selectedDate: Date;
+}
+
+export const CleaningTab: React.FC<CleaningTabProps> = ({ selectedDate }) => {
   const {
     selectedClient,
     selectedSite

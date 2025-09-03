@@ -4,7 +4,12 @@ import { CompactGrassCuttingHistoric } from "@/components/grassCutting/CompactGr
 import { useClientContext } from "@/contexts/ClientContext";
 import { mockGrassCuttingData } from "@/data/mockGrassCuttingData";
 import { GrassCuttingSiteData } from "@/types/grassCutting";
-export const GrassCuttingTab: React.FC = () => {
+
+interface GrassCuttingTabProps {
+  selectedDate: Date;
+}
+
+export const GrassCuttingTab: React.FC<GrassCuttingTabProps> = ({ selectedDate }) => {
   const {
     selectedClient,
     selectedSite
