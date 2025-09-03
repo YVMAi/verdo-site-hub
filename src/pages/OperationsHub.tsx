@@ -255,11 +255,11 @@ export default function OperationsHub() {
           {/* Fixed Main Content Area - Scrollable Independently */}
           <div className="flex-1 overflow-auto">
             <TabsContent value="grass-cutting" className="h-full m-0 p-3">
-              <GrassCuttingTab />
+              <GrassCuttingTab selectedDate={selectedDate} />
             </TabsContent>
 
             <TabsContent value="cleaning" className="h-full m-0 p-3">
-              <CleaningTab />
+              <CleaningTab selectedDate={selectedDate} />
             </TabsContent>
 
             <TabsContent value="inspection" className="h-full m-0 p-3">
