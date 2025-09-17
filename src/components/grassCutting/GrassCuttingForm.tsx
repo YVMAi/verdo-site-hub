@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { format } from "date-fns";
 import { CalendarIcon, Plus, Trash2 } from "lucide-react";
@@ -11,12 +10,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-
 interface GrassCuttingFormProps {
   data: GrassCuttingSiteData | null;
   onDataChange?: (data: GrassCuttingSiteData) => void;
 }
-
 interface FormRow {
   id: string;
   blockId: string;
@@ -26,39 +23,37 @@ interface FormRow {
   totalStrings: number;
   percentCompleted: number;
 }
-
-export const GrassCuttingForm: React.FC<GrassCuttingFormProps> = ({ data, onDataChange }) => {
+export const GrassCuttingForm: React.FC<GrassCuttingFormProps> = ({
+  data,
+  onDataChange
+}) => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [formRows, setFormRows] = useState<FormRow[]>([
-    {
-      id: '1',
-      blockId: '',
-      inverterId: '',
-      stringsCleaned: '0',
-      remarks: '',
-      totalStrings: 0,
-      percentCompleted: 0
-    }
-  ]);
-
+  const [formRows, setFormRows] = useState<FormRow[]>([{
+    id: '1',
+    blockId: '',
+    inverterId: '',
+    stringsCleaned: '0',
+    remarks: '',
+    totalStrings: 0,
+    percentCompleted: 0
+  }]);
   if (!data) {
-    return (
-      <div className="text-center text-gray-500 text-sm">
+    return <div className="text-center text-gray-500 text-sm">
         Select client and site to view data
-      </div>
-    );
+      </div>;
   }
-
   const getInvertersForBlock = (blockId: string) => {
     const block = data.blocks.find(b => b.id === blockId);
     return block ? block.inverters : [];
   };
-
   const updateFormRow = (id: string, field: keyof FormRow, value: string | number) => {
     setFormRows(prev => prev.map(row => {
       if (row.id === id) {
-        const updatedRow = { ...row, [field]: value };
-        
+        const updatedRow = {
+          ...row,
+          [field]: value
+        };
+
         // Update related fields when block or inverter changes
         if (field === 'blockId') {
           updatedRow.inverterId = '';
@@ -70,21 +65,19 @@ export const GrassCuttingForm: React.FC<GrassCuttingFormProps> = ({ data, onData
           if (inverter) {
             updatedRow.totalStrings = inverter.totalStrings;
             const cleaned = parseInt(updatedRow.stringsCleaned) || 0;
-            updatedRow.percentCompleted = Math.round((cleaned / inverter.totalStrings) * 100);
+            updatedRow.percentCompleted = Math.round(cleaned / inverter.totalStrings * 100);
           }
         } else if (field === 'stringsCleaned') {
           const cleaned = parseInt(value as string) || 0;
           if (updatedRow.totalStrings > 0) {
-            updatedRow.percentCompleted = Math.round((cleaned / updatedRow.totalStrings) * 100);
+            updatedRow.percentCompleted = Math.round(cleaned / updatedRow.totalStrings * 100);
           }
         }
-        
         return updatedRow;
       }
       return row;
     }));
   };
-
   const addFormRow = () => {
     const newRow: FormRow = {
       id: Date.now().toString(),
@@ -97,38 +90,21 @@ export const GrassCuttingForm: React.FC<GrassCuttingFormProps> = ({ data, onData
     };
     setFormRows(prev => [...prev, newRow]);
   };
-
   const removeFormRow = (id: string) => {
     if (formRows.length > 1) {
       setFormRows(prev => prev.filter(row => row.id !== id));
     }
   };
-
-  return (
-    <div className="space-y-4">
+  return <div className="space-y-4">
       {/* Date Selector */}
       <div className="flex items-center gap-2">
-        <label className="text-sm font-medium min-w-20">Select Date</label>
+        
         <Popover>
           <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn(
-                "justify-start text-left font-normal",
-                "border-gray-300"
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {format(selectedDate, "MMMM do, yyyy")}
-            </Button>
+            
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={(date) => date && setSelectedDate(date)}
-              initialFocus
-            />
+            <Calendar mode="single" selected={selectedDate} onSelect={date => date && setSelectedDate(date)} initialFocus />
           </PopoverContent>
         </Popover>
       </div>
@@ -148,59 +124,39 @@ export const GrassCuttingForm: React.FC<GrassCuttingFormProps> = ({ data, onData
         </div>
 
         <div className="divide-y">
-          {formRows.map((row) => (
-            <div key={row.id} className="grid grid-cols-7 gap-0 items-center">
+          {formRows.map(row => <div key={row.id} className="grid grid-cols-7 gap-0 items-center">
               <div className="px-2 py-2 border-r">
-                <Select value={row.blockId} onValueChange={(value) => updateFormRow(row.id, 'blockId', value)}>
+                <Select value={row.blockId} onValueChange={value => updateFormRow(row.id, 'blockId', value)}>
                   <SelectTrigger className="h-8 border-0 shadow-none">
                     <SelectValue placeholder="Select Block" />
                   </SelectTrigger>
                   <SelectContent>
-                    {data.blocks.map(block => (
-                      <SelectItem key={block.id} value={block.id}>
+                    {data.blocks.map(block => <SelectItem key={block.id} value={block.id}>
                         {block.name}
-                      </SelectItem>
-                    ))}
+                      </SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               
               <div className="px-2 py-2 border-r">
-                <Select 
-                  value={row.inverterId} 
-                  onValueChange={(value) => updateFormRow(row.id, 'inverterId', value)}
-                  disabled={!row.blockId}
-                >
+                <Select value={row.inverterId} onValueChange={value => updateFormRow(row.id, 'inverterId', value)} disabled={!row.blockId}>
                   <SelectTrigger className="h-8 border-0 shadow-none">
                     <SelectValue placeholder="Select Inverter" />
                   </SelectTrigger>
                   <SelectContent>
-                    {getInvertersForBlock(row.blockId).map(inverter => (
-                      <SelectItem key={inverter.id} value={inverter.id}>
+                    {getInvertersForBlock(row.blockId).map(inverter => <SelectItem key={inverter.id} value={inverter.id}>
                         {inverter.id}
-                      </SelectItem>
-                    ))}
+                      </SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               
               <div className="px-2 py-2 border-r">
-                <Input
-                  type="number"
-                  value={row.stringsCleaned}
-                  onChange={(e) => updateFormRow(row.id, 'stringsCleaned', e.target.value)}
-                  className="h-8 border-0 shadow-none"
-                  min="0"
-                />
+                <Input type="number" value={row.stringsCleaned} onChange={e => updateFormRow(row.id, 'stringsCleaned', e.target.value)} className="h-8 border-0 shadow-none" min="0" />
               </div>
               
               <div className="px-2 py-2 border-r">
-                <Input
-                  value={row.remarks}
-                  onChange={(e) => updateFormRow(row.id, 'remarks', e.target.value)}
-                  placeholder="Enter remarks..."
-                  className="h-8 border-0 shadow-none"
-                />
+                <Input value={row.remarks} onChange={e => updateFormRow(row.id, 'remarks', e.target.value)} placeholder="Enter remarks..." className="h-8 border-0 shadow-none" />
               </div>
               
               <div className="px-4 py-2 border-r text-center text-sm bg-gray-100">
@@ -213,33 +169,20 @@ export const GrassCuttingForm: React.FC<GrassCuttingFormProps> = ({ data, onData
               
               <div className="px-2 py-2 flex items-center justify-center gap-1">
                 <div className="flex flex-col items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeFormRow(row.id)}
-                    disabled={formRows.length === 1}
-                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => removeFormRow(row.id)} disabled={formRows.length === 1} className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50">
                     <Trash2 className="h-4 w-4" />
                   </Button>
                   <span className="text-xs text-gray-600">Delete</span>
                 </div>
                 <div className="flex flex-col items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={addFormRow}
-                    className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                  >
+                  <Button variant="ghost" size="sm" onClick={addFormRow} className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50">
                     <Plus className="h-4 w-4" />
                   </Button>
                   <span className="text-xs text-gray-600">Add</span>
                 </div>
               </div>
-            </div>
-          ))}
+            </div>)}
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
