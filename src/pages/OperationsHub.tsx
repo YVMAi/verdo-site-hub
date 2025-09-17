@@ -5,13 +5,18 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Scissors, Droplets, Search, Leaf, CheckCircle2, Clock, BarChart3, Circle, Lock, Wrench, Package, FileText, MapPin, Shield, Bot, Satellite, Zap, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Scissors, Droplets, Search, Leaf, CheckCircle2, Clock, BarChart3, Circle, Lock, Wrench, Package, FileText, MapPin, Shield, Bot, Satellite, Zap, AlertTriangle, ChevronLeft, ChevronRight, CalendarIcon } from "lucide-react";
 import { GrassCuttingTab } from "@/components/operations/GrassCuttingTab";
 import { CleaningTab } from "@/components/operations/CleaningTab";
 import { ComingSoonTab } from "@/components/operations/ComingSoonTab";
 import { AllOperationsSummary } from "@/components/operations/AllOperationsSummary";
+import { BulkUploadModal } from "@/components/generation/BulkUploadModal";
 import { useClientContext } from "@/contexts/ClientContext";
 import { mockSites } from "@/data/mockGenerationData";
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 const getOperationsForSite = (siteId: string | null, siteName: string | null) => {
   const baseOperations = [{
@@ -144,6 +149,11 @@ export default function OperationsHub() {
     setCurrentTabIndex(0); // Reset to first page when site changes
   };
 
+  const handleBulkUpload = (data: any[]) => {
+    console.log('Bulk upload data:', data);
+    // TODO: Implement bulk upload logic for operations
+  };
+
   const handlePrevious = () => {
     if (currentTabIndex > 0) {
       setCurrentTabIndex(Math.max(0, currentTabIndex - tabsPerPage));
@@ -183,7 +193,7 @@ export default function OperationsHub() {
         
         <div className="flex items-center gap-4">
           {/* Site Selector */}
-          <div className="flex items-center gap-2 min-w-[300px]">
+          <div className="flex items-center gap-2 min-w-[200px]">
             <Select onValueChange={handleSiteChange} disabled={!selectedClient} value={selectedSite?.id || ""}>
               <SelectTrigger className="bg-white/10 border-white/20 text-white h-8 text-sm">
                 <SelectValue placeholder={selectedClient ? "Select a site..." : "Select client from sidebar first"} />
@@ -196,6 +206,26 @@ export default function OperationsHub() {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          {/* Date Picker */}
+          <div className="flex items-center gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="bg-white/10 border-white/20 text-white h-8 text-sm hover:bg-white/20">
+                  <CalendarIcon className="h-3 w-3 mr-2" />
+                  {format(selectedDate, "dd MMM yyyy")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar mode="single" selected={selectedDate} onSelect={date => date && setSelectedDate(date)} initialFocus className="pointer-events-auto" />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Bulk Upload */}
+          <div className="flex items-center gap-2">
+            <BulkUploadModal selectedSite={selectedSite} activeTab="plant-data" onUpload={handleBulkUpload} />
           </div>
         </div>
       </div>
