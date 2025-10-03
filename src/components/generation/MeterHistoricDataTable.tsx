@@ -265,37 +265,35 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
 
   return (
     <>
-      <div className="bg-white rounded border">
-        <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm flex justify-between items-center">
-          <span>Historic Data - Meter Data</span>
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col items-center">
+      <div className="bg-white rounded-lg shadow-sm border">
+        <div className="bg-background border-b px-4 py-3 flex justify-between items-center">
+          <h2 className="text-base font-semibold text-foreground">Historic Data - Meter Data</h2>
+          <div className="flex items-center gap-2">
+            <Button 
+              onClick={isEditMode ? handleSaveClick : () => setIsEditMode(true)} 
+              size="sm" 
+              className={cn(
+                "gap-2",
+                isEditMode ? "bg-verdo-navy hover:bg-verdo-navy/90" : "bg-muted hover:bg-muted/80"
+              )}
+            >
+              {isEditMode ? <Save className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
+              {isEditMode ? 'Save' : 'Edit'}
+            </Button>
+            <ExportDialog
+              title="Export Historic Data"
+              description="Select the date range for which you want to export historic meter data:"
+              onExport={handleExportWithDateRange}
+            >
               <Button 
-                onClick={isEditMode ? handleSaveClick : () => setIsEditMode(true)} 
-                variant="outline" 
                 size="sm" 
-                className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0"
+                variant="outline"
+                className="gap-2"
               >
-                {isEditMode ? <Save className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
+                <Download className="h-4 w-4" />
+                Export
               </Button>
-              <span className="text-xs mt-1">{isEditMode ? 'Save' : 'Edit'}</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <ExportDialog
-                title="Export Historic Data"
-                description="Select the date range for which you want to export historic meter data:"
-                onExport={handleExportWithDateRange}
-              >
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0"
-                >
-                  <Download className="h-4 w-4" />
-                </Button>
-              </ExportDialog>
-              <span className="text-xs mt-1">Export</span>
-            </div>
+            </ExportDialog>
           </div>
         </div>
 
@@ -339,9 +337,9 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
         
         <div className="overflow-x-auto" style={{ maxHeight: '400px' }}>
           <table className="w-full text-xs border-collapse">
-            <thead className="sticky top-0">
-              <tr className="bg-verdo-navy text-white">
-                <th className="px-2 py-1 text-left font-medium border border-gray-300 w-24">Field</th>
+            <thead className="sticky top-0 z-10">
+              <tr className="bg-muted/50 text-foreground border-b-2">
+                <th className="px-3 py-2 text-left font-semibold border-r w-24">Field</th>
                 {meterBlocks.map(block => (
                   <CollapsibleBlockHeader
                     key={block.id}
@@ -352,11 +350,11 @@ export const MeterHistoricDataTable: React.FC<MeterHistoricDataTableProps> = ({
                     onToggle={() => toggleBlock(block.id)}
                   />
                 ))}
-                <th className="px-2 py-1 text-center font-medium border border-gray-300 bg-verdo-navy w-32">Remarks</th>
+                <th className="px-3 py-2 text-center font-semibold w-32">Remarks</th>
               </tr>
               {Object.keys(expandedBlocks).some(key => expandedBlocks[key]) && (
-                <tr className="bg-blue-800 text-white">
-                  <th className="px-2 py-1 border border-gray-300">Meter</th>
+                <tr className="bg-muted/40 text-foreground border-b">
+                  <th className="px-3 py-2 border-r font-medium">Meter</th>
                   {meterBlocks.map(block => (
                     expandedBlocks[block.id] ? (
                       block.meters.map(meter => (

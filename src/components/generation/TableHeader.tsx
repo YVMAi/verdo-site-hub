@@ -23,20 +23,20 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
   showViewToggle = false
 }) => {
   return (
-    <div className="bg-verdo-navy px-3 py-2 text-white font-medium text-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+    <div className="bg-background border-b px-4 py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
       <div className="flex items-center gap-4">
-        <span className="text-sm sm:text-base">{title}</span>
+        <h2 className="text-base font-semibold text-foreground">{title}</h2>
         {showViewToggle && onViewModeChange && (
-          <div className="bg-white/10 rounded p-1 flex">
+          <div className="border rounded-md p-0.5 flex gap-1">
             <Button
               variant={viewMode === 'form' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => onViewModeChange('form')}
               className={cn(
-                "h-6 px-2 text-xs font-medium transition-colors",
+                "h-7 px-3 text-xs font-medium",
                 viewMode === 'form' 
-                  ? "bg-white text-verdo-navy hover:bg-white/90" 
-                  : "bg-transparent text-white hover:bg-white/10"
+                  ? "bg-verdo-navy text-white hover:bg-verdo-navy/90" 
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
               <LayoutGrid className="h-3 w-3 mr-1" />
@@ -47,10 +47,10 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
               size="sm"
               onClick={() => onViewModeChange('table')}
               className={cn(
-                "h-6 px-2 text-xs font-medium transition-colors ml-1",
+                "h-7 px-3 text-xs font-medium",
                 viewMode === 'table' 
-                  ? "bg-white text-verdo-navy hover:bg-white/90" 
-                  : "bg-transparent text-white hover:bg-white/10"
+                  ? "bg-verdo-navy text-white hover:bg-verdo-navy/90" 
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
               <Table className="h-3 w-3 mr-1" />
@@ -59,21 +59,18 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
           </div>
         )}
       </div>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
-        <div className="text-xs sm:text-sm text-white/80 order-2 sm:order-1">
-          Date: {format(selectedDate, 'MMM dd, yyyy')}
-        </div>
-        <div className="flex flex-col items-center order-1 sm:order-2">
-          <Button 
-            onClick={onSave} 
-            variant="outline"
-            size="sm" 
-            className="bg-transparent border-white text-white hover:bg-white/10 w-8 h-8 p-0"
-          >
-            <Save className="h-4 w-4" />
-          </Button>
-          <span className="text-xs mt-1">Save</span>
-        </div>
+      <div className="flex items-center gap-3 w-full sm:w-auto">
+        <span className="text-sm text-muted-foreground">
+          {format(selectedDate, 'MMM dd, yyyy')}
+        </span>
+        <Button 
+          onClick={onSave} 
+          size="sm" 
+          className="bg-verdo-navy text-white hover:bg-verdo-navy/90 gap-2"
+        >
+          <Save className="h-4 w-4" />
+          Save
+        </Button>
       </div>
     </div>
   );

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -174,7 +173,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
       });
 
       return (
-        <div className="bg-white rounded-lg border overflow-hidden">
+        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
           <TableHeader 
             title={`Data Entry - ${getTabTitle(activeTab)}`}
             selectedDate={selectedDate}
@@ -192,15 +191,15 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
     }
 
     return (
-      <div className="bg-white rounded-lg border overflow-hidden">
+      <Card className="bg-white rounded-lg shadow-sm overflow-hidden">
         <TableHeader 
           title={`Data Entry - ${getTabTitle(activeTab)}`}
           selectedDate={selectedDate}
           onSave={handleSave}
         />
         
-        <Card className="border-0 rounded-none">
-          <CardContent className="p-6" onPaste={handlePasteFromExcel} tabIndex={0}>
+        <CardContent className="p-6 bg-muted/20" onPaste={handlePasteFromExcel} tabIndex={0}>
+          <div className="bg-white rounded-lg border shadow-sm p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Left Column */}
               <div className="space-y-4">
@@ -216,7 +215,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
                       value={formData[column.id] || ''}
                       onChange={(e) => handleInputChange(column.id, e.target.value)}
                       className={cn(
-                        "w-full",
+                        "w-full border-2 focus:border-verdo-navy",
                         errors[column.id] && "border-destructive focus:border-destructive"
                       )}
                       placeholder={getPlaceholder(column)}
@@ -243,7 +242,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
                       value={formData[column.id] || ''}
                       onChange={(e) => handleInputChange(column.id, e.target.value)}
                       className={cn(
-                        "w-full",
+                        "w-full border-2 focus:border-verdo-navy",
                         errors[column.id] && "border-destructive focus:border-destructive"
                       )}
                       placeholder={getPlaceholder(column)}
@@ -265,7 +264,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
                     value={formData['remarks'] || ''}
                     onChange={(e) => handleInputChange('remarks', e.target.value)}
                     className={cn(
-                      "w-full min-h-[80px]",
+                      "w-full min-h-[80px] border-2 focus:border-verdo-navy",
                       errors['remarks'] && "border-destructive focus:border-destructive"
                     )}
                     placeholder="Enter any remarks or notes..."
@@ -276,16 +275,16 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   // For other tabs, keep the table format
   if (isMobile) {
     return (
-      <div className="bg-white rounded-lg border overflow-hidden">
+      <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
         <TableHeader 
           title={`Data Entry - ${getTabTitle(activeTab)}`}
           selectedDate={selectedDate}
@@ -310,37 +309,37 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
   }
 
   return (
-    <div className="bg-white rounded-lg border overflow-hidden">
+    <Card className="bg-white rounded-lg shadow-sm overflow-hidden">
       <TableHeader 
         title={`Data Entry - ${getTabTitle(activeTab)}`}
         selectedDate={selectedDate}
         onSave={handleSave}
       />
       
-      <div className="overflow-x-auto">
-        <div className="min-w-full" onPaste={handlePasteFromExcel} tabIndex={0}>
+      <CardContent className="p-6 bg-muted/20">
+        <div className="bg-white rounded-lg border shadow-sm overflow-hidden" onPaste={handlePasteFromExcel} tabIndex={0}>
           <table className="w-full text-sm border-collapse">
             <thead className="sticky top-0">
-              <tr className="bg-verdo-navy text-white">
+              <tr className="bg-muted/50 text-foreground border-b-2">
                 {filteredColumns.map((column) => (
-                  <th key={column.id} className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
+                  <th key={column.id} className="px-3 py-3 text-left font-semibold border-r last:border-r-0 min-w-[120px]">
                     {column.name}
-                    {column.required && <span className="text-red-300 ml-1">*</span>}
+                    {column.required && <span className="text-destructive ml-1">*</span>}
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              <tr className="hover:bg-muted/20">
+              <tr className="hover:bg-muted/10">
                 {filteredColumns.map((column) => (
-                  <td key={column.id} className="px-3 py-2 border border-gray-300">
+                  <td key={column.id} className="px-3 py-3 border-r border-b last:border-r-0">
                     <div className="space-y-1">
                       <Input
                         type={getInputType(column)}
                         value={formData[column.id] || ''}
                         onChange={(e) => handleInputChange(column.id, e.target.value)}
                         className={cn(
-                          "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
+                          "h-9 border-2 bg-background focus:border-verdo-navy",
                           errors[column.id] && "border-destructive focus:border-destructive"
                         )}
                         placeholder={getPlaceholder(column)}
@@ -356,7 +355,7 @@ export const DataEntryTable: React.FC<DataEntryTableProps> = ({ site, activeTab,
             </tbody>
           </table>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };

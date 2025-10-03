@@ -366,19 +366,20 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
         </div>
       </div>
       
-      <div className="overflow-x-auto">
-        <div className="min-w-full" onPaste={handlePasteFromExcel} tabIndex={0}>
-          {viewMode === 'form' ? (
-            <div className="border rounded-lg overflow-hidden">
-              <div className="bg-verdo-navy text-white">
-                <div className="grid grid-cols-5 gap-0 text-sm font-medium">
-                  <div className="px-4 py-3 border-r border-white/20">Block</div>
-                  <div className="px-4 py-3 border-r border-white/20">Inverter</div>
-                  <div className="px-4 py-3 border-r border-white/20">Generation</div>
-                  <div className="px-4 py-3 border-r border-white/20">Remarks</div>
-                  <div className="px-4 py-3">Actions</div>
+      
+        <div className="p-4 bg-muted/20">
+          <div className="bg-white rounded-lg border shadow-sm overflow-hidden" onPaste={handlePasteFromExcel} tabIndex={0}>
+            {viewMode === 'form' ? (
+              <>
+                <div className="bg-muted/50 border-b">
+                  <div className="grid grid-cols-5 gap-0 text-sm font-semibold text-foreground">
+                    <div className="px-4 py-3 border-r">Block</div>
+                    <div className="px-4 py-3 border-r">Inverter</div>
+                    <div className="px-4 py-3 border-r">Generation</div>
+                    <div className="px-4 py-3 border-r">Remarks</div>
+                    <div className="px-4 py-3">Actions</div>
+                  </div>
                 </div>
-              </div>
 
               <div className="divide-y">
                 {filteredFormRows.map((row) => (
@@ -524,12 +525,12 @@ export const InverterDataTable: React.FC<InverterDataTableProps> = ({ site, sele
                   </div>
                 ))}
               </div>
-            </div>
-          ) : (
+              </>
+            ) : (
             <table className="w-full text-sm border-collapse">
-              <thead className="sticky top-0">
-                <tr className="bg-verdo-navy text-white">
-                  <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[120px] text-sm">
+              <thead className="sticky top-0 z-10">
+                <tr className="bg-muted/50 text-foreground border-b-2">
+                  <th className="px-3 py-3 text-left font-semibold border-r min-w-[120px]">
                     Field
                   </th>
                   {site.inverterConfig?.blocks.map((block) => 

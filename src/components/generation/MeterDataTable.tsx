@@ -258,7 +258,7 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
   }
 
   return (
-    <div className="bg-white rounded-lg border overflow-hidden">
+    <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
       <TableHeader 
         title="Data Entry - Meter Data"
         selectedDate={selectedDate}
@@ -269,7 +269,7 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
       />
       
       {/* Search Bar */}
-      <div className="p-4 border-b">
+      <div className="p-4 border-b bg-muted/20">
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -277,28 +277,31 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
             placeholder="Search meters..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 border-2 focus:border-verdo-navy"
           />
         </div>
       </div>
       
-      <div className="overflow-x-auto">
-        <div className="min-w-full" onPaste={handlePasteFromExcel} tabIndex={0}>
+      <div className="p-4 bg-muted/20">
+        <div className="bg-white rounded-lg border shadow-sm overflow-hidden" onPaste={handlePasteFromExcel} tabIndex={0}>
           {viewMode === 'form' ? (
-            <div className="border rounded-lg overflow-hidden">
-              <div className="bg-verdo-navy text-white">
-                <div className="grid grid-cols-5 gap-0 text-sm font-medium">
-                  <div className="px-4 py-3 border-r border-white/20">Meter</div>
-                  <div className="px-4 py-3 border-r border-white/20">Export</div>
-                  <div className="px-4 py-3 border-r border-white/20">Import</div>
-                  <div className="px-4 py-3 border-r border-white/20">Remarks</div>
+            <>
+              <div className="bg-muted/50 border-b">
+                <div className="grid grid-cols-5 gap-0 text-sm font-semibold text-foreground">
+                  <div className="px-4 py-3 border-r">Meter</div>
+                  <div className="px-4 py-3 border-r">Export</div>
+                  <div className="px-4 py-3 border-r">Import</div>
+                  <div className="px-4 py-3 border-r">Remarks</div>
                   <div className="px-4 py-3">Actions</div>
                 </div>
               </div>
 
               <div className="divide-y">
-                {filteredFormRows.map((row) => (
-                  <div key={row.id} className="grid grid-cols-5 gap-0 items-center">
+                {filteredFormRows.map((row, index) => (
+                  <div key={row.id} className={cn(
+                    "grid grid-cols-5 gap-0 items-center",
+                    index % 2 === 0 ? "bg-background" : "bg-muted/10"
+                  )}>
                     <div className="px-2 py-2 border-r">
                       <Popover open={openDropdowns[`${row.id}-meter`]} onOpenChange={(open) => 
                         setOpenDropdowns(prev => ({ ...prev, [`${row.id}-meter`]: open }))
@@ -350,7 +353,7 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
                         type="number"
                         value={row.export}
                         onChange={(e) => updateFormRow(row.id, 'export', e.target.value)}
-                        className="h-8 border-0 shadow-none"
+                        className="h-9 border-2 focus:border-verdo-navy"
                         placeholder="0.00"
                         step="0.01"
                       />
@@ -361,7 +364,7 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
                         type="number"
                         value={row.import}
                         onChange={(e) => updateFormRow(row.id, 'import', e.target.value)}
-                        className="h-8 border-0 shadow-none"
+                        className="h-9 border-2 focus:border-verdo-navy"
                         placeholder="0.00"
                         step="0.01"
                       />
@@ -372,89 +375,84 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
                         value={row.remarks}
                         onChange={(e) => updateFormRow(row.id, 'remarks', e.target.value)}
                         placeholder="Enter remarks..."
-                        className="h-8 border-0 shadow-none"
+                        className="h-9 border-2 focus:border-verdo-navy"
                       />
                     </div>
                     
-                    <div className="px-2 py-2 flex items-center justify-center gap-1">
-                      <div className="flex flex-col items-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeFormRow(row.id)}
-                          disabled={formRows.length === 1}
-                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                        <span className="text-xs text-gray-600">Delete</span>
-                      </div>
-                      <div className="flex flex-col items-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={addFormRow}
-                          className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                        <span className="text-xs text-gray-600">Add</span>
-                      </div>
+                    <div className="px-2 py-2 flex items-center justify-center gap-2">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => removeFormRow(row.id)}
+                        disabled={formRows.length === 1}
+                        className="h-8 px-3 gap-1"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Delete
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={addFormRow}
+                        className="h-8 px-3 gap-1 bg-verdo-jade hover:bg-verdo-jade/90 text-white"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Add
+                      </Button>
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
+            </>
           ) : (
             <table className="w-full text-sm border-collapse">
-              <thead className="sticky top-0">
-                <tr className="bg-verdo-navy text-white">
-                  <th className="px-3 py-2 text-left font-medium border border-gray-300 min-w-[80px] text-sm">
+              <thead className="sticky top-0 z-10">
+                <tr className="bg-muted/50 text-foreground border-b-2">
+                  <th className="px-3 py-3 text-left font-semibold border-r min-w-[80px]">
                     Field
                   </th>
                   {filteredMeters.map((meterName) => (
-                    <th key={meterName} colSpan={2} className="px-3 py-2 text-center font-medium border border-gray-300 min-w-[200px] text-sm">
+                    <th key={meterName} colSpan={2} className="px-3 py-3 text-center font-semibold border-r min-w-[200px]">
                       {meterName}
                     </th>
                   ))}
-                  <th className="px-3 py-2 text-center font-medium border border-gray-300 min-w-[100px] text-sm">
+                  <th className="px-3 py-3 text-center font-semibold min-w-[100px]">
                     Remarks
                   </th>
                 </tr>
-                <tr className="bg-verdo-navy text-white">
-                  <th className="px-3 py-2 text-left font-medium border border-gray-300 text-sm">
+                <tr className="bg-muted/40 text-foreground border-b">
+                  <th className="px-3 py-2 text-left font-medium border-r">
                     Meter Data
                   </th>
                   {filteredMeters.map((meterName) => (
                     <React.Fragment key={meterName}>
-                      <th className="px-3 py-2 text-center font-medium border border-gray-300 min-w-[100px] text-sm">
+                      <th className="px-3 py-2 text-center font-medium border-r min-w-[100px]">
                         Export
                       </th>
-                      <th className="px-3 py-2 text-center font-medium border border-gray-300 min-w-[100px] text-sm">
+                      <th className="px-3 py-2 text-center font-medium border-r min-w-[100px]">
                         Import
                       </th>
                     </React.Fragment>
                   ))}
-                  <th className="px-3 py-2 text-center font-medium border border-gray-300 text-sm">
+                  <th className="px-3 py-2 text-center font-medium">
                     {/* Empty for remarks */}
                   </th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="hover:bg-muted/20">
-                  <td className="px-3 py-2 border border-gray-300 font-medium bg-muted/30">
+                  <td className="px-3 py-3 border-r border-b font-medium bg-muted/20">
                     Meter Data
                   </td>
                   {filteredMeters.map((meterName) => (
                     <React.Fragment key={meterName}>
-                      <td className="px-3 py-2 border border-gray-300">
+                      <td className="px-3 py-3 border-r border-b">
                         <div className="space-y-1">
                           <Input
                             type="number"
                             value={formData[`${meterName}_export`] || ''}
                             onChange={(e) => handleInputChange(meterName, 'export', e.target.value)}
                             className={cn(
-                              "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
+                              "h-9 border-2 bg-background focus:border-verdo-navy",
                               errors[`${meterName}_export`] && "border-destructive focus:border-destructive"
                             )}
                             placeholder="0.00"
@@ -465,14 +463,14 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
                           )}
                         </div>
                       </td>
-                      <td className="px-3 py-2 border border-gray-300">
+                      <td className="px-3 py-3 border-r border-b">
                         <div className="space-y-1">
                           <Input
                             type="number"
                             value={formData[`${meterName}_import`] || ''}
                             onChange={(e) => handleInputChange(meterName, 'import', e.target.value)}
                             className={cn(
-                              "h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring",
+                              "h-9 border-2 bg-background focus:border-verdo-navy",
                               errors[`${meterName}_import`] && "border-destructive focus:border-destructive"
                             )}
                             placeholder="0.00"
@@ -485,11 +483,13 @@ export const MeterDataTable: React.FC<MeterDataTableProps> = ({ site, selectedDa
                       </td>
                     </React.Fragment>
                   ))}
-                  <td className="px-3 py-2 border border-gray-300">
+                  <td className="px-3 py-3 border-b">
                     <Input
                       type="text"
-                      className="h-8 text-xs border-0 bg-transparent focus:bg-background focus:border focus:border-ring"
-                      placeholder="Add remarks..."
+                      value={formData['remarks'] || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, remarks: e.target.value }))}
+                      className="h-9 border-2 bg-background focus:border-verdo-navy"
+                      placeholder="Enter remarks..."
                     />
                   </td>
                 </tr>
