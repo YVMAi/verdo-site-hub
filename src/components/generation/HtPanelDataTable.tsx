@@ -366,12 +366,12 @@ export const HtPanelDataTable: React.FC<HtPanelDataTableProps> = ({ site, select
           <div className="bg-white rounded-lg border shadow-sm overflow-hidden" onPaste={handlePasteFromExcel} tabIndex={0}>
             {viewMode === 'form' ? (
               <>
-                <div className="bg-muted/50 border-b">
-                  <div className="grid grid-cols-5 gap-0 text-sm font-semibold text-foreground">
-                    <div className="px-4 py-3 border-r">Block</div>
-                    <div className="px-4 py-3 border-r">Incoming</div>
-                    <div className="px-4 py-3 border-r">Outgoing</div>
-                    <div className="px-4 py-3 border-r">Remarks</div>
+                <div className="bg-verdo-navy border-b">
+                  <div className="grid grid-cols-5 gap-0 text-sm font-semibold text-white">
+                    <div className="px-4 py-3 border-r border-white/20">Block</div>
+                    <div className="px-4 py-3 border-r border-white/20">Incoming</div>
+                    <div className="px-4 py-3 border-r border-white/20">Outgoing</div>
+                    <div className="px-4 py-3 border-r border-white/20">Remarks</div>
                     <div className="px-4 py-3">Actions</div>
                   </div>
                 </div>

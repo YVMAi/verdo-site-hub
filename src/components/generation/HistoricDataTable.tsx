@@ -296,8 +296,8 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
         <div className="overflow-x-auto" style={{ maxHeight: '400px' }}>
           <table className="w-full text-xs border-collapse">
             <thead className="sticky top-0 z-10">
-              <tr className="bg-muted/50 text-foreground border-b-2">
-                <th className="px-3 py-2 text-left font-semibold border-r w-24">Field</th>
+              <tr className="bg-verdo-navy text-white border-b-2">
+                <th className="px-3 py-2 text-left font-semibold border-r border-white/20 w-24">Field</th>
                 {blockStructure.length > 0 ? (
                   blockStructure.map(block => (
                     <CollapsibleBlockHeader
@@ -313,7 +313,7 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
                   tabColumns.filter(col => col.id !== 'date').map((column) => (
                     <th 
                       key={column.id}
-                      className="px-3 py-2 text-left font-semibold border-r min-w-[100px] cursor-pointer hover:bg-muted/70"
+                      className="px-3 py-2 text-left font-semibold border-r border-white/20 min-w-[100px] cursor-pointer hover:bg-verdo-navy/80"
                       onClick={() => handleSort(column.id)}
                     >
                       <div className="flex items-center justify-between">
@@ -330,8 +330,8 @@ export const HistoricDataTable: React.FC<HistoricDataTableProps> = ({
                 <th className="px-3 py-2 text-center font-semibold w-32">Remarks</th>
               </tr>
               {blockStructure.length > 0 && Object.keys(expandedBlocks).some(key => expandedBlocks[key]) && (
-                <tr className="bg-muted/40 text-foreground border-b">
-                  <th className="px-3 py-2 border-r font-medium">Item</th>
+                <tr className="bg-verdo-navy/90 text-white border-b">
+                  <th className="px-3 py-2 border-r border-white/20 font-medium">Item</th>
                   {blockStructure.map(block => (
                     expandedBlocks[block.id] ? (
                       block.items.map((item: string) => (
