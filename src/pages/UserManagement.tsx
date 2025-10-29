@@ -1,5 +1,4 @@
 import { Users, Plus, Search } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -32,23 +31,24 @@ export default function UserManagement() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto p-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>User Directory</CardTitle>
-            <CardDescription>
+      <div className="flex-1 overflow-auto">
+        <div className="p-6">
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold">User Directory</h2>
+            <p className="text-muted-foreground text-sm mt-1">
               View and manage user accounts and access levels
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-12">
+            </p>
+          </div>
+          
+          <div className="bg-white border rounded-lg p-12">
+            <div className="text-center">
               <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground">
                 User management features coming soon
               </p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

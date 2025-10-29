@@ -1,5 +1,4 @@
 import { FileText, Download, Filter } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -41,23 +40,24 @@ export default function Reports() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto p-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Reports</CardTitle>
-            <CardDescription>
+      <div className="flex-1 overflow-auto">
+        <div className="p-6">
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold">Reports</h2>
+            <p className="text-muted-foreground text-sm mt-1">
               Generate and download reports for your sites
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-12">
+            </p>
+          </div>
+          
+          <div className="bg-white border rounded-lg p-12">
+            <div className="text-center">
               <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground">
                 Report generation features coming soon
               </p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

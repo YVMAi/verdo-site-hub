@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Building2, RefreshCw } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -82,18 +81,19 @@ export default function ClientManagement() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto p-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Client Directory</CardTitle>
-            <CardDescription>
+      <div className="flex-1 overflow-auto">
+        <div className="p-6">
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold">Client Directory</h2>
+            <p className="text-muted-foreground text-sm mt-1">
               Clients synced from core application. Toggle to enable or disable access.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+            </p>
+          </div>
+          
+          <div className="bg-white border rounded-lg overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow className="bg-verdo-navy hover:bg-verdo-navy">
+                <TableRow className="bg-[hsl(var(--verdo-navy))] hover:bg-[hsl(var(--verdo-navy))]">
                   <TableHead className="text-white">Client Name</TableHead>
                   <TableHead className="text-white">Client ID</TableHead>
                   <TableHead className="text-white">Last Synced</TableHead>
@@ -136,8 +136,8 @@ export default function ClientManagement() {
                 })}
               </TableBody>
             </Table>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
