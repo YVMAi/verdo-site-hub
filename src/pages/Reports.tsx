@@ -1,7 +1,12 @@
 import { useState } from "react";
-import { FileText } from "lucide-react";
+import { FileText, CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { useClient } from "@/contexts/ClientContext";
 import { mockSites } from "@/data/mockGenerationData";
 
@@ -9,6 +14,8 @@ export default function Reports() {
   const { selectedClient, selectedSite, setSelectedSite } = useClient();
   const availableSites = selectedClient ? mockSites.filter(site => site.clientId === selectedClient.id) : [];
   const [dateRange, setDateRange] = useState<string>("last-30-days");
+  const [startDate, setStartDate] = useState<Date>();
+  const [endDate, setEndDate] = useState<Date>();
 
   const handleSiteChange = (siteId: string) => {
     const site = availableSites.find(s => s.id === siteId) || null;
@@ -57,9 +64,71 @@ export default function Reports() {
                 <SelectItem value="last-month" className="text-sm">Last Month</SelectItem>
                 <SelectItem value="this-year" className="text-sm">This Year</SelectItem>
                 <SelectItem value="last-year" className="text-sm">Last Year</SelectItem>
+                <SelectItem value="custom" className="text-sm">Custom</SelectItem>
               </SelectContent>
             </Select>
           </div>
+
+          {/* Custom Date Range Pickers */}
+          {dateRange === "custom" && (
+            <>
+              <div className="flex flex-col gap-1.5 min-w-[160px]">
+                <Label htmlFor="start-date" className="text-white text-xs">Start Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="start-date"
+                      variant="outline"
+                      className={cn(
+                        "bg-white/10 border-white/20 text-white h-9 text-sm hover:bg-white/20 justify-start text-left font-normal",
+                        !startDate && "text-white/60"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 bg-white z-50" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={startDate}
+                      onSelect={setStartDate}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="flex flex-col gap-1.5 min-w-[160px]">
+                <Label htmlFor="end-date" className="text-white text-xs">End Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="end-date"
+                      variant="outline"
+                      className={cn(
+                        "bg-white/10 border-white/20 text-white h-9 text-sm hover:bg-white/20 justify-start text-left font-normal",
+                        !endDate && "text-white/60"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {endDate ? format(endDate, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 bg-white z-50" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={endDate}
+                      onSelect={setEndDate}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
