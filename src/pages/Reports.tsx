@@ -1,14 +1,18 @@
 import { useState } from "react";
-import { FileText, CalendarIcon } from "lucide-react";
+import { Download, CalendarIcon, Search } from "lucide-react";
 import { format } from "date-fns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { useClient } from "@/contexts/ClientContext";
 import { mockSites } from "@/data/mockGenerationData";
+import { mockHistoricReports } from "@/data/mockReportData";
 
 export default function Reports() {
   const { selectedClient, selectedSite, setSelectedSite } = useClient();
@@ -16,11 +20,22 @@ export default function Reports() {
   const [dateRange, setDateRange] = useState<string>("last-30-days");
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const handleSiteChange = (siteId: string) => {
     const site = availableSites.find(s => s.id === siteId) || null;
     setSelectedSite(site);
   };
+
+  const filteredReports = mockHistoricReports.filter(report => {
+    const matchesSearch = searchQuery === "" || 
+      report.siteName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      report.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      report.fileName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      report.dateRange.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    return matchesSearch;
+  });
 
   return (
     <div className="min-h-screen w-full flex flex-col bg-white">
@@ -134,22 +149,77 @@ export default function Reports() {
 
       {/* Content */}
       <div className="flex-1 overflow-auto">
-        <div className="px-6 py-4">
-          <div className="mb-4">
-            <h2 className="text-2xl font-bold">Reports</h2>
-            <p className="text-muted-foreground text-sm mt-1">
-              Generate and download reports for your sites
-            </p>
-          </div>
-          
-          <div className="bg-white border rounded-lg p-12">
-            <div className="text-center">
-              <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">
-                Report generation features coming soon
-              </p>
-            </div>
-          </div>
+        <div className="px-6 py-6">
+          {/* Historic Reports Section */}
+          <Card>
+            <CardHeader className="space-y-4">
+              <div>
+                <CardTitle>Download History</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  View and download previously generated reports
+                </p>
+              </div>
+              
+              {/* Search Bar */}
+              <div className="relative max-w-sm">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search reports..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+            </CardHeader>
+            
+            <CardContent>
+              <div className="border rounded-lg overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date & Time</TableHead>
+                      <TableHead>User Name</TableHead>
+                      <TableHead>Site</TableHead>
+                      <TableHead>Date Range</TableHead>
+                      <TableHead>File Name</TableHead>
+                      <TableHead className="text-right">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredReports.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                          No reports found
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredReports.map((report) => (
+                        <TableRow key={report.id}>
+                          <TableCell className="font-medium">{report.generatedAt}</TableCell>
+                          <TableCell>{report.userName}</TableCell>
+                          <TableCell>{report.siteName}</TableCell>
+                          <TableCell>{report.dateRange}</TableCell>
+                          <TableCell>{report.fileName}</TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8"
+                              onClick={() => window.open(report.fileUrl, '_blank')}
+                            >
+                              <Download className="h-4 w-4 mr-1" />
+                              Download
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
