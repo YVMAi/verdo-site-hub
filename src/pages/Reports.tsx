@@ -1,8 +1,17 @@
-import { FileText, Download, Filter } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { FileText } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useClient } from "@/contexts/ClientContext";
+import { mockSites } from "@/data/mockGenerationData";
 
 export default function Reports() {
+  const { selectedClient, selectedSite, setSelectedSite } = useClient();
+  const availableSites = selectedClient ? mockSites.filter(site => site.clientId === selectedClient.id) : [];
+
+  const handleSiteChange = (siteId: string) => {
+    const site = availableSites.find(s => s.id === siteId) || null;
+    setSelectedSite(site);
+  };
+
   return (
     <div className="min-h-screen w-full flex flex-col bg-white">
       {/* Top Navigation Bar */}
@@ -13,29 +22,21 @@ export default function Reports() {
         </div>
         
         <div className="flex items-center gap-4">
-          {/* Report Type Selector */}
-          <Select>
-            <SelectTrigger className="bg-white/10 border-white/20 text-white h-8 w-48">
-              <SelectValue placeholder="Select report type..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="generation">Generation Report</SelectItem>
-              <SelectItem value="operations">Operations Report</SelectItem>
-              <SelectItem value="maintenance">Maintenance Report</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          {/* Filter Button */}
-          <Button className="bg-white/10 hover:bg-white/20 border-white/20 text-white h-8">
-            <Filter className="h-4 w-4 mr-2" />
-            Filter
-          </Button>
-          
-          {/* Generate Button */}
-          <Button className="bg-white/10 hover:bg-white/20 border-white/20 text-white h-8">
-            <Download className="h-4 w-4 mr-2" />
-            Generate
-          </Button>
+          {/* Site Selector */}
+          <div className="flex items-center gap-2 min-w-[200px]">
+            <Select onValueChange={handleSiteChange} disabled={!selectedClient} value={selectedSite?.id || ""}>
+              <SelectTrigger className="bg-white/10 border-white/20 text-white h-8 text-sm">
+                <SelectValue placeholder={selectedClient ? "Select a site..." : "Select client from sidebar first"} />
+              </SelectTrigger>
+              <SelectContent className="bg-white z-50">
+                {availableSites.map(site => (
+                  <SelectItem key={site.id} value={site.id} className="text-sm">
+                    {site.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
