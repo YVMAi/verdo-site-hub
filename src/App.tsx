@@ -15,6 +15,7 @@ import Vegetation from "./pages/Vegetation";
 import OperationsHub from "./pages/OperationsHub";
 import Reports from "./pages/Reports";
 import UserManagement from "./pages/UserManagement";
+import ClientManagement from "./pages/ClientManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/vegetation" element={<Vegetation />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/admin/users" element={<UserManagement />} />
+              <Route path="/admin/clients" element={<ClientManagement />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppLayout>

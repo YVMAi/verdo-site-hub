@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Menu, X, Zap, Settings, Scissors, Droplets, Search, Leaf, ChevronDown, BarChart3, Plus, ClipboardList, FileText, Shield, Users } from 'lucide-react';
+import { Menu, X, Zap, Settings, Scissors, Droplets, Search, Leaf, ChevronDown, BarChart3, Plus, ClipboardList, FileText, Shield, Users, Building2 } from 'lucide-react';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ClientSelector } from './ClientSelector';
@@ -35,12 +35,20 @@ const reportGenerationItems = [{
   description: "Generate and manage reports"
 }];
 
-const adminItems = [{
-  title: "User Management",
-  url: "/admin/users",
-  icon: Users,
-  description: "Manage users and permissions"
-}];
+const adminItems = [
+  {
+    title: "User Management",
+    url: "/admin/users",
+    icon: Users,
+    description: "Manage users and permissions"
+  },
+  {
+    title: "Client Management",
+    url: "/admin/clients",
+    icon: Building2,
+    description: "Sync and manage clients"
+  }
+];
 
 export function VerdoSidebar() {
   const { state } = useSidebar();
