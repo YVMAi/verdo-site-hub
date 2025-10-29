@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download, CalendarIcon, Search, FileText } from "lucide-react";
+import { Download, CalendarIcon, Search } from "lucide-react";
 import { format } from "date-fns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -9,7 +9,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useClient } from "@/contexts/ClientContext";
 import { mockSites } from "@/data/mockGenerationData";
@@ -26,25 +25,10 @@ export default function Reports() {
   const [endDate, setEndDate] = useState<Date>();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [reportTypeFilter, setReportTypeFilter] = useState<string>("all");
-  const [customStartDate, setCustomStartDate] = useState<Date>();
-  const [customEndDate, setCustomEndDate] = useState<Date>();
-  const [isCustomReportOpen, setIsCustomReportOpen] = useState(false);
   const handleSiteChange = (siteId: string) => {
     const site = availableSites.find(s => s.id === siteId) || null;
     setSelectedSite(site);
   };
-  const handleGenerateCustomReport = () => {
-    if (!customStartDate || !customEndDate) {
-      return;
-    }
-    // In production, this would call backend API to generate report
-    const fileName = `custom-report-${format(customStartDate, 'dd-MMM')}-to-${format(customEndDate, 'dd-MMM')}.pdf`;
-    console.log("Generating custom report:", { startDate: customStartDate, endDate: customEndDate, fileName });
-    setIsCustomReportOpen(false);
-    setCustomStartDate(undefined);
-    setCustomEndDate(undefined);
-  };
-
   const filteredReports = mockHistoricReports.filter(report => {
     const matchesSearch = searchQuery === "" || report.siteName.toLowerCase().includes(searchQuery.toLowerCase()) || report.userName.toLowerCase().includes(searchQuery.toLowerCase()) || report.fileName.toLowerCase().includes(searchQuery.toLowerCase()) || report.reportTitle.toLowerCase().includes(searchQuery.toLowerCase()) || report.reportDate.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = reportTypeFilter === "all" || report.reportType === reportTypeFilter;
@@ -135,86 +119,7 @@ export default function Reports() {
           {/* Historic Reports Section */}
           <Card>
             <CardHeader className="space-y-4">
-              <div className="flex items-center justify-between">
-                <CardTitle>Historic Reports</CardTitle>
-                <Dialog open={isCustomReportOpen} onOpenChange={setIsCustomReportOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="default" size="sm">
-                      <FileText className="h-4 w-4 mr-2" />
-                      Custom Report
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>Generate Custom Report</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="custom-start-date">Start Date</Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              id="custom-start-date"
-                              variant="outline"
-                              className={cn(
-                                "w-full justify-start text-left font-normal",
-                                !customStartDate && "text-muted-foreground"
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {customStartDate ? format(customStartDate, "PPP") : <span>Pick start date</span>}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={customStartDate}
-                              onSelect={setCustomStartDate}
-                              initialFocus
-                              className="pointer-events-auto"
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="custom-end-date">End Date</Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              id="custom-end-date"
-                              variant="outline"
-                              className={cn(
-                                "w-full justify-start text-left font-normal",
-                                !customEndDate && "text-muted-foreground"
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {customEndDate ? format(customEndDate, "PPP") : <span>Pick end date</span>}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={customEndDate}
-                              onSelect={setCustomEndDate}
-                              initialFocus
-                              className="pointer-events-auto"
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                      <Button 
-                        onClick={handleGenerateCustomReport} 
-                        className="w-full"
-                        disabled={!customStartDate || !customEndDate}
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Generate & Download
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
+              
               
               {/* Search and Filter Bar */}
               <div className="flex items-center gap-4">
@@ -231,7 +136,7 @@ export default function Reports() {
                     </SelectTrigger>
                     <SelectContent className="bg-white z-50">
                       <SelectItem value="all">All</SelectItem>
-                      <SelectItem value="DGR">DGR</SelectItem>
+                      
                       <SelectItem value="DOR">DOR</SelectItem>
                       <SelectItem value="HSE">HSE</SelectItem>
                     </SelectContent>
