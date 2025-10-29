@@ -21,6 +21,7 @@ export default function Reports() {
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [reportTypeFilter, setReportTypeFilter] = useState<string>("all");
 
   const handleSiteChange = (siteId: string) => {
     const site = availableSites.find(s => s.id === siteId) || null;
@@ -35,7 +36,9 @@ export default function Reports() {
       report.reportTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
       report.reportDate.toLowerCase().includes(searchQuery.toLowerCase());
     
-    return matchesSearch;
+    const matchesType = reportTypeFilter === "all" || report.reportType === reportTypeFilter;
+    
+    return matchesSearch && matchesType;
   });
 
   return (
@@ -161,16 +164,33 @@ export default function Reports() {
                 </p>
               </div>
               
-              {/* Search Bar */}
-              <div className="relative max-w-sm">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search reports..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
-                />
+              {/* Search and Filter Bar */}
+              <div className="flex items-center gap-4">
+                <div className="relative flex-1 max-w-sm">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Search reports..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+                
+                <div className="flex items-center gap-2 min-w-[180px]">
+                  <Label htmlFor="report-type-filter" className="text-sm whitespace-nowrap">Report Type:</Label>
+                  <Select value={reportTypeFilter} onValueChange={setReportTypeFilter}>
+                    <SelectTrigger id="report-type-filter" className="h-9">
+                      <SelectValue placeholder="All" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white z-50">
+                      <SelectItem value="all">All</SelectItem>
+                      <SelectItem value="DGR">DGR</SelectItem>
+                      <SelectItem value="DOR">DOR</SelectItem>
+                      <SelectItem value="HSE">HSE</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </CardHeader>
             
@@ -180,6 +200,7 @@ export default function Reports() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Report</TableHead>
+                      <TableHead>Report Type</TableHead>
                       <TableHead>File Name</TableHead>
                       <TableHead className="text-right">Action</TableHead>
                     </TableRow>
@@ -187,7 +208,7 @@ export default function Reports() {
                   <TableBody>
                     {filteredReports.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
+                        <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                           No reports found
                         </TableCell>
                       </TableRow>
@@ -195,6 +216,11 @@ export default function Reports() {
                       filteredReports.map((report) => (
                         <TableRow key={report.id}>
                           <TableCell className="font-medium">{report.reportTitle}</TableCell>
+                          <TableCell>
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                              {report.reportType}
+                            </span>
+                          </TableCell>
                           <TableCell>{report.fileName}</TableCell>
                           <TableCell className="text-right">
                             <Button

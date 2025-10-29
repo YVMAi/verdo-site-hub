@@ -5,6 +5,7 @@ export interface HistoricReport {
   siteName: string;
   reportDate: string;
   reportTitle: string;
+  reportType: "DGR" | "DOR" | "HSE";
   fileName: string;
   fileUrl: string;
 }
@@ -17,7 +18,8 @@ export const mockHistoricReports: HistoricReport[] = [
     siteName: "Solar Farm A",
     reportDate: "29 Oct",
     reportTitle: "Report for 29 Oct",
-    fileName: "Solar_Farm_A_29_Oct_2024.pdf",
+    reportType: "DGR",
+    fileName: "Solar_Farm_A_DGR_29_Oct_2024.pdf",
     fileUrl: "#"
   },
   {
@@ -27,7 +29,8 @@ export const mockHistoricReports: HistoricReport[] = [
     siteName: "Solar Farm B",
     reportDate: "28 Oct",
     reportTitle: "Report for 28 Oct",
-    fileName: "Solar_Farm_B_28_Oct_2024.pdf",
+    reportType: "DOR",
+    fileName: "Solar_Farm_B_DOR_28_Oct_2024.pdf",
     fileUrl: "#"
   },
   {
@@ -37,7 +40,8 @@ export const mockHistoricReports: HistoricReport[] = [
     siteName: "Solar Farm A",
     reportDate: "28 Oct",
     reportTitle: "Report for 28 Oct",
-    fileName: "Solar_Farm_A_28_Oct_2024.pdf",
+    reportType: "HSE",
+    fileName: "Solar_Farm_A_HSE_28_Oct_2024.pdf",
     fileUrl: "#"
   },
   {
@@ -47,7 +51,8 @@ export const mockHistoricReports: HistoricReport[] = [
     siteName: "Solar Farm C",
     reportDate: "27 Oct",
     reportTitle: "Report for 27 Oct",
-    fileName: "Solar_Farm_C_27_Oct_2024.pdf",
+    reportType: "DGR",
+    fileName: "Solar_Farm_C_DGR_27_Oct_2024.pdf",
     fileUrl: "#"
   },
   {
@@ -57,7 +62,8 @@ export const mockHistoricReports: HistoricReport[] = [
     siteName: "Solar Farm B",
     reportDate: "27 Oct",
     reportTitle: "Report for 27 Oct",
-    fileName: "Solar_Farm_B_27_Oct_2024.pdf",
+    reportType: "DOR",
+    fileName: "Solar_Farm_B_DOR_27_Oct_2024.pdf",
     fileUrl: "#"
   },
   {
@@ -67,7 +73,8 @@ export const mockHistoricReports: HistoricReport[] = [
     siteName: "Solar Farm A",
     reportDate: "26 Oct",
     reportTitle: "Report for 26 Oct",
-    fileName: "Solar_Farm_A_26_Oct_2024.pdf",
+    reportType: "HSE",
+    fileName: "Solar_Farm_A_HSE_26_Oct_2024.pdf",
     fileUrl: "#"
   },
   {
@@ -77,7 +84,8 @@ export const mockHistoricReports: HistoricReport[] = [
     siteName: "Solar Farm C",
     reportDate: "25 Oct",
     reportTitle: "Report for 25 Oct",
-    fileName: "Solar_Farm_C_25_Oct_2024.pdf",
+    reportType: "DGR",
+    fileName: "Solar_Farm_C_DGR_25_Oct_2024.pdf",
     fileUrl: "#"
   },
   {
@@ -87,7 +95,8 @@ export const mockHistoricReports: HistoricReport[] = [
     siteName: "Solar Farm B",
     reportDate: "25 Oct",
     reportTitle: "Report for 25 Oct",
-    fileName: "Solar_Farm_B_25_Oct_2024.pdf",
+    reportType: "DOR",
+    fileName: "Solar_Farm_B_DOR_25_Oct_2024.pdf",
     fileUrl: "#"
   }
 ];
