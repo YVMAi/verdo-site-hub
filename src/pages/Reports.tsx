@@ -41,7 +41,7 @@ export default function Reports() {
 
       {/* Content */}
       <div className="flex-1 overflow-auto">
-        <div className="p-6">
+        <div className="px-6 py-4">
           <div className="mb-4">
             <h2 className="text-2xl font-bold">Reports</h2>
             <p className="text-muted-foreground text-sm mt-1">
