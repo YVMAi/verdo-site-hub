@@ -60,33 +60,29 @@ export default function ClientManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Page Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-verdo-navy/10 rounded-lg flex items-center justify-center">
-              <Building2 className="w-6 h-6 text-verdo-navy" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Client Management</h1>
-              <p className="text-muted-foreground mt-1">
-                Sync and manage client access to the application
-              </p>
-            </div>
-          </div>
-          
+    <div className="min-h-screen w-full flex flex-col bg-white">
+      {/* Top Navigation Bar */}
+      <div className="bg-[hsl(var(--verdo-navy))] text-white px-6 py-4 flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold">Client Management</h1>
+          <p className="text-sm text-white/80">Sync and manage client access to the application</p>
+        </div>
+        
+        <div className="flex items-center gap-4">
+          {/* Sync Button */}
           <Button
             onClick={handleSync}
             disabled={syncing}
-            className="bg-verdo-navy hover:bg-verdo-navy-light text-white"
+            className="bg-white/10 hover:bg-white/20 border-white/20 text-white h-8"
           >
             <RefreshCw className={`w-4 h-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
             Sync Clients
           </Button>
         </div>
+      </div>
 
-        {/* Content */}
+      {/* Content */}
+      <div className="flex-1 overflow-auto p-6">
         <Card>
           <CardHeader>
             <CardTitle>Client Directory</CardTitle>

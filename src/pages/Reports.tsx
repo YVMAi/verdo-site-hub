@@ -1,29 +1,52 @@
-import { FileText } from "lucide-react";
+import { FileText, Download, Filter } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function Reports() {
   return (
-    <div className="min-h-screen bg-background p-6 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Page Header */}
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-verdo-jade/10 rounded-lg flex items-center justify-center">
-            <FileText className="w-6 h-6 text-verdo-jade" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Report Generation</h1>
-            <p className="text-muted-foreground mt-1">
-              Generate and manage comprehensive reports
-            </p>
-          </div>
+    <div className="min-h-screen w-full flex flex-col bg-white">
+      {/* Top Navigation Bar */}
+      <div className="bg-[hsl(var(--verdo-navy))] text-white px-6 py-4 flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold">Report Generation</h1>
+          <p className="text-sm text-white/80">Generate and manage reports</p>
         </div>
+        
+        <div className="flex items-center gap-4">
+          {/* Report Type Selector */}
+          <Select>
+            <SelectTrigger className="bg-white/10 border-white/20 text-white h-8 w-48">
+              <SelectValue placeholder="Select report type..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="generation">Generation Report</SelectItem>
+              <SelectItem value="operations">Operations Report</SelectItem>
+              <SelectItem value="maintenance">Maintenance Report</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          {/* Filter Button */}
+          <Button className="bg-white/10 hover:bg-white/20 border-white/20 text-white h-8">
+            <Filter className="h-4 w-4 mr-2" />
+            Filter
+          </Button>
+          
+          {/* Generate Button */}
+          <Button className="bg-white/10 hover:bg-white/20 border-white/20 text-white h-8">
+            <Download className="h-4 w-4 mr-2" />
+            Generate
+          </Button>
+        </div>
+      </div>
 
-        {/* Content */}
+      {/* Content */}
+      <div className="flex-1 overflow-auto p-6">
         <Card>
           <CardHeader>
-            <CardTitle>Available Reports</CardTitle>
+            <CardTitle>Reports</CardTitle>
             <CardDescription>
-              Select a report type to generate detailed insights
+              Generate and download reports for your sites
             </CardDescription>
           </CardHeader>
           <CardContent>

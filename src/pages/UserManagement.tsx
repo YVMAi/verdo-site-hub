@@ -1,24 +1,38 @@
-import { Users } from "lucide-react";
+import { Users, Plus, Search } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function UserManagement() {
   return (
-    <div className="min-h-screen bg-background p-6 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Page Header */}
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-verdo-navy/10 rounded-lg flex items-center justify-center">
-            <Users className="w-6 h-6 text-verdo-navy" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">User Management</h1>
-            <p className="text-muted-foreground mt-1">
-              Manage users, roles, and permissions
-            </p>
-          </div>
+    <div className="min-h-screen w-full flex flex-col bg-white">
+      {/* Top Navigation Bar */}
+      <div className="bg-[hsl(var(--verdo-navy))] text-white px-6 py-4 flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold">User Management</h1>
+          <p className="text-sm text-white/80">Manage users, roles, and permissions</p>
         </div>
+        
+        <div className="flex items-center gap-4">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+            <Input 
+              placeholder="Search users..." 
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-8 pl-9 w-64"
+            />
+          </div>
+          
+          {/* Add User Button */}
+          <Button className="bg-white/10 hover:bg-white/20 border-white/20 text-white h-8">
+            <Plus className="h-4 w-4 mr-2" />
+            Add User
+          </Button>
+        </div>
+      </div>
 
-        {/* Content */}
+      {/* Content */}
+      <div className="flex-1 overflow-auto p-6">
         <Card>
           <CardHeader>
             <CardTitle>User Directory</CardTitle>
