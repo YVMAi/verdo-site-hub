@@ -3,6 +3,7 @@ import { FileText, Download, Search, CalendarIcon, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -68,20 +69,19 @@ export default function Reports() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto">
-        {/* Select Date Range Section */}
-        <div className="px-6 py-4 border-b">
-          <div className="flex items-start gap-6">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <FileText className="h-5 w-5 text-verdo-navy" />
-                <h2 className="text-lg font-semibold">Select Date Range</h2>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Generate DSM report as per the commercial data available in the sharepoint
-              </p>
-            </div>
-            
+      <div className="flex-1 overflow-auto p-6 space-y-6">
+        {/* Select Date Range Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-verdo-navy" />
+              Select Date Range
+            </CardTitle>
+            <CardDescription>
+              Generate DSM report as per the commercial data available in the sharepoint
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
             <div className="flex items-end gap-4">
               {/* Start Date */}
               <div className="flex flex-col gap-1">
@@ -153,78 +153,81 @@ export default function Reports() {
                 Generate Report
               </Button>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        {/* Download History Section */}
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Download className="h-5 w-5 text-verdo-navy" />
+        {/* Download History Card */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-semibold">Download History</h2>
-                <p className="text-sm text-muted-foreground">Recent DSM data downloads</p>
+                <CardTitle className="flex items-center gap-2">
+                  <Download className="h-5 w-5 text-verdo-navy" />
+                  Download History
+                </CardTitle>
+                <CardDescription>Recent DSM data downloads</CardDescription>
+              </div>
+              
+              {/* Search */}
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search Downloads..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 h-10"
+                />
               </div>
             </div>
-            
-            {/* Search */}
-            <div className="relative w-64">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search Downloads..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-10"
-              />
-            </div>
-          </div>
-
-          {/* Table */}
-          <div className="border rounded-lg overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-gray-50 hover:bg-gray-50">
-                  <TableHead className="font-semibold text-gray-700">Date & Time</TableHead>
-                  <TableHead className="font-semibold text-gray-700">User Name</TableHead>
-                  <TableHead className="font-semibold text-gray-700">Site</TableHead>
-                  <TableHead className="font-semibold text-gray-700">Date Range</TableHead>
-                  <TableHead className="font-semibold text-gray-700">File Name</TableHead>
-                  <TableHead className="font-semibold text-gray-700 text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredDownloads.length > 0 ? (
-                  filteredDownloads.map((download) => (
-                    <TableRow key={download.id}>
-                      <TableCell className="font-medium">{download.dateTime}</TableCell>
-                      <TableCell className="text-muted-foreground">{download.userName}</TableCell>
-                      <TableCell>{download.site}</TableCell>
-                      <TableCell>{download.dateRange}</TableCell>
-                      <TableCell className="max-w-md truncate">{download.fileName}</TableCell>
-                      <TableCell className="text-right">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          className="text-verdo-navy hover:text-verdo-navy hover:bg-verdo-navy/10"
-                          onClick={() => toast.success("Downloading report...")}
-                        >
-                          <Download className="h-4 w-4 mr-2" />
-                          Download
-                        </Button>
+          </CardHeader>
+          <CardContent>
+            {/* Table */}
+            <div className="border rounded-lg overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-gray-50 hover:bg-gray-50">
+                    <TableHead className="font-semibold text-gray-700">Date & Time</TableHead>
+                    <TableHead className="font-semibold text-gray-700">User Name</TableHead>
+                    <TableHead className="font-semibold text-gray-700">Site</TableHead>
+                    <TableHead className="font-semibold text-gray-700">Date Range</TableHead>
+                    <TableHead className="font-semibold text-gray-700">File Name</TableHead>
+                    <TableHead className="font-semibold text-gray-700 text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredDownloads.length > 0 ? (
+                    filteredDownloads.map((download) => (
+                      <TableRow key={download.id}>
+                        <TableCell className="font-medium">{download.dateTime}</TableCell>
+                        <TableCell className="text-muted-foreground">{download.userName}</TableCell>
+                        <TableCell>{download.site}</TableCell>
+                        <TableCell>{download.dateRange}</TableCell>
+                        <TableCell className="max-w-md truncate">{download.fileName}</TableCell>
+                        <TableCell className="text-right">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className="text-verdo-navy hover:text-verdo-navy hover:bg-verdo-navy/10"
+                            onClick={() => toast.success("Downloading report...")}
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Download
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                        No reports found
                       </TableCell>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                      No reports found
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </div>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
