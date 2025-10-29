@@ -32,7 +32,8 @@ export default function Reports() {
       report.siteName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       report.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       report.fileName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      report.dateRange.toLowerCase().includes(searchQuery.toLowerCase());
+      report.reportTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      report.reportDate.toLowerCase().includes(searchQuery.toLowerCase());
     
     return matchesSearch;
   });
@@ -181,7 +182,7 @@ export default function Reports() {
                       <TableHead>Date & Time</TableHead>
                       <TableHead>User Name</TableHead>
                       <TableHead>Site</TableHead>
-                      <TableHead>Date Range</TableHead>
+                      <TableHead>Report</TableHead>
                       <TableHead>File Name</TableHead>
                       <TableHead className="text-right">Action</TableHead>
                     </TableRow>
@@ -199,7 +200,7 @@ export default function Reports() {
                           <TableCell className="font-medium">{report.generatedAt}</TableCell>
                           <TableCell>{report.userName}</TableCell>
                           <TableCell>{report.siteName}</TableCell>
-                          <TableCell>{report.dateRange}</TableCell>
+                          <TableCell>{report.reportTitle}</TableCell>
                           <TableCell>{report.fileName}</TableCell>
                           <TableCell className="text-right">
                             <Button

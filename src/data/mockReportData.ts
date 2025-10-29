@@ -3,7 +3,8 @@ export interface HistoricReport {
   generatedAt: string;
   userName: string;
   siteName: string;
-  dateRange: string;
+  reportDate: string;
+  reportTitle: string;
   fileName: string;
   fileUrl: string;
 }
@@ -11,56 +12,82 @@ export interface HistoricReport {
 export const mockHistoricReports: HistoricReport[] = [
   {
     id: "1",
-    generatedAt: "2024-01-15 14:30",
+    generatedAt: "2024-10-29 14:30",
     userName: "John Smith",
     siteName: "Solar Farm A",
-    dateRange: "Jan 1 - Jan 15, 2024",
-    fileName: "Solar_Farm_A_Jan_2024.pdf",
+    reportDate: "29 Oct",
+    reportTitle: "Report for 29 Oct",
+    fileName: "Solar_Farm_A_29_Oct_2024.pdf",
     fileUrl: "#"
   },
   {
     id: "2",
-    generatedAt: "2024-01-10 09:15",
+    generatedAt: "2024-10-28 09:15",
     userName: "Sarah Johnson",
     siteName: "Solar Farm B",
-    dateRange: "Dec 1 - Dec 31, 2023",
-    fileName: "Solar_Farm_B_Dec_2023.pdf",
+    reportDate: "28 Oct",
+    reportTitle: "Report for 28 Oct",
+    fileName: "Solar_Farm_B_28_Oct_2024.pdf",
     fileUrl: "#"
   },
   {
     id: "3",
-    generatedAt: "2024-01-08 16:45",
+    generatedAt: "2024-10-28 16:45",
     userName: "Michael Chen",
     siteName: "Solar Farm A",
-    dateRange: "Dec 15 - Dec 31, 2023",
-    fileName: "Solar_Farm_A_Dec_2023.pdf",
+    reportDate: "28 Oct",
+    reportTitle: "Report for 28 Oct",
+    fileName: "Solar_Farm_A_28_Oct_2024.pdf",
     fileUrl: "#"
   },
   {
     id: "4",
-    generatedAt: "2024-01-05 11:20",
+    generatedAt: "2024-10-27 11:20",
     userName: "John Smith",
     siteName: "Solar Farm C",
-    dateRange: "Nov 1 - Nov 30, 2023",
-    fileName: "Solar_Farm_C_Nov_2023.pdf",
+    reportDate: "27 Oct",
+    reportTitle: "Report for 27 Oct",
+    fileName: "Solar_Farm_C_27_Oct_2024.pdf",
     fileUrl: "#"
   },
   {
     id: "5",
-    generatedAt: "2023-12-28 13:00",
+    generatedAt: "2024-10-27 13:00",
     userName: "Emily Davis",
     siteName: "Solar Farm B",
-    dateRange: "Nov 15 - Dec 15, 2023",
-    fileName: "Solar_Farm_B_Nov_Dec_2023.pdf",
+    reportDate: "27 Oct",
+    reportTitle: "Report for 27 Oct",
+    fileName: "Solar_Farm_B_27_Oct_2024.pdf",
     fileUrl: "#"
   },
   {
     id: "6",
-    generatedAt: "2023-12-20 10:30",
+    generatedAt: "2024-10-26 10:30",
     userName: "Sarah Johnson",
     siteName: "Solar Farm A",
-    dateRange: "Oct 1 - Oct 31, 2023",
-    fileName: "Solar_Farm_A_Oct_2023.pdf",
+    reportDate: "26 Oct",
+    reportTitle: "Report for 26 Oct",
+    fileName: "Solar_Farm_A_26_Oct_2024.pdf",
+    fileUrl: "#"
+  },
+  {
+    id: "7",
+    generatedAt: "2024-10-25 15:45",
+    userName: "Michael Chen",
+    siteName: "Solar Farm C",
+    reportDate: "25 Oct",
+    reportTitle: "Report for 25 Oct",
+    fileName: "Solar_Farm_C_25_Oct_2024.pdf",
+    fileUrl: "#"
+  },
+  {
+    id: "8",
+    generatedAt: "2024-10-25 08:20",
+    userName: "John Smith",
+    siteName: "Solar Farm B",
+    reportDate: "25 Oct",
+    reportTitle: "Report for 25 Oct",
+    fileName: "Solar_Farm_B_25_Oct_2024.pdf",
     fileUrl: "#"
   }
 ];
