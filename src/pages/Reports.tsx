@@ -13,36 +13,28 @@ import { cn } from "@/lib/utils";
 import { useClient } from "@/contexts/ClientContext";
 import { mockSites } from "@/data/mockGenerationData";
 import { mockHistoricReports } from "@/data/mockReportData";
-
 export default function Reports() {
-  const { selectedClient, selectedSite, setSelectedSite } = useClient();
+  const {
+    selectedClient,
+    selectedSite,
+    setSelectedSite
+  } = useClient();
   const availableSites = selectedClient ? mockSites.filter(site => site.clientId === selectedClient.id) : [];
   const [dateRange, setDateRange] = useState<string>("last-30-days");
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [reportTypeFilter, setReportTypeFilter] = useState<string>("all");
-
   const handleSiteChange = (siteId: string) => {
     const site = availableSites.find(s => s.id === siteId) || null;
     setSelectedSite(site);
   };
-
   const filteredReports = mockHistoricReports.filter(report => {
-    const matchesSearch = searchQuery === "" || 
-      report.siteName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      report.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      report.fileName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      report.reportTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      report.reportDate.toLowerCase().includes(searchQuery.toLowerCase());
-    
+    const matchesSearch = searchQuery === "" || report.siteName.toLowerCase().includes(searchQuery.toLowerCase()) || report.userName.toLowerCase().includes(searchQuery.toLowerCase()) || report.fileName.toLowerCase().includes(searchQuery.toLowerCase()) || report.reportTitle.toLowerCase().includes(searchQuery.toLowerCase()) || report.reportDate.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = reportTypeFilter === "all" || report.reportType === reportTypeFilter;
-    
     return matchesSearch && matchesType;
   });
-
-  return (
-    <div className="min-h-screen w-full flex flex-col bg-white">
+  return <div className="min-h-screen w-full flex flex-col bg-white">
       {/* Top Navigation Bar */}
       <div className="bg-[hsl(var(--verdo-navy))] text-white px-6 py-4 flex items-center justify-between">
         <div>
@@ -59,11 +51,9 @@ export default function Reports() {
                 <SelectValue placeholder={selectedClient ? "Select a site..." : "Select client from sidebar first"} />
               </SelectTrigger>
               <SelectContent className="bg-white z-50">
-                {availableSites.map(site => (
-                  <SelectItem key={site.id} value={site.id} className="text-sm">
+                {availableSites.map(site => <SelectItem key={site.id} value={site.id} className="text-sm">
                     {site.name}
-                  </SelectItem>
-                ))}
+                  </SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -89,32 +79,18 @@ export default function Reports() {
           </div>
 
           {/* Custom Date Range Pickers */}
-          {dateRange === "custom" && (
-            <>
+          {dateRange === "custom" && <>
               <div className="flex flex-col gap-1.5 min-w-[160px]">
                 <Label htmlFor="start-date" className="text-white text-xs">Start Date</Label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button
-                      id="start-date"
-                      variant="outline"
-                      className={cn(
-                        "bg-white/10 border-white/20 text-white h-9 text-sm hover:bg-white/20 justify-start text-left font-normal",
-                        !startDate && "text-white/60"
-                      )}
-                    >
+                    <Button id="start-date" variant="outline" className={cn("bg-white/10 border-white/20 text-white h-9 text-sm hover:bg-white/20 justify-start text-left font-normal", !startDate && "text-white/60")}>
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0 bg-white z-50" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={startDate}
-                      onSelect={setStartDate}
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
+                    <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus className="pointer-events-auto" />
                   </PopoverContent>
                 </Popover>
               </div>
@@ -123,31 +99,17 @@ export default function Reports() {
                 <Label htmlFor="end-date" className="text-white text-xs">End Date</Label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button
-                      id="end-date"
-                      variant="outline"
-                      className={cn(
-                        "bg-white/10 border-white/20 text-white h-9 text-sm hover:bg-white/20 justify-start text-left font-normal",
-                        !endDate && "text-white/60"
-                      )}
-                    >
+                    <Button id="end-date" variant="outline" className={cn("bg-white/10 border-white/20 text-white h-9 text-sm hover:bg-white/20 justify-start text-left font-normal", !endDate && "text-white/60")}>
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {endDate ? format(endDate, "PPP") : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0 bg-white z-50" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={endDate}
-                      onSelect={setEndDate}
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
+                    <Calendar mode="single" selected={endDate} onSelect={setEndDate} initialFocus className="pointer-events-auto" />
                   </PopoverContent>
                 </Popover>
               </div>
-            </>
-          )}
+            </>}
         </div>
       </div>
 
@@ -157,24 +119,13 @@ export default function Reports() {
           {/* Historic Reports Section */}
           <Card>
             <CardHeader className="space-y-4">
-              <div>
-                <CardTitle>Download History</CardTitle>
-                <p className="text-sm text-muted-foreground mt-1">
-                  View and download previously generated reports
-                </p>
-              </div>
+              
               
               {/* Search and Filter Bar */}
               <div className="flex items-center gap-4">
                 <div className="relative flex-1 max-w-sm">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="text"
-                    placeholder="Search reports..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9"
-                  />
+                  <Input type="text" placeholder="Search reports..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-9" />
                 </div>
                 
                 <div className="flex items-center gap-2 min-w-[180px]">
@@ -206,15 +157,11 @@ export default function Reports() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredReports.length === 0 ? (
-                      <TableRow>
+                    {filteredReports.length === 0 ? <TableRow>
                         <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                           No reports found
                         </TableCell>
-                      </TableRow>
-                    ) : (
-                      filteredReports.map((report) => (
-                        <TableRow key={report.id}>
+                      </TableRow> : filteredReports.map(report => <TableRow key={report.id}>
                           <TableCell className="font-medium">{report.reportTitle}</TableCell>
                           <TableCell>
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
@@ -223,19 +170,12 @@ export default function Reports() {
                           </TableCell>
                           <TableCell>{report.fileName}</TableCell>
                           <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8"
-                              onClick={() => window.open(report.fileUrl, '_blank')}
-                            >
+                            <Button variant="ghost" size="sm" className="h-8" onClick={() => window.open(report.fileUrl, '_blank')}>
                               <Download className="h-4 w-4 mr-1" />
                               Download
                             </Button>
                           </TableCell>
-                        </TableRow>
-                      ))
-                    )}
+                        </TableRow>)}
                   </TableBody>
                 </Table>
               </div>
@@ -243,6 +183,5 @@ export default function Reports() {
           </Card>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 }
