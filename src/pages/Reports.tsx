@@ -179,9 +179,6 @@ export default function Reports() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Date & Time</TableHead>
-                      <TableHead>User Name</TableHead>
-                      <TableHead>Site</TableHead>
                       <TableHead>Report</TableHead>
                       <TableHead>File Name</TableHead>
                       <TableHead className="text-right">Action</TableHead>
@@ -190,17 +187,14 @@ export default function Reports() {
                   <TableBody>
                     {filteredReports.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                        <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
                           No reports found
                         </TableCell>
                       </TableRow>
                     ) : (
                       filteredReports.map((report) => (
                         <TableRow key={report.id}>
-                          <TableCell className="font-medium">{report.generatedAt}</TableCell>
-                          <TableCell>{report.userName}</TableCell>
-                          <TableCell>{report.siteName}</TableCell>
-                          <TableCell>{report.reportTitle}</TableCell>
+                          <TableCell className="font-medium">{report.reportTitle}</TableCell>
                           <TableCell>{report.fileName}</TableCell>
                           <TableCell className="text-right">
                             <Button
