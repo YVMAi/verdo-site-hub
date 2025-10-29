@@ -17,7 +17,7 @@ export const mockHistoricReports: HistoricReport[] = [
     userName: "John Smith",
     siteName: "Solar Farm A",
     reportDate: "29 Oct",
-    reportTitle: "Report for 29 Oct",
+    reportTitle: "Report as on 29 Oct",
     reportType: "DGR",
     fileName: "Solar_Farm_A_DGR_29_Oct_2024.pdf",
     fileUrl: "#"
@@ -28,7 +28,7 @@ export const mockHistoricReports: HistoricReport[] = [
     userName: "Sarah Johnson",
     siteName: "Solar Farm B",
     reportDate: "28 Oct",
-    reportTitle: "Report for 28 Oct",
+    reportTitle: "Report as on 28 Oct",
     reportType: "DOR",
     fileName: "Solar_Farm_B_DOR_28_Oct_2024.pdf",
     fileUrl: "#"
@@ -39,7 +39,7 @@ export const mockHistoricReports: HistoricReport[] = [
     userName: "Michael Chen",
     siteName: "Solar Farm A",
     reportDate: "28 Oct",
-    reportTitle: "Report for 28 Oct",
+    reportTitle: "Report as on 28 Oct",
     reportType: "HSE",
     fileName: "Solar_Farm_A_HSE_28_Oct_2024.pdf",
     fileUrl: "#"
@@ -50,7 +50,7 @@ export const mockHistoricReports: HistoricReport[] = [
     userName: "John Smith",
     siteName: "Solar Farm C",
     reportDate: "27 Oct",
-    reportTitle: "Report for 27 Oct",
+    reportTitle: "Report as on 27 Oct",
     reportType: "DGR",
     fileName: "Solar_Farm_C_DGR_27_Oct_2024.pdf",
     fileUrl: "#"
@@ -61,7 +61,7 @@ export const mockHistoricReports: HistoricReport[] = [
     userName: "Emily Davis",
     siteName: "Solar Farm B",
     reportDate: "27 Oct",
-    reportTitle: "Report for 27 Oct",
+    reportTitle: "Report as on 27 Oct",
     reportType: "DOR",
     fileName: "Solar_Farm_B_DOR_27_Oct_2024.pdf",
     fileUrl: "#"
@@ -72,7 +72,7 @@ export const mockHistoricReports: HistoricReport[] = [
     userName: "Sarah Johnson",
     siteName: "Solar Farm A",
     reportDate: "26 Oct",
-    reportTitle: "Report for 26 Oct",
+    reportTitle: "Report as on 26 Oct",
     reportType: "HSE",
     fileName: "Solar_Farm_A_HSE_26_Oct_2024.pdf",
     fileUrl: "#"
@@ -83,7 +83,7 @@ export const mockHistoricReports: HistoricReport[] = [
     userName: "Michael Chen",
     siteName: "Solar Farm C",
     reportDate: "25 Oct",
-    reportTitle: "Report for 25 Oct",
+    reportTitle: "Report as on 25 Oct",
     reportType: "DGR",
     fileName: "Solar_Farm_C_DGR_25_Oct_2024.pdf",
     fileUrl: "#"
@@ -94,7 +94,7 @@ export const mockHistoricReports: HistoricReport[] = [
     userName: "John Smith",
     siteName: "Solar Farm B",
     reportDate: "25 Oct",
-    reportTitle: "Report for 25 Oct",
+    reportTitle: "Report as on 25 Oct",
     reportType: "DOR",
     fileName: "Solar_Farm_B_DOR_25_Oct_2024.pdf",
     fileUrl: "#"
