@@ -135,8 +135,7 @@ export default function Reports() {
           {/* Historic Reports Section */}
           <Card>
             <CardHeader className="space-y-4">
-              <div className="flex items-center justify-between">
-                <CardTitle>Historic Reports</CardTitle>
+              <div className="flex items-center justify-end">
                 <Dialog open={isCustomReportOpen} onOpenChange={setIsCustomReportOpen}>
                   <DialogTrigger asChild>
                     <Button variant="default" size="sm">
