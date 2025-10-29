@@ -13,6 +13,8 @@ import Cleaning from "./pages/Cleaning";
 import FieldInspection from "./pages/FieldInspection";
 import Vegetation from "./pages/Vegetation";
 import OperationsHub from "./pages/OperationsHub";
+import Reports from "./pages/Reports";
+import UserManagement from "./pages/UserManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +35,8 @@ const App = () => (
               <Route path="/cleaning" element={<Cleaning />} />
               <Route path="/field-inspection" element={<FieldInspection />} />
               <Route path="/vegetation" element={<Vegetation />} />
+              <Route path="/reports" element={<Reports />} />
+              <Route path="/admin/users" element={<UserManagement />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppLayout>
